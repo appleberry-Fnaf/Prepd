@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #fcf7df;
+    color: #3e3630;
+  }
+
+  ::selection {
+    background-color: #c7d3db;
+    color: #3e3630;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #fcf7df;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #a79a8a;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3e3630;
+  }
+}
+
+@layer components {
+  .card-warm {
+    @apply bg-white rounded-2xl border border-taupe-300/50 shadow-sm;
+  }
+
+  .card-warm-hover {
+    @apply hover:border-taupe-300 hover:shadow-md transition-all duration-300;
+  }
+
+  .btn-warm {
+    @apply px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300;
+    background: #3e3630;
+    color: #fcf7df;
+  }
+
+  .btn-warm:hover {
+    background: #2a231f;
+    box-shadow: 0 8px 24px -8px rgba(62, 54, 48, 0.35);
+  }
+
+  .btn-warm-outline {
+    @apply px-6 py-3 rounded-xl font-semibold text-sm border-2 transition-all duration-300;
+    border-color: #3e3630;
+    color: #3e3630;
+    background: transparent;
+  }
+
+  .btn-warm-outline:hover {
+    background: #3e3630;
+    color: #fcf7df;
+  }
+
+  .glass-warm {
+    background: rgba(252, 247, 223, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(167, 154, 138, 0.2);
+  }
+
+  .accent-strip {
+    @apply h-1 w-12 rounded-full;
+    background: #c7d3db;
+  }
+}
