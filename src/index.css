@@ -7,13 +7,13 @@
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #fcf7df;
-    color: #3e3630;
+    background-color: #FFF9F0;
+    color: #081F5C;
   }
 
   ::selection {
-    background-color: #c7d3db;
-    color: #3e3630;
+    background-color: #BAD6EB;
+    color: #081F5C;
   }
 
   ::-webkit-scrollbar {
@@ -22,16 +22,16 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #fcf7df;
+    background: #FFF9F0;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #a79a8a;
+    background: #7096D1;
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #3e3630;
+    background: #334EAC;
   }
 }
 
@@ -46,36 +46,100 @@
 
   .btn-warm {
     @apply px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300;
-    background: #3e3630;
-    color: #fcf7df;
+    background: #334EAC;
+    color: #FFF9F0;
   }
 
   .btn-warm:hover {
-    background: #2a231f;
-    box-shadow: 0 8px 24px -8px rgba(62, 54, 48, 0.35);
+    background: #081F5C;
+    box-shadow: 0 8px 24px -8px rgba(51, 78, 172, 0.45);
   }
 
   .btn-warm-outline {
     @apply px-6 py-3 rounded-xl font-semibold text-sm border-2 transition-all duration-300;
-    border-color: #3e3630;
-    color: #3e3630;
+    border-color: #334EAC;
+    color: #334EAC;
     background: transparent;
   }
 
   .btn-warm-outline:hover {
-    background: #3e3630;
-    color: #fcf7df;
+    background: #334EAC;
+    color: #FFF9F0;
   }
 
   .glass-warm {
-    background: rgba(252, 247, 223, 0.75);
+    background: rgba(255, 249, 240, 0.8);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(167, 154, 138, 0.2);
+    border: 1px solid rgba(112, 150, 209, 0.25);
   }
 
   .accent-strip {
     @apply h-1 w-12 rounded-full;
-    background: #c7d3db;
+    background: #334EAC;
+  }
+}
+
+/* ===== Pool-water caustics animated background ===== */
+.liquid-bg {
+  /* Light blue pool-water gradient that the caustics ripple over */
+  background:
+    linear-gradient(180deg, #EAF3FF 0%, #D0E3FF 38%, #BAD6EB 75%, #9FC2E5 100%);
+}
+
+.caustics {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Slow, swimming drift so the light never looks static */
+  animation: caustic-swim 30s ease-in-out infinite;
+  will-change: transform;
+}
+
+.caustic-layer {
+  mix-blend-mode: screen;
+}
+
+.caustic-layer--a {
+  opacity: 0.7;
+}
+
+.caustic-layer--b {
+  opacity: 0.5;
+  transform-origin: center;
+  animation: caustic-swim-fine 22s ease-in-out infinite;
+}
+
+/* Soft light glinting off the surface */
+.liquid-sheen {
+  position: absolute;
+  inset: -25%;
+  background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.4), transparent 55%);
+  mix-blend-mode: screen;
+  animation: liquid-sheen 18s ease-in-out infinite;
+}
+
+@keyframes caustic-swim {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
+  50% { transform: translate3d(-2%, 2%, 0) scale(1.12); }
+}
+
+@keyframes caustic-swim-fine {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2%, -1.5%, 0) scale(1.06); }
+}
+
+@keyframes liquid-sheen {
+  0%, 100% { transform: translate(-8%, -6%); opacity: 0.45; }
+  50% { transform: translate(10%, 8%); opacity: 0.7; }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .caustics,
+  .caustic-layer--b,
+  .liquid-sheen {
+    animation: none;
   }
 }
