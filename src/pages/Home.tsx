@@ -7,7 +7,6 @@ import {
   BookOpen,
   PenTool,
   Upload,
-  Trophy,
   GraduationCap,
   Users,
   Zap,
@@ -16,13 +15,14 @@ import {
   Target,
   Compass,
   Award,
+  CheckCircle2,
+  HeartHandshake,
 } from 'lucide-react';
 
 export default function Home() {
   const [subjects, setSubjects] = useState<APSubject[]>([]);
   const [featuredCount, setFeaturedCount] = useState(0);
   const [questionCount, setQuestionCount] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
@@ -32,7 +32,6 @@ export default function Home() {
       setSubjects(subjectsData || []);
       setFeaturedCount((resourcesData || []).filter(r => r.is_featured).length);
       setQuestionCount(questionsData?.length || 0);
-      setLoading(false);
     }
     loadData();
   }, []);
@@ -126,61 +125,24 @@ export default function Home() {
                       <BookOpen className="w-5 h-5 text-ink" />
                     </div>
                     <div>
-                      <div className="font-semibold text-ink">Study Dashboard</div>
-                      <div className="text-xs text-taupe-500">Track your progress</div>
+                      <div className="font-semibold text-ink">Everything in one place</div>
+                      <div className="text-xs text-taupe-500">Made for AP students</div>
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-green-600" />
-                        <span className="text-sm text-ink">Calculus AB</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-stone/30 rounded-full overflow-hidden">
-                          <div className="w-3/4 h-full bg-ink rounded-full" />
+                    {[
+                      { icon: Layers, text: 'Notes & study guides for every AP subject' },
+                      { icon: CheckCircle2, text: 'Community resources, checked by moderators' },
+                      { icon: HeartHandshake, text: 'Earn verified volunteer hours' },
+                      { icon: Award, text: 'Points, tiers & a leaderboard' },
+                    ].map((item) => (
+                      <div key={item.text} className="flex items-center gap-3 p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
+                        <div className="w-8 h-8 rounded-lg bg-ink/8 flex items-center justify-center shrink-0">
+                          <item.icon className="w-4 h-4 text-ink" />
                         </div>
-                        <span className="text-xs text-taupe-500 font-medium">75%</span>
+                        <span className="text-sm text-ink font-medium">{item.text}</span>
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-ink" />
-                        <span className="text-sm text-ink">Biology</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-stone/30 rounded-full overflow-hidden">
-                          <div className="w-1/2 h-full bg-ink rounded-full" />
-                        </div>
-                        <span className="text-xs text-taupe-500 font-medium">50%</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-wood" />
-                        <span className="text-sm text-ink">US History</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-stone/30 rounded-full overflow-hidden">
-                          <div className="w-1/3 h-full bg-ink rounded-full" />
-                        </div>
-                        <span className="text-xs text-taupe-500 font-medium">33%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 pt-2">
-                    <div className="text-center p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                      <div className="text-lg font-bold text-ink">12</div>
-                      <div className="text-xs text-taupe-500">Questions</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                      <div className="text-lg font-bold text-ink">8</div>
-                      <div className="text-xs text-taupe-500">Correct</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                      <div className="text-lg font-bold text-ink">67%</div>
-                      <div className="text-xs text-taupe-500">Accuracy</div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -248,7 +210,7 @@ export default function Home() {
       <section className="py-16 bg-ink">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-parchment mb-4">Ready to start preparing?</h2>
-          <p className="text-stone-300 text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-slate-300 text-lg mb-8 max-w-2xl mx-auto">
             Join thousands of students who use Prepd to stay organized and ace their AP exams.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -261,7 +223,7 @@ export default function Home() {
             </Link>
             <Link
               to="/contribute"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent text-parchment font-semibold text-sm border-2 border-stone-300 hover:bg-parchment/10 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent text-parchment font-semibold text-sm border-2 border-slate-400 hover:bg-parchment/10 transition-all"
             >
               <Upload className="w-4 h-4" />
               Share Your Notes

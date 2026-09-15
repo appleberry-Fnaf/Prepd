@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { CatMark } from './Logo';
 import {
   BookOpen,
-  Compass,
   PenTool,
   Upload,
   Trophy,
@@ -12,6 +12,7 @@ import {
   X,
   LogOut,
   Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 
 const navItems = [
@@ -25,24 +26,26 @@ const navItems = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const items = profile?.is_moderator
+    ? [...navItems, { path: '/moderate', label: 'Moderate', icon: ShieldCheck }]
+    : navItems;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-warm border-b border-taupe-300/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-ink flex items-center justify-center shadow-lg shadow-ink/15 group-hover:shadow-ink/25 transition-shadow">
-              <Compass className="w-5 h-5 text-parchment" />
-            </div>
+          <Link to="/" className="flex items-center gap-2 group">
+            <CatMark className="w-9 h-9 group-hover:scale-105 transition-transform" />
             <span className="text-xl font-bold text-ink tracking-tight">Prepd</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
+            {items.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
@@ -90,7 +93,7 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden glass-warm border-b border-taupe-300/30">
           <div className="px-4 py-3 space-y-1">
-            {navItems.map((item) => {
+            {items.map((item) => {
               const Icon = item.icon;
               return (
                 <Link

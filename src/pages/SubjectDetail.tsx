@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import type { APSubject, Resource, PracticeQuestion } from '../lib/supabase';
 import {
   ArrowLeft,
@@ -24,6 +25,7 @@ import {
   PenTool,
   CheckCircle,
   XCircle,
+  Trash2,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -55,6 +57,7 @@ const typeIcon: Record<string, React.ElementType> = {
 
 export default function SubjectDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const { user, profile } = useAuth();
   const [subject, setSubject] = useState<APSubject | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -139,6 +142,14 @@ export default function SubjectDetail() {
   const Icon = iconMap[subject.icon] || BookOpen;
   const featured = resources.filter(r => r.is_featured);
   const regular = resources.filter(r => !r.is_featured);
+
+  const canDelete = (r: Resource) => !!user && (r.user_id === user.id || !!profile?.is_moderator);
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this note? This can’t be undone.')) return;
+    const { error } = await supabase.from('resources').delete().eq('id', id);
+    if (error) window.alert('Could not delete: ' + error.message);
+    else setResources(prev => prev.filter(r => r.id !== id));
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -225,6 +236,12 @@ export default function SubjectDetail() {
                         <span className="text-xs font-medium text-ink bg-parchment px-2 py-0.5 rounded">
                           {typeLabel[resource.type] || resource.type}
                         </span>
+                        {canDelete(resource) && (
+                          <button onClick={() => handleDelete(resource.id)} title="Delete note"
+                            className="ml-auto p-1.5 rounded-lg text-taupe-400 hover:text-red-600 hover:bg-red-50 transition-all">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                       <h3 className="font-semibold text-ink mb-1">{resource.title}</h3>
                       <p className="text-sm text-taupe-500 mb-4">{resource.description}</p>
@@ -268,6 +285,12 @@ export default function SubjectDetail() {
                         <span className="text-xs font-medium text-ink bg-parchment px-2 py-0.5 rounded">
                           {typeLabel[resource.type] || resource.type}
                         </span>
+                        {canDelete(resource) && (
+                          <button onClick={() => handleDelete(resource.id)} title="Delete note"
+                            className="ml-auto p-1.5 rounded-lg text-taupe-400 hover:text-red-600 hover:bg-red-50 transition-all">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                       <h3 className="font-semibold text-ink mb-1">{resource.title}</h3>
                       <p className="text-sm text-taupe-500 mb-4">{resource.description}</p>

@@ -7,7 +7,10 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null; needsConfirmation?: boolean }>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -28,20 +31,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(data);
   }
 
+  // Make sure the signed-in user has a profile row (Google / OAuth logins
+  // don't create one on their own), then load it into state.
+  async function ensureProfile(u: { id: string; email?: string | null; user_metadata?: Record<string, unknown> }) {
+    const { data } = await supabase.from('profiles').select('*').eq('id', u.id).maybeSingle();
+    if (data) {
+      setProfile(data);
+      return;
+    }
+    const meta = u.user_metadata || {};
+    const fallbackName =
+      (meta.full_name as string) ||
+      (meta.name as string) ||
+      (u.email ? u.email.split('@')[0] : 'Student');
+    await supabase.from('profiles').insert({ id: u.id, display_name: fallbackName });
+    await loadProfile(u.id);
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser({ id: session.user.id, email: session.user.email || '' });
-        loadProfile(session.user.id);
+        ensureProfile(session.user);
       }
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       (async () => {
         if (session?.user) {
           setUser({ id: session.user.id, email: session.user.email || '' });
-          await loadProfile(session.user.id);
+          await ensureProfile(session.user);
         } else {
           setUser(null);
           setProfile(null);
@@ -58,18 +78,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signUp(email: string, password: string, displayName: string) {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: displayName } },
+    });
     if (error) return { error: error.message };
 
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      await supabase.from('profiles').insert({
-        id: session.user.id,
-        display_name: displayName,
-      });
-      await loadProfile(session.user.id);
+    if (data.session?.user) {
+      await supabase.from('profiles').upsert({ id: data.session.user.id, display_name: displayName });
+      await loadProfile(data.session.user.id);
+      return { error: null, needsConfirmation: false };
     }
-    return { error: null };
+    return { error: null, needsConfirmation: true };
+  }
+
+  async function signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/profile` },
+    });
+    return { error: error?.message || null };
+  }
+
+  async function resetPassword(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { error: error?.message || null };
+  }
+
+  async function updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password });
+    return { error: error?.message || null };
   }
 
   async function signOut() {
@@ -83,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signInWithGoogle, resetPassword, updatePassword, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

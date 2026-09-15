@@ -4,9 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import type { APSubject, UserProgress, Submission } from '../lib/supabase';
 import {
-  User, Edit, BookOpen, PenTool, Upload, Award,
-  ChevronRight, Clock, CheckCircle, XCircle, Loader, Zap,
+  User, Edit, BookOpen, PenTool, Upload, Camera, Loader,
+  ChevronRight, Clock, CheckCircle, Zap, HeartHandshake,
 } from 'lucide-react';
+import TierBadge from '../components/TierBadge';
+import { getNextTier, tierProgress } from '../lib/rewards';
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth();
@@ -14,9 +16,11 @@ export default function Profile() {
   const [progress, setProgress] = useState<UserProgress[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ display_name: '', bio: '', school_name: '', grade_level: '' });
+  const [editForm, setEditForm] = useState({ display_name: '', bio: '', school_name: '', grade_level: '', avatar_url: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
 
   useEffect(() => {
     async function loadData() {
@@ -35,20 +39,43 @@ export default function Profile() {
 
   useEffect(() => {
     if (profile) {
-      setEditForm({ display_name: profile.display_name || '', bio: profile.bio || '', school_name: profile.school_name || '', grade_level: profile.grade_level || '' });
+      setEditForm({ display_name: profile.display_name || '', bio: profile.bio || '', school_name: profile.school_name || '', grade_level: profile.grade_level || '', avatar_url: profile.avatar_url || '' });
     }
   }, [profile]);
 
   async function saveProfile() {
     if (!user) return;
     setSaving(true);
-    await supabase.from('profiles').update({
+    await supabase.from('profiles').upsert({
+      id: user.id,
       display_name: editForm.display_name, bio: editForm.bio, school_name: editForm.school_name, grade_level: editForm.grade_level,
+      avatar_url: editForm.avatar_url || null,
       updated_at: new Date().toISOString(),
-    }).eq('id', user.id);
+    });
     await refreshProfile();
     setEditing(false);
     setSaving(false);
+  }
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setAvatarError('');
+    if (!file.type.startsWith('image/')) { setAvatarError('Please choose an image file.'); return; }
+    if (file.size > 5 * 1024 * 1024) { setAvatarError('Image must be under 5 MB.'); return; }
+    setUploadingAvatar(true);
+    const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+    const path = `${user.id}/avatar.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, cacheControl: '3600' });
+    if (upErr) {
+      setAvatarError('Upload failed — make sure the "avatars" storage bucket exists.');
+    } else {
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+      setEditForm(prev => ({ ...prev, avatar_url: `${data.publicUrl}?v=${Date.now()}` }));
+    }
+    setUploadingAvatar(false);
   }
 
   const getSubjectName = (id: string) => subjects.find(s => s.id === id)?.name || 'Unknown';
@@ -58,7 +85,12 @@ export default function Profile() {
   const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
   const approvedCount = submissions.filter(s => s.status === 'approved').length;
   const pendingCount = submissions.filter(s => s.status === 'pending').length;
+  const points = profile?.total_points || 0;
+  const volunteerHours = profile?.volunteer_hours || 0;
+  const nextTier = getNextTier(points);
+  const tierPct = tierProgress(points);
   const getInitials = (name: string | null) => { if (!name) return '??'; return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2); };
+  const displayAvatar = editing ? editForm.avatar_url : (profile?.avatar_url || '');
 
   if (loading) {
     return (
@@ -89,17 +121,29 @@ export default function Profile() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Profile Header */}
       <div className="card-warm p-6 sm:p-8 mb-8">
         <div className="flex flex-col sm:flex-row items-start gap-6">
-          <div className="w-20 h-20 rounded-full bg-parchment border-2 border-taupe-300/50 flex items-center justify-center text-2xl font-bold text-ink shrink-0">
-            {getInitials(profile?.display_name || 'Student')}
+          <div className="relative shrink-0">
+            {displayAvatar ? (
+              <img src={displayAvatar} alt="Profile" className="w-20 h-20 rounded-full object-cover border-2 border-taupe-300/50" />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-parchment border-2 border-taupe-300/50 flex items-center justify-center text-2xl font-bold text-ink">
+                {getInitials(profile?.display_name || 'Student')}
+              </div>
+            )}
+            {editing && (
+              <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-ink text-parchment flex items-center justify-center cursor-pointer border-2 border-white shadow-md hover:bg-ink/90 transition-all" title="Change photo">
+                {uploadingAvatar ? <Loader className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} disabled={uploadingAvatar} />
+              </label>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             {!editing ? (
               <div>
-                <div className="flex items-center gap-3 mb-1">
+                <div className="flex items-center gap-3 mb-1 flex-wrap">
                   <h1 className="text-2xl font-bold text-ink">{profile?.display_name || 'Student'}</h1>
+                  <TierBadge points={points} />
                   <button onClick={() => setEditing(true)} className="p-2 rounded-lg text-taupe-400 hover:bg-parchment hover:text-ink transition-all">
                     <Edit className="w-4 h-4" />
                   </button>
@@ -113,6 +157,8 @@ export default function Profile() {
               </div>
             ) : (
               <div className="space-y-4 max-w-lg">
+                <p className="text-xs text-taupe-500">Tap the camera icon on your photo to upload a picture.</p>
+                {avatarError && <p className="text-xs text-red-600">{avatarError}</p>}
                 <div>
                   <label className="block text-sm font-medium text-ink mb-1">Display Name</label>
                   <input type="text" value={editForm.display_name} onChange={(e) => setEditForm(prev => ({ ...prev, display_name: e.target.value }))}
@@ -148,17 +194,37 @@ export default function Profile() {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2 bg-parchment px-4 py-2 rounded-xl border border-taupe-300/50 shrink-0">
-            <Zap className="w-5 h-5 text-wood" />
-            <div>
-              <div className="text-lg font-bold text-ink">{profile?.total_points || 0}</div>
-              <div className="text-xs text-taupe-500">points</div>
+          <div className="flex gap-3 shrink-0">
+            <div className="flex items-center gap-2 bg-parchment px-4 py-2 rounded-xl border border-taupe-300/50">
+              <Zap className="w-5 h-5 text-wood" />
+              <div>
+                <div className="text-lg font-bold text-ink">{points}</div>
+                <div className="text-xs text-taupe-500">points</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-parchment px-4 py-2 rounded-xl border border-taupe-300/50">
+              <HeartHandshake className="w-5 h-5 text-ink" />
+              <div>
+                <div className="text-lg font-bold text-ink">{volunteerHours}</div>
+                <div className="text-xs text-taupe-500">volunteer hrs</div>
+              </div>
             </div>
           </div>
         </div>
+
+        {nextTier && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-xs text-taupe-500 mb-1.5">
+              <span>Progress to {nextTier.name}</span>
+              <span>{points} / {nextTier.min} pts</span>
+            </div>
+            <div className="w-full h-2 bg-taupe-300/30 rounded-full overflow-hidden">
+              <div className="h-full bg-ink rounded-full transition-all" style={{ width: `${tierPct}%` }} />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="card-warm p-5">
           <div className="w-10 h-10 rounded-xl bg-parchment flex items-center justify-center mb-3 border border-taupe-300/30">
@@ -191,7 +257,6 @@ export default function Profile() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Progress */}
         <div className="card-warm p-6">
           <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-ink" />Study Progress
@@ -222,7 +287,6 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Submissions */}
         <div className="card-warm p-6">
           <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
             <Upload className="w-5 h-5 text-ink" />My Submissions
@@ -243,11 +307,8 @@ export default function Profile() {
                     <p className="text-sm font-medium text-ink truncate">{sub.title}</p>
                     <p className="text-xs text-taupe-500 capitalize">{sub.type}</p>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-taupe-500 shrink-0">
-                    {sub.status === 'approved' && <CheckCircle className="w-3.5 h-3.5 text-green-600" />}
-                    {sub.status === 'rejected' && <XCircle className="w-3.5 h-3.5 text-red-500" />}
-                    {sub.status === 'pending' && <Loader className="w-3.5 h-3.5 text-amber-500" />}
-                    <span className="capitalize">{sub.status}</span>
+                  <div className="flex items-center gap-1 text-xs text-taupe-500 shrink-0 capitalize">
+                    {sub.status}
                   </div>
                 </div>
               ))}

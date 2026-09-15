@@ -12,6 +12,7 @@ interface LeaderboardProfile {
   display_name: string;
   avatar_url: string | null;
   total_points: number;
+  volunteer_hours: number;
 }
 
 const rankStyles = [
@@ -40,13 +41,15 @@ export default function Leaderboard() {
   const [topProfiles, setTopProfiles] = useState<LeaderboardProfile[]>([]);
   const [recentContributions, setRecentContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'points' | 'hours'>('points');
 
   useEffect(() => {
     async function loadData() {
+      const orderCol = sortBy === 'hours' ? 'volunteer_hours' : 'total_points';
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url, total_points')
-        .order('total_points', { ascending: false })
+        .select('id, display_name, avatar_url, total_points, volunteer_hours')
+        .order(orderCol, { ascending: false })
         .limit(20);
       setTopProfiles(profilesData || []);
       const { data: contributionsData } = await supabase
@@ -58,7 +61,11 @@ export default function Leaderboard() {
       setLoading(false);
     }
     loadData();
-  }, []);
+  }, [sortBy]);
+
+  const val = (p: LeaderboardProfile) => (sortBy === 'hours' ? (p.volunteer_hours || 0) : (p.total_points || 0));
+  const unit = sortBy === 'hours' ? 'hrs' : 'pts';
+  const unitLong = sortBy === 'hours' ? 'hours' : 'points';
 
   const getInitials = (name: string | null) => {
     if (!name) return '??';
@@ -90,42 +97,53 @@ export default function Leaderboard() {
         </p>
       </div>
 
-      {/* Top 3 Podium */}
       {topProfiles.length > 0 && (
         <div className="mb-12">
           <div className="flex flex-col sm:flex-row items-end justify-center gap-4 sm:gap-6">
             {topProfiles[1] && (
               <div className="order-2 sm:order-1 flex flex-col items-center">
-                <div className="w-20 h-20 rounded-full bg-taupe-300/50 flex items-center justify-center text-xl font-bold text-ink mb-3">
-                  {getInitials(topProfiles[1].display_name)}
-                </div>
+                {topProfiles[1].avatar_url ? (
+                  <img src={topProfiles[1].avatar_url} alt="" className="w-20 h-20 rounded-full object-cover mb-3" />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-taupe-300/50 flex items-center justify-center text-xl font-bold text-ink mb-3">
+                    {getInitials(topProfiles[1].display_name)}
+                  </div>
+                )}
                 <div className="w-12 h-12 rounded-full bg-taupe-600 flex items-center justify-center mb-2">
                   <span className="text-lg font-bold text-parchment">2</span>
                 </div>
                 <p className="font-semibold text-ink text-sm text-center max-w-[120px] truncate">{topProfiles[1].display_name || 'Student'}</p>
-                <p className="text-sm text-taupe-500">{topProfiles[1].total_points} pts</p>
+                <p className="text-sm text-taupe-500">{val(topProfiles[1])} {unit}</p>
               </div>
             )}
             <div className="order-1 sm:order-2 flex flex-col items-center -mt-4">
-              <div className="w-24 h-24 rounded-full bg-wood/20 flex items-center justify-center text-xl font-bold text-ink mb-3 ring-4 ring-wood/20">
-                {getInitials(topProfiles[0].display_name)}
-              </div>
+              {topProfiles[0].avatar_url ? (
+                <img src={topProfiles[0].avatar_url} alt="" className="w-24 h-24 rounded-full object-cover mb-3 ring-4 ring-wood/20" />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-wood/20 flex items-center justify-center text-xl font-bold text-ink mb-3 ring-4 ring-wood/20">
+                  {getInitials(topProfiles[0].display_name)}
+                </div>
+              )}
               <div className="w-14 h-14 rounded-full bg-wood flex items-center justify-center mb-2 shadow-lg shadow-wood/30">
                 <Crown className="w-7 h-7 text-parchment" />
               </div>
               <p className="font-semibold text-ink text-sm text-center max-w-[120px] truncate">{topProfiles[0].display_name || 'Student'}</p>
-              <p className="text-sm text-wood font-semibold">{topProfiles[0].total_points} pts</p>
+              <p className="text-sm text-wood font-semibold">{val(topProfiles[0])} {unit}</p>
             </div>
             {topProfiles[2] && (
               <div className="order-3 flex flex-col items-center">
-                <div className="w-20 h-20 rounded-full bg-taupe-300/30 flex items-center justify-center text-xl font-bold text-ink mb-3">
-                  {getInitials(topProfiles[2].display_name)}
-                </div>
+                {topProfiles[2].avatar_url ? (
+                  <img src={topProfiles[2].avatar_url} alt="" className="w-20 h-20 rounded-full object-cover mb-3" />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-taupe-300/30 flex items-center justify-center text-xl font-bold text-ink mb-3">
+                    {getInitials(topProfiles[2].display_name)}
+                  </div>
+                )}
                 <div className="w-12 h-12 rounded-full bg-taupe-400 flex items-center justify-center mb-2">
                   <span className="text-lg font-bold text-parchment">3</span>
                 </div>
                 <p className="font-semibold text-ink text-sm text-center max-w-[120px] truncate">{topProfiles[2].display_name || 'Student'}</p>
-                <p className="text-sm text-taupe-500">{topProfiles[2].total_points} pts</p>
+                <p className="text-sm text-taupe-500">{val(topProfiles[2])} {unit}</p>
               </div>
             )}
           </div>
@@ -139,7 +157,10 @@ export default function Leaderboard() {
               <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-wood" />Top Contributors
               </h2>
-              <span className="text-xs text-taupe-500">Ranked by total points</span>
+              <div className="flex items-center gap-1 bg-parchment rounded-lg p-0.5 border border-taupe-300/30">
+                <button onClick={() => setSortBy('points')} className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${sortBy === 'points' ? 'bg-ink text-parchment' : 'text-taupe-600 hover:text-ink'}`}>Points</button>
+                <button onClick={() => setSortBy('hours')} className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${sortBy === 'hours' ? 'bg-ink text-parchment' : 'text-taupe-600 hover:text-ink'}`}>Volunteer hrs</button>
+              </div>
             </div>
             <div className="divide-y divide-taupe-300/20">
               {topProfiles.length === 0 ? (
@@ -157,9 +178,13 @@ export default function Leaderboard() {
                       <div className={`w-8 h-8 rounded-full ${style.medal} flex items-center justify-center shrink-0`}>
                         <span className={`text-sm font-bold ${index < 3 ? 'text-parchment' : 'text-ink'}`}>{index + 1}</span>
                       </div>
-                      <div className="w-10 h-10 rounded-full bg-taupe-300/50 flex items-center justify-center text-sm font-bold text-ink shrink-0">
-                        {getInitials(profile.display_name)}
-                      </div>
+                      {profile.avatar_url ? (
+                        <img src={profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-taupe-300/50 flex items-center justify-center text-sm font-bold text-ink shrink-0">
+                          {getInitials(profile.display_name)}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-ink text-sm truncate">{profile.display_name || 'Anonymous'}</p>
                         <div className="flex items-center gap-2 text-xs text-taupe-500">
@@ -168,8 +193,8 @@ export default function Leaderboard() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="text-lg font-bold text-ink">{profile.total_points}</div>
-                        <div className="text-xs text-taupe-500">points</div>
+                        <div className="text-lg font-bold text-ink">{val(profile)}</div>
+                        <div className="text-xs text-taupe-500">{unitLong}</div>
                       </div>
                     </div>
                   );

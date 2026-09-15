@@ -43,6 +43,7 @@ export type Submission = {
   moderator_notes: string | null;
   reviewed_by: string | null;
   reviewed_at: string | null;
+  volunteer_hours: number;
   created_at: string;
 };
 
@@ -66,6 +67,7 @@ export type Profile = {
   grade_level: string | null;
   is_moderator: boolean;
   total_points: number;
+  volunteer_hours: number;
   created_at: string;
   updated_at: string;
 };

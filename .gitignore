@@ -21,3 +21,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+public/logo.png
+public/logo-full.png
+prepd-site-*.zip
+*.zip
