@@ -2,13 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Theme tokens ===== */
+:root {
+  --color-ink-rgb: 16, 42, 99;          /* #102a63 */
+  --color-parchment-rgb: 245, 249, 255; /* #f5f9ff */
+  --color-stone-rgb: 186, 214, 235;     /* #bad6eb */
+  --color-wood: #5b82c9;
+}
+
+.dark {
+  --color-ink-rgb: 221, 238, 255;       /* #ddeeff */
+  --color-parchment-rgb: 11, 23, 41;    /* #0b1729 */
+  --color-stone-rgb: 26, 47, 78;        /* #1a2f4e */
+  --color-wood: #7faaee;
+}
+
 @layer base {
   body {
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #FFF9F0;
-    color: #081F5C;
+    background-color: rgb(var(--color-parchment-rgb));
+    color: rgb(var(--color-ink-rgb));
   }
 
   ::selection {
@@ -22,7 +37,7 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #FFF9F0;
+    background: rgb(var(--color-parchment-rgb));
   }
 
   ::-webkit-scrollbar-thumb {
@@ -32,6 +47,14 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background: #334EAC;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #3a6080;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #4a78a0;
   }
 }
 
@@ -78,6 +101,89 @@
     @apply h-1 w-12 rounded-full;
     background: #334EAC;
   }
+}
+
+/* ===== Dark mode overrides ===== */
+
+/* Cards */
+.dark .card-warm {
+  background: #122040;
+  border-color: rgba(50, 90, 140, 0.3);
+}
+
+/* Navbar / glass panels */
+.dark .glass-warm {
+  background: rgba(11, 23, 41, 0.9);
+  border-color: rgba(50, 90, 140, 0.2);
+}
+
+/* Primary button */
+.dark .btn-warm {
+  background: #3a65c0;
+  color: #f0f6ff;
+}
+.dark .btn-warm:hover {
+  background: #2d54ab;
+  box-shadow: 0 8px 24px -8px rgba(58, 101, 192, 0.45);
+}
+
+/* Outline button */
+.dark .btn-warm-outline {
+  border-color: #5a88da;
+  color: #8abae8;
+}
+.dark .btn-warm-outline:hover {
+  background: #3a65c0;
+  color: #f0f6ff;
+}
+
+/* Accent strip */
+.dark .accent-strip {
+  background: #5a88da;
+}
+
+/* Generic white backgrounds (filter buttons, category badges, etc.) */
+.dark .bg-white {
+  background-color: #122040;
+}
+
+/* Cream tinted section */
+.dark .bg-cream-200\/30 {
+  background-color: rgba(15, 29, 53, 0.5);
+}
+
+/* Muted text scale */
+.dark .text-taupe-600 { color: #8abbd8; }
+.dark .text-taupe-500 { color: #7aacce; }
+.dark .text-taupe-400 { color: #6a9cc0; }
+.dark .text-taupe-300 { color: #3a6080; }
+
+/* Taupe borders */
+.dark .border-taupe-300\/50 { border-color: rgba(50, 90, 140, 0.35); }
+.dark .border-taupe-300\/30 { border-color: rgba(50, 90, 140, 0.25); }
+.dark .border-taupe-300\/20 { border-color: rgba(50, 90, 140, 0.2); }
+.dark .border-taupe-800 { border-color: rgba(30, 60, 100, 0.6); }
+
+/* Progress bar track */
+.dark .bg-taupe-300\/30 { background-color: rgba(50, 90, 140, 0.25); }
+
+/* Form inputs */
+.dark input:not([type=checkbox]):not([type=radio]),
+.dark textarea,
+.dark select {
+  background-color: #0f1d35;
+  border-color: rgba(50, 90, 140, 0.4);
+  color: rgb(var(--color-ink-rgb));
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgba(var(--color-ink-rgb), 0.35);
+}
+.dark input:focus,
+.dark textarea:focus {
+  border-color: rgba(90, 136, 218, 0.6);
+  box-shadow: 0 0 0 2px rgba(90, 136, 218, 0.15);
+  outline: none;
 }
 
 /* ===== Pool-water caustics animated background ===== */

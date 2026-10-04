@@ -207,23 +207,23 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-ink">
+      <section className="py-16 bg-ink dark:bg-[#07111e]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-parchment mb-4">Ready to start preparing?</h2>
+          <h2 className="text-3xl font-bold text-parchment dark:text-[#c8e0ff] mb-4">Ready to start preparing?</h2>
           <p className="text-slate-300 text-lg mb-8 max-w-2xl mx-auto">
             Join thousands of students who use Prepd to stay organized and ace their AP exams.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               to="/subjects"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-parchment text-ink font-semibold text-sm hover:bg-cream-200 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-parchment dark:bg-[#1a3260] text-ink dark:text-[#c8e0ff] font-semibold text-sm hover:bg-cream-200 dark:hover:bg-[#243f78] transition-all"
             >
               Browse All Subjects
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/contribute"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent text-parchment font-semibold text-sm border-2 border-slate-400 hover:bg-parchment/10 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent text-parchment dark:text-[#c8e0ff] font-semibold text-sm border-2 border-slate-400 dark:border-[#3a6090] hover:bg-parchment/10 transition-all"
             >
               <Upload className="w-4 h-4" />
               Share Your Notes

@@ -3,7 +3,7 @@ import { CatMark } from './Logo';
 
 export default function Footer() {
   return (
-    <footer className="bg-ink border-t border-taupe-800">
+    <footer className="bg-ink dark:bg-[#07111e] border-t border-taupe-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1">
@@ -41,7 +41,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-taupe-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-8 pt-8 border-t border-taupe-800 dark:border-[#0f2040] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-400">2026 Prepd. Built for AP students.</p>
           <div className="flex items-center gap-6">
             <Link to="/subjects" className="text-sm text-slate-400 hover:text-slate-300 transition-colors">Subjects</Link>

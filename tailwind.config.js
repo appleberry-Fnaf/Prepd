@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   safelist: [
     // AP subject icon colors come from the database at runtime, so Tailwind
     // can't see them in the source — keep them in the build.
@@ -42,10 +43,19 @@ export default {
           800: '#22395a',
           900: '#13233d',
         },
-        ink: '#102a63',
-        parchment: '#f5f9ff',
-        stone: '#bad6eb',
-        wood: '#5b82c9',
+        ink: ({ opacityValue }: { opacityValue?: string }) =>
+          opacityValue !== undefined
+            ? `rgba(var(--color-ink-rgb), ${opacityValue})`
+            : `rgb(var(--color-ink-rgb))`,
+        parchment: ({ opacityValue }: { opacityValue?: string }) =>
+          opacityValue !== undefined
+            ? `rgba(var(--color-parchment-rgb), ${opacityValue})`
+            : `rgb(var(--color-parchment-rgb))`,
+        stone: ({ opacityValue }: { opacityValue?: string }) =>
+          opacityValue !== undefined
+            ? `rgba(var(--color-stone-rgb), ${opacityValue})`
+            : `rgb(var(--color-stone-rgb))`,
+        wood: 'var(--color-wood)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],

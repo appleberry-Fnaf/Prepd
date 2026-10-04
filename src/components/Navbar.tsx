@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { CatMark } from './Logo';
+import { animate } from 'animejs';
 import {
   BookOpen,
   PenTool,
@@ -13,6 +15,8 @@ import {
   LogOut,
   Sparkles,
   ShieldCheck,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 const navItems = [
@@ -27,7 +31,21 @@ const navItems = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
+  const { theme, toggle } = useTheme();
+  const iconRef = useRef<HTMLSpanElement>(null);
   const location = useLocation();
+
+  function handleThemeToggle() {
+    if (iconRef.current) {
+      animate(iconRef.current, {
+        rotate: ['0deg', '360deg'],
+        scale: [1, 1.35, 1],
+        duration: 480,
+        ease: 'easeOutBack',
+      });
+    }
+    toggle();
+  }
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -62,6 +80,17 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            <button
+              onClick={handleThemeToggle}
+              className="p-2 rounded-lg text-taupe-600 hover:bg-ink/5 hover:text-ink transition-colors duration-200 ml-1"
+              aria-label="Toggle dark mode"
+            >
+              <span ref={iconRef} className="inline-flex">
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </span>
+            </button>
+
             {user ? (
               <button
                 onClick={signOut}
@@ -111,6 +140,16 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            <button
+              onClick={handleThemeToggle}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-taupe-600 hover:bg-ink/5 w-full"
+            >
+              <span ref={null} className="inline-flex">
+                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </span>
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </button>
+
             {user ? (
               <button
                 onClick={() => { signOut(); setMobileOpen(false); }}
