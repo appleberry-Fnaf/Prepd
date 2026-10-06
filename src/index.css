@@ -717,41 +717,105 @@
 
 /* ===== Cube Hero — full-page landing experience ===== */
 
-/* Applied to <body> while Home page is mounted */
 body.cube-hero-bg {
   background: #0b0b0f !important;
-  /* Hide scrollbar visually, keep scrolling functional */
   scrollbar-width: none;
   -ms-overflow-style: none;
   overflow-y: scroll;
 }
-body.cube-hero-bg::-webkit-scrollbar {
-  display: none;
-}
+body.cube-hero-bg::-webkit-scrollbar { display: none; }
 
-/* Full dark page container */
 .cube-hero-page {
   background: #0b0b0f;
   min-height: 100vh;
   position: relative;
 }
 
-/* Ambient glow bloom — behind the cube */
-.cube-hero-glow {
+/* ── Navbar ── */
+.ch-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  /* gradient fade so it doesn't cut the dark bg sharply */
+  background: linear-gradient(to bottom, rgba(11,11,15,0.88) 0%, transparent 100%);
+}
+.ch-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.85);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+.ch-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.ch-nav-links a {
+  color: rgba(255,255,255,0.48);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: color 0.2s ease;
+}
+.ch-nav-links a:hover { color: rgba(255,255,255,0.86); }
+
+/* ── Hero text (fixed left, fades out on scroll) ── */
+.ch-hero-text {
+  position: fixed;
+  top: 50%;
+  left: clamp(24px, 7vw, 100px);
+  transform: translateY(-50%);
+  z-index: 15;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* opacity driven by JS scroll progress */
+}
+.ch-line {
+  display: block;
+  font-size: clamp(38px, 5.8vw, 84px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.07;
+  /* start invisible — anime.js sets from 0 → 1 */
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.ch-line:first-child { color: rgba(255,255,255,0.88); }
+.ch-line--accent     { color: #7faaee; } /* brand wood-blue, legible on dark */
+
+/* ── Warm static ambient glow — not AI-neon ── */
+.ch-glow {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 90vmin;
-  height: 90vmin;
+  width: 80vmin;
+  height: 80vmin;
   border-radius: 50%;
-  filter: blur(72px);
+  /* warm off-white, very low opacity — feels like a lamp, not RGB */
+  background: radial-gradient(
+    circle,
+    rgba(255, 246, 228, 0.07) 0%,
+    rgba(200, 180, 140, 0.04) 40%,
+    transparent 68%
+  );
+  filter: blur(55px);
   pointer-events: none;
   z-index: 5;
-  transition: background 0.85s ease;
 }
 
-/* Fixed wrapper — keeps cube perfectly centered at all scroll positions */
+/* ── Fixed centered cube wrapper ── */
 .cube-hero-fixed {
   position: fixed;
   top: 50%;
@@ -762,70 +826,63 @@ body.cube-hero-bg::-webkit-scrollbar {
   user-select: none;
 }
 
-/* Perspective container — sizes the scene */
+/* Perspective scene — slightly smaller than before */
 .cube-hero-scene {
-  --sz: min(60vmin, 600px);
-  --half: min(30vmin, 300px);
-  width: var(--sz);
+  --sz:   min(52vmin, 500px);
+  --half: min(26vmin, 250px);
+  width:  var(--sz);
   height: var(--sz);
   perspective: calc(var(--sz) * 2.6);
   perspective-origin: 50% 47%;
 }
 
-/* 3D cube body */
 .cube-hero-body {
-  width: var(--sz);
+  width:  var(--sz);
   height: var(--sz);
   position: relative;
   transform-style: preserve-3d;
   will-change: transform;
 }
 
-/* Scale-pulse when crossing a face boundary */
+/* Gentle scale-pulse on face crossing */
 @keyframes cube-land-pulse {
   0%   { scale: 1; }
-  35%  { scale: 1.048; }
+  36%  { scale: 1.028; }
   100% { scale: 1; }
 }
 .cube-land-pulse {
-  animation: cube-land-pulse 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: cube-land-pulse 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* ── Face base styles ── */
+/* ── Face base ── */
 .cube-hero-face {
   position: absolute;
-  width: var(--sz);
+  width:  var(--sz);
   height: var(--sz);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  border-radius: clamp(10px, 2vmin, 22px);
+  border-radius: clamp(10px, 2vmin, 20px);
   border: 1px solid rgba(255, 255, 255, 0.055);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(10px, 1.8vmin, 20px);
-  padding: clamp(18px, 4vmin, 52px);
+  gap: clamp(8px, 1.6vmin, 18px);
+  padding: clamp(16px, 3.5vmin, 48px);
   box-shadow:
-    /* colored outer glow — per-face via --face-glow inline var */
-    0 0 80px -10px var(--face-glow, rgba(59,130,246,0.65)),
-    /* top-edge inner highlight */
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    /* depth shadow inside */
-    inset 0 0 80px rgba(0, 0, 0, 0.38),
-    /* crisp outer border */
-    0 0 0 1px rgba(0, 0, 0, 0.50);
+    0 0 72px -12px var(--face-glow, rgba(59,130,246,0.55)),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 0 70px rgba(0,0,0,0.38),
+    0 0 0 1px rgba(0,0,0,0.48);
   overflow: hidden;
 }
-
-/* Subtle top gloss */
 .cube-hero-face::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 44%;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.048), transparent);
-  border-radius: clamp(10px, 2vmin, 22px) clamp(10px, 2vmin, 22px) 0 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.045), transparent);
+  border-radius: clamp(10px,2vmin,20px) clamp(10px,2vmin,20px) 0 0;
   pointer-events: none;
 }
 
@@ -837,32 +894,83 @@ body.cube-hero-bg::-webkit-scrollbar {
 .cube-face-top    { transform: rotateX(90deg)   translateZ(var(--half)); }
 .cube-face-bottom { transform: rotateX(-90deg)  translateZ(var(--half)); }
 
-/* Subject label — large bold centrepiece */
+/* Subject label */
 .cube-hero-label {
-  font-size: clamp(22px, 5vmin, 54px);
+  font-size: clamp(20px, 4.5vmin, 50px);
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.90);
+  color: rgba(255,255,255,0.90);
   letter-spacing: -0.03em;
   text-align: center;
   line-height: 1.1;
-  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.55);
+  text-shadow: 0 2px 24px rgba(0,0,0,0.55);
+}
+
+/* ── CTA panel (fixed bottom, fades in at end of scroll) ── */
+.ch-cta {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 20;
+  padding: 48px 24px 36px;
+  background: linear-gradient(to top,
+    rgba(11,11,15,0.96) 0%,
+    rgba(11,11,15,0.72) 55%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.ch-cta-heading {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.36);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ch-cta-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ch-cta-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.78);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.ch-cta-card:hover {
+  background: rgba(255,255,255,0.11);
+  border-color: rgba(255,255,255,0.16);
+  color: rgba(255,255,255,0.92);
 }
 
 /* ── Mobile ── */
 @media (max-width: 639px) {
+  .ch-nav { padding: 14px 16px; }
+  .ch-nav-links { gap: 18px; }
   .cube-hero-scene {
-    --sz: min(70vw, 340px);
-    --half: min(35vw, 170px);
+    --sz:   min(68vw, 320px);
+    --half: min(34vw, 160px);
   }
-  .cube-hero-glow {
-    width: 110vw;
-    height: 110vw;
-  }
+  /* Hide hero text on small screens — cube takes full stage */
+  .ch-hero-text { display: none; }
+  .ch-cta { padding: 40px 16px 28px; }
 }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .cube-hero-glow { transition: none; }
   .cube-land-pulse { animation: none; }
-  .cube-hero-body { will-change: auto; }
+  .cube-hero-body  { will-change: auto; }
 }

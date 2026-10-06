@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Calculator, FlaskConical, Landmark, BookOpen, Globe, Code } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { animate } from 'animejs';
+import { Calculator, FlaskConical, Landmark, BookOpen, Globe, Code, ArrowRight, Layers, PenTool, Upload } from 'lucide-react';
+import { CatMark } from '../components/Logo';
 
 const FACES = [
   {
@@ -8,7 +11,6 @@ const FACES = [
     Icon: Calculator,
     bg: 'linear-gradient(145deg, #0e1a30 0%, #172d52 100%)',
     glow: '#3b82f6',
-    glowRgb: '59,130,246',
     accent: '#60a5fa',
     cls: 'cube-face-front',
   },
@@ -18,7 +20,6 @@ const FACES = [
     Icon: FlaskConical,
     bg: 'linear-gradient(145deg, #091e10 0%, #0e2e18 100%)',
     glow: '#22c55e',
-    glowRgb: '34,197,94',
     accent: '#4ade80',
     cls: 'cube-face-right',
   },
@@ -28,7 +29,6 @@ const FACES = [
     Icon: Landmark,
     bg: 'linear-gradient(145deg, #1e1000 0%, #2e1800 100%)',
     glow: '#f59e0b',
-    glowRgb: '245,158,11',
     accent: '#fbbf24',
     cls: 'cube-face-back',
   },
@@ -38,7 +38,6 @@ const FACES = [
     Icon: BookOpen,
     bg: 'linear-gradient(145deg, #150a25 0%, #200e38 100%)',
     glow: '#8b5cf6',
-    glowRgb: '139,92,246',
     accent: '#a78bfa',
     cls: 'cube-face-left',
   },
@@ -48,7 +47,6 @@ const FACES = [
     Icon: Globe,
     bg: 'linear-gradient(145deg, #200812 0%, #300f1c 100%)',
     glow: '#f43f5e',
-    glowRgb: '244,63,94',
     accent: '#fb7185',
     cls: 'cube-face-top',
   },
@@ -58,37 +56,84 @@ const FACES = [
     Icon: Code,
     bg: 'linear-gradient(145deg, #041520 0%, #071d2c 100%)',
     glow: '#06b6d4',
-    glowRgb: '6,182,212',
     accent: '#22d3ee',
     cls: 'cube-face-bottom',
   },
 ] as const;
 
+const DESTINATIONS = [
+  { to: '/subjects',   label: 'Subjects',   Icon: Layers,  color: '#7faaee' },
+  { to: '/practice',   label: 'Practice',   Icon: PenTool, color: '#4ade80' },
+  { to: '/contribute', label: 'Contribute', Icon: Upload,  color: '#fbbf24' },
+];
+
+function playChime() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    // Two soft sine tones — A4 then E5, quiet and short
+    [[440, 0, 0.048], [659, 0.18, 0.032]].forEach(([freq, delay, peak]) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+      gain.gain.linearRampToValueAtTime(peak, ctx.currentTime + delay + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 1.6);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 1.6);
+    });
+  } catch { /* audio not available */ }
+}
+
 export default function Home() {
-  const cubeRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
+  const cubeRef    = useRef<HTMLDivElement>(null);
+  const textRef    = useRef<HTMLDivElement>(null);
+  const ctaRef     = useRef<HTMLDivElement>(null);
+  const readyRef   = useRef<HTMLSpanElement>(null);
+  const prepdRef   = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const cube = cubeRef.current;
-    const glow = glowRef.current;
-    if (!cube) return;
-
-    // Dark bg + hidden scrollbar on body while this page is active
     document.body.classList.add('cube-hero-bg');
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (reduced) {
-      cube.style.transform = 'rotateX(-10deg) rotateY(25deg)';
-      return () => { document.body.classList.remove('cube-hero-bg'); };
+    // ── Startup chime on first interaction ──
+    let chimePlayed = false;
+    function onFirstInteract() {
+      if (chimePlayed) return;
+      chimePlayed = true;
+      playChime();
     }
+    window.addEventListener('click',  onFirstInteract, { once: true });
+    window.addEventListener('scroll', onFirstInteract, { once: true, passive: true });
+
+    // ── Slide-in text ──
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced) {
+      if (readyRef.current) {
+        animate(readyRef.current, {
+          translateX: [-80, 0], opacity: [0, 1],
+          duration: 950, ease: 'outExpo', delay: 450,
+        });
+      }
+      if (prepdRef.current) {
+        animate(prepdRef.current, {
+          translateX: [-80, 0], opacity: [0, 1],
+          duration: 950, ease: 'outExpo', delay: 750,
+        });
+      }
+    }
+
+    // ── Cube rotation + scroll-driven effects ──
+    const cube = cubeRef.current;
+    if (!cube) return () => { document.body.classList.remove('cube-hero-bg'); };
 
     const isTouch = window.matchMedia('(pointer: coarse)').matches;
     let rafId: number;
     let idleAngle = 0;
-    let mx = 0, my = 0;
-    let lx = 0, ly = 0;
-    let lastFaceIdx = -1;
+    let mx = 0, my = 0, lx = 0, ly = 0;
+    let lastZone = -1;
 
     function getScrollProg() {
       const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -96,68 +141,92 @@ export default function Home() {
     }
 
     function onMouseMove(e: MouseEvent) {
-      mx = (e.clientX / window.innerWidth - 0.5) * 2;
+      mx = (e.clientX / window.innerWidth  - 0.5) * 2;
       my = (e.clientY / window.innerHeight - 0.5) * 2;
     }
 
     function tick() {
-      idleAngle += 0.055; // ~3.3 deg/sec — barely perceptible, keeps it alive
-
+      idleAngle += 0.055;
       if (!isTouch) {
         lx += (mx - lx) * 0.055;
         ly += (my - ly) * 0.055;
       }
 
-      const prog = getScrollProg();
-      const scrollRy = -(prog * 360);
-      const totalRy = scrollRy + idleAngle + lx * 24;
+      const prog   = getScrollProg();
+      const totalRy = -(prog * 360) + idleAngle + lx * 24;
       const totalRx = -10 + ly * -22;
-
       cube.style.transform = `rotateX(${totalRx}deg) rotateY(${totalRy}deg)`;
 
-      // Glow + pulse: one step per 1/6 of scroll travel
-      const faceIdx = Math.min(Math.floor(prog * 6), 5);
-      if (faceIdx !== lastFaceIdx) {
-        lastFaceIdx = faceIdx;
-        const f = FACES[faceIdx];
-        if (glow) {
-          glow.style.background =
-            `radial-gradient(circle, rgba(${f.glowRgb},0.22) 0%, transparent 65%)`;
-        }
-        // Scale-pulse via CSS animation
+      // Hero text: fade out in first 30 % of scroll
+      if (textRef.current) {
+        textRef.current.style.opacity = String(Math.max(0, 1 - prog * 3.3));
+      }
+
+      // CTA panel: fade in from 72 % onward
+      if (ctaRef.current) {
+        const ctaOpacity = Math.max(0, (prog - 0.72) * 3.6);
+        ctaRef.current.style.opacity   = String(ctaOpacity);
+        ctaRef.current.style.pointerEvents = ctaOpacity > 0.05 ? 'auto' : 'none';
+      }
+
+      // Subtle scale-pulse when crossing a 90 ° Y-face boundary
+      const normY = ((totalRy % 360) + 360) % 360;
+      const zone  = Math.floor(normY / 90);
+      if (zone !== lastZone) {
+        lastZone = zone;
         cube.classList.remove('cube-land-pulse');
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        cube.offsetWidth; // trigger reflow so animation re-fires
+        void cube.offsetWidth; // reflow
         cube.classList.add('cube-land-pulse');
       }
 
       rafId = requestAnimationFrame(tick);
     }
 
-    if (!isTouch) window.addEventListener('mousemove', onMouseMove, { passive: true });
-    rafId = requestAnimationFrame(tick);
+    if (!reduced) {
+      if (!isTouch) window.addEventListener('mousemove', onMouseMove, { passive: true });
+      rafId = requestAnimationFrame(tick);
+    } else {
+      cube.style.transform = 'rotateX(-10deg) rotateY(25deg)';
+    }
 
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('click',  onFirstInteract);
+      window.removeEventListener('scroll', onFirstInteract);
       document.body.classList.remove('cube-hero-bg');
     };
   }, []);
 
   return (
     <div className="cube-hero-page">
-      {/* Invisible tall div — creates 600 vh of scrollable space */}
-      <div style={{ height: '600vh', width: '100%', pointerEvents: 'none' }} aria-hidden="true" />
 
-      {/* Ambient glow bloom (z-index below cube) */}
-      <div
-        ref={glowRef}
-        className="cube-hero-glow"
-        style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.22) 0%, transparent 65%)' }}
-        aria-hidden="true"
-      />
+      {/* ── Nav ── */}
+      <nav className="ch-nav">
+        <Link to="/" className="ch-nav-brand">
+          <CatMark className="w-8 h-8" />
+          <span>Prepd</span>
+        </Link>
+        <div className="ch-nav-links">
+          <Link to="/subjects">Subjects</Link>
+          <Link to="/practice">Practice</Link>
+          <Link to="/contribute">Contribute</Link>
+        </div>
+      </nav>
 
-      {/* Fixed centered cube */}
+      {/* ── Scroll area — creates the 600 vh of scrollable height ── */}
+      <div style={{ height: '600vh' }} aria-hidden="true" />
+
+      {/* ── Warm ambient glow — static, not AI-neon ── */}
+      <div className="ch-glow" aria-hidden="true" />
+
+      {/* ── Hero text (slides in, fades out on scroll) ── */}
+      <div ref={textRef} className="ch-hero-text" aria-label="Get Ready. Get Prepd.">
+        <span ref={readyRef}  className="ch-line">Get Ready.</span>
+        <span ref={prepdRef}  className="ch-line ch-line--accent">Get Prepd.</span>
+      </div>
+
+      {/* ── Fixed 3D cube ── */}
       <div className="cube-hero-fixed" aria-label="Interactive 3D subject cube">
         <div className="cube-hero-scene">
           <div ref={cubeRef} className="cube-hero-body">
@@ -171,8 +240,8 @@ export default function Home() {
                   aria-hidden="true"
                   style={{
                     color: accent,
-                    width: 'clamp(26px, 5vmin, 58px)',
-                    height: 'clamp(26px, 5vmin, 58px)',
+                    width:  'clamp(22px, 4vmin, 52px)',
+                    height: 'clamp(22px, 4vmin, 52px)',
                     flexShrink: 0,
                   }}
                 />
@@ -182,6 +251,26 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* ── CTA panel (fades in at end of scroll) ── */}
+      <div
+        ref={ctaRef}
+        className="ch-cta"
+        style={{ opacity: 0, pointerEvents: 'none' }}
+        aria-hidden="true"
+      >
+        <p className="ch-cta-heading">Where do you want to start?</p>
+        <div className="ch-cta-grid">
+          {DESTINATIONS.map(({ to, label, Icon, color }) => (
+            <Link key={to} to={to} className="ch-cta-card">
+              <Icon aria-hidden="true" style={{ color, width: 18, height: 18, flexShrink: 0 }} />
+              {label}
+              <ArrowRight aria-hidden="true" style={{ width: 14, height: 14, opacity: 0.4 }} />
+            </Link>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }
