@@ -1160,36 +1160,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   opacity: 0;
 }
 
-/* Step list — blueprint scenes */
-.ah-steps {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ah-step {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.ah-step-num {
-  font-family: var(--ah-mono);
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(0,0,0,0.35);
-  min-width: 20px;
-  flex-shrink: 0;
-}
-
-.ah-step-label {
-  font-family: var(--ah-sans);
-  font-size: 14px;
-  color: rgba(0,0,0,0.62);
-}
+/* Step list — defined further below with blueprint scene styles */
 
 .ah-scene-link {
   display: inline-block;
@@ -1455,6 +1426,130 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   border-top: 1px solid rgba(255,255,255,0.05);
 }
 
+/* ── Blueprint stage: dot-grid overlay ── */
+.ah-stage[data-bp] {
+  background-image: radial-gradient(rgba(42,40,36,0.13) 1px, transparent 1px) !important;
+  background-size: 28px 28px !important;
+}
+
+/* ── Blueprint annotation overlay ── */
+.ah-bp-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Three labels: N, E, S — positioned around the ring center (50%, 50%) */
+}
+
+.ah-bp-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  stroke: rgba(42,40,36,0.28);
+  stroke-width: 0.4;
+  fill: none;
+}
+
+.ah-bp-label {
+  position: absolute;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* North — above the ring */
+.ah-bp-label--n {
+  top:  calc(50% - 268px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+}
+/* East — right of ring */
+.ah-bp-label--e {
+  top:  50%;
+  left: calc(50% + 270px);
+  transform: translateY(-50%);
+}
+/* South — below the ring */
+.ah-bp-label--s {
+  top:  calc(50% + 268px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ah-bp-label-num {
+  font-family: var(--ah-mono);
+  font-size: 10px;
+  color: rgba(42,40,36,0.38);
+}
+
+.ah-bp-label-text {
+  font-family: var(--ah-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(42,40,36,0.72);
+  letter-spacing: 0.02em;
+}
+
+/* ── Step flow diagram (blueprint text block) ── */
+.ah-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+/* Vertical connector line through the step numbers */
+.ah-steps::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 22px;
+  bottom: 22px;
+  width: 1px;
+  background: rgba(42,40,36,0.18);
+}
+
+.ah-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.ah-step-num {
+  font-family: var(--ah-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(42,40,36,0.45);
+  min-width: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  /* Dot on the connector line */
+  position: relative;
+}
+.ah-step-num::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(42,40,36,0.38);
+}
+
+.ah-step-label {
+  font-family: var(--ah-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(42,40,36,0.7);
+}
+
 /* ── Mobile ── */
 @media (max-width: 640px) {
   .ah-nav { padding: 14px 20px; gap: 16px; }
@@ -1464,6 +1559,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   .ah-scene-text { bottom: 32px; left: 20px; right: 20px; max-width: none; }
   .ah-code-card { display: none; }
   .ah-progress { right: 16px; bottom: 28px; }
+  .ah-bp-overlay { display: none; }
 
   .ah-ring-wrap { transform: translate(-50%, -50%) scale(0.7); }
 
@@ -1476,7 +1572,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .ah-stage, .ah-accent-bar { transition: none; }
   .ah-scene-heading, .ah-scene-sub, .ah-scene-link,
-  .ah-code-card, .ah-scene-tag { opacity: 1 !important; transform: none !important; }
+  .ah-code-card, .ah-scene-tag, .ah-bp-label { opacity: 1 !important; transform: none !important; }
   .ah-progress-fill { transition: none; }
   .ah-ring path, .ah-ring line { transition: none; }
 }

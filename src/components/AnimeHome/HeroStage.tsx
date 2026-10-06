@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { animate } from 'animejs';
 import { createThreeScene, ThreeScene } from './ThreeObject';
 import Ring from './Ring';
+import BlueprintOverlay from './BlueprintOverlay';
 import ProgressTicker from './ProgressTicker';
 import { SCENES, SCROLL_VH, BG_LIGHT } from './constants';
 
@@ -143,7 +144,7 @@ export default function HeroStage() {
 
   return (
     <div ref={wrapperRef} className="ah-scroll-wrapper" style={{ height: `${SCROLL_VH}vh` }}>
-      <div className="ah-stage" style={{ background: bg }}>
+      <div className="ah-stage" style={{ background: bg }} data-bp={blueprint ? '' : undefined}>
 
         {/* Three.js canvas */}
         <canvas ref={canvasRef} className="ah-canvas" aria-hidden="true" />
@@ -156,6 +157,14 @@ export default function HeroStage() {
             blueprint={blueprint}
           />
         </div>
+
+        {/* Blueprint annotation labels (only during beige scenes) */}
+        {scene.annotations && (
+          <BlueprintOverlay
+            annotations={scene.annotations}
+            visible={blueprint}
+          />
+        )}
 
         {/* Scene text block */}
         <div

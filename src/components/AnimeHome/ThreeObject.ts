@@ -54,9 +54,8 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     metalness: 0.62,
     roughness: 0.52,
   });
-  const edgeMat = new THREE.LineBasicMaterial({ color: 0x5a5450, linewidth: 1 });
-  const bpMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a, wireframe: false });
-  const bpEdgeMat = new THREE.LineBasicMaterial({ color: 0x1a1a1a, linewidth: 1 });
+  const edgeMat    = new THREE.LineBasicMaterial({ color: 0x5a5450 });
+  const bpEdgeMat  = new THREE.LineBasicMaterial({ color: 0x2a2824 });
 
   // Build discs
   const discDefs = [
@@ -107,20 +106,35 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
 
   scene.add(group);
 
+  // Collect all meshes + edge sets for bulk toggling in blueprint mode
+  const allMeshes: THREE.Mesh[] = [];
+  const allEdges: THREE.LineSegments[] = [];
+  group.traverse(obj => {
+    if (obj instanceof THREE.Mesh)          allMeshes.push(obj);
+    else if (obj instanceof THREE.LineSegments) allEdges.push(obj);
+  });
+
   // State
   let currentP = 0;
   let targetP = 0;
   let mx = 0, my = 0, lmx = 0, lmy = 0;
   let animId: number;
+  let isBlueprintMode = false;
 
   function setScrollProgress(p: number) { targetP = p; }
   function setMouseTilt(x: number, y: number) { mx = x; my = y; }
   function setBlueprintMode(on: boolean) {
-    discs.forEach(d => {
-      (d.mesh.material as THREE.MeshStandardMaterial) = on ? bpMat as unknown as THREE.MeshStandardMaterial : darkMat;
-      d.mesh.material = on ? bpMat : darkMat;
-      d.edges.material = on ? bpEdgeMat : edgeMat;
+    if (on === isBlueprintMode) return;
+    isBlueprintMode = on;
+    // In blueprint mode: hide all fill meshes, darken edges for beige bg contrast
+    allMeshes.forEach(m => { m.visible = !on; });
+    allEdges.forEach(e => {
+      (e.material as THREE.LineBasicMaterial).color.setHex(on ? 0x2a2824 : 0x5a5450);
     });
+    // Lights don't affect LineBasicMaterial; adjust ambient for fill meshes when they return
+    ambient.intensity  = on ? 0 : 0.25;
+    rimLight.intensity = on ? 0 : 2.2;
+    fillLight.intensity = on ? 0 : 0.6;
   }
 
   function loop() {
@@ -158,12 +172,14 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
       d.edges.position.y = d.baseY + dir * explodeAmt;
     });
 
-    // Fade out: p 0.92–1.0 — drive via group opacity using renderer alpha + scale trick
+    // Fade out: p 0.92–1.0 via scale
     const fadeOut = 1 - Math.max(0, Math.min(1, (p - 0.92) / 0.08));
     group.scale.setScalar(scaleIn * fadeOut);
-    // Dim lights instead of per-material opacity (avoids shared-material mutation)
-    rimLight.intensity = 2.2 * fadeOut;
-    ambient.intensity  = 0.25 * fadeOut;
+    if (!isBlueprintMode) {
+      rimLight.intensity  = 2.2  * fadeOut;
+      ambient.intensity   = 0.25 * fadeOut;
+      fillLight.intensity = 0.6  * fadeOut;
+    }
 
     renderer.render(scene, camera);
   }
@@ -171,17 +187,10 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
 
   function dispose() {
     cancelAnimationFrame(animId);
-    group.traverse(obj => {
-      if ((obj as THREE.Mesh).isMesh) {
-        (obj as THREE.Mesh).geometry.dispose();
-      }
-      if ((obj as THREE.LineSegments).isLineSegments) {
-        (obj as THREE.LineSegments).geometry.dispose();
-      }
-    });
+    allMeshes.forEach(m  => m.geometry.dispose());
+    allEdges.forEach(e   => e.geometry.dispose());
     darkMat.dispose();
     edgeMat.dispose();
-    bpMat.dispose();
     bpEdgeMat.dispose();
     renderer.dispose();
   }
