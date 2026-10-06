@@ -264,32 +264,65 @@
 }
 
 .book-scene {
-  perspective: 1800px;
-  perspective-origin: 50% 40%;
+  perspective: 2600px;
+  perspective-origin: 50% 42%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1;
   width: 100%;
-  padding: 0 16px;
+  padding: 0 8px;
 }
 
 .book {
   position: relative;
   transform-style: preserve-3d;
-  width: min(96vw, 1000px);
-  height: min(78vh, 640px);
+  /* Fill the monitor: full width, height capped so it doesn't overflow viewport */
+  width: calc(100vw - 16px);
+  height: min(calc(100vh - 140px), calc((100vw - 16px) * 0.62));
   will-change: transform, opacity;
   filter:
-    drop-shadow(0 52px 90px rgba(0,0,0,0.55))
-    drop-shadow(0 14px 32px rgba(0,0,0,0.3));
+    drop-shadow(0 60px 100px rgba(0,0,0,0.60))
+    drop-shadow(0 16px 36px rgba(0,0,0,0.32));
+}
+
+/* ── Page edges visible beside and below the closed hardcover ── */
+/* Right edge: cream page stack peeking out from under the cover */
+.book-edge-right {
+  position: absolute;
+  top: 3%; bottom: 3%;
+  right: -11px;
+  width: 11px;
+  border-radius: 0 4px 4px 0;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px,
+    #f0e8d5 1px, #f0e8d5 3px
+  );
+  box-shadow: 4px 0 12px rgba(0,0,0,0.22);
+}
+/* Bottom edge: page stack from the foot of the book */
+.book-edge-bottom {
+  position: absolute;
+  left: 3%; right: 3%;
+  bottom: -10px;
+  height: 10px;
+  border-radius: 0 0 4px 4px;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    to right,
+    rgba(0,0,0,0.08) 0, rgba(0,0,0,0.08) 1px,
+    #f0e8d5 1px, #f0e8d5 3px
+  );
+  box-shadow: 0 6px 16px rgba(0,0,0,0.28);
 }
 
 /* ── Interior: left page ─────────────────────────────── */
 .book-left-page {
   position: absolute;
   top: 0; left: 0; bottom: 0;
-  right: calc(50% + 10px);
+  right: calc(50% + 14px);
   background: var(--bk-page);
   border-radius: 4px 0 0 4px;
   overflow: hidden;
@@ -312,7 +345,7 @@
 .book-right-bg {
   position: absolute;
   top: 0; right: 0; bottom: 0;
-  left: calc(50% + 10px);
+  left: calc(50% + 14px);
   background: var(--bk-page-alt);
   border-radius: 0 4px 4px 0;
   overflow: visible;
@@ -335,8 +368,8 @@
 .book-spine {
   position: absolute;
   top: 0; bottom: 0;
-  left: calc(50% - 10px);
-  width: 20px;
+  left: calc(50% - 14px);
+  width: 28px;
   z-index: 10;
   background: linear-gradient(
     to right,
@@ -412,8 +445,8 @@
 .book-page-turning {
   position: absolute;
   top: 0;
-  left: calc(50% + 10px);
-  width: calc(50% - 10px);
+  left: calc(50% + 14px);
+  width: calc(50% - 14px);
   height: 100%;
   transform-style: preserve-3d;
   transform-origin: 0% 50%;
@@ -450,8 +483,8 @@
 .book-right-page-static {
   position: absolute;
   top: 0;
-  left: calc(50% + 10px);
-  width: calc(50% - 10px);
+  left: calc(50% + 14px);
+  width: calc(50% - 14px);
   height: 100%;
   background: var(--bk-page);
   overflow: hidden;
@@ -519,19 +552,22 @@
 
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 639px) {
+  .book-scene { padding: 0 4px; }
   .book {
-    width: min(96vw, 420px);
-    height: min(70vh, 340px);
+    width: calc(100vw - 8px);
+    height: min(calc(100vh - 110px), calc((100vw - 8px) * 1.1));
   }
-  .book-spine { width: 12px; left: calc(50% - 6px); }
+  .book-spine { width: 16px; left: calc(50% - 8px); }
   .book-spine-text { display: none; }
-  .book-page-inner, .book-left-page-inner { padding: 1.25rem 1rem; }
+  .book-page-inner, .book-left-page-inner { padding: 1rem 0.875rem; }
   .book-page-turning, .book-right-page-static {
-    left: calc(50% + 6px);
-    width: calc(50% - 6px);
+    left: calc(50% + 8px);
+    width: calc(50% - 8px);
   }
-  .book-left-page { right: calc(50% + 6px); }
-  .book-right-bg { left: calc(50% + 6px); }
+  .book-left-page { right: calc(50% + 8px); }
+  .book-right-bg { left: calc(50% + 8px); }
+  .book-edge-right { right: -7px; width: 7px; }
+  .book-edge-bottom { height: 7px; bottom: -7px; }
 }
 
 /* ── Dark mode — book pages stay warm cream, text stays dark ── */

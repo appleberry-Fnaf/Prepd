@@ -310,12 +310,6 @@ export default function Home() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-stone/12 rounded-full blur-[100px]" />
           </div>
 
-          {/* Section label */}
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 text-center pointer-events-none z-10">
-            <div className="accent-strip mx-auto mb-2" />
-            <h2 className="text-2xl font-bold text-ink tracking-tight">Everything You Need</h2>
-          </div>
-
           {/* Scroll hint */}
           <div
             ref={scrollHintRef}
@@ -328,6 +322,10 @@ export default function Home() {
           {/* 3D Book */}
           <div className="book-scene relative z-10">
             <div ref={bookRef} className="book">
+
+              {/* Hardcover edge strips — page stack visible beside and below the closed cover */}
+              <div className="book-edge-right" aria-hidden="true" />
+              <div className="book-edge-bottom" aria-hidden="true" />
 
               {/* Interior left page */}
               <div className="book-left-page">
