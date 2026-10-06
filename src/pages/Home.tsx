@@ -26,7 +26,8 @@ export default function Home() {
   const [questionCount, setQuestionCount] = useState(0);
   const [displayStats, setDisplayStats] = useState({ subjects: 0, questions: 0, featured: 0 });
 
-  const heroTextRef = useRef<HTMLSpanElement>(null);
+  const readyRef = useRef<HTMLSpanElement>(null);
+  const prepdRef = useRef<HTMLSpanElement>(null);
   const categoriesGridRef = useRef<HTMLDivElement>(null);
   const featuresGridRef = useRef<HTMLDivElement>(null);
 
@@ -42,13 +43,20 @@ export default function Home() {
     loadData();
   }, []);
 
-  // Scramble "Get Prepd." on mount
+  // Scramble "Ready" then "Prepd" on mount
   useEffect(() => {
-    if (heroTextRef.current) {
-      animate(heroTextRef.current, {
+    if (readyRef.current) {
+      animate(readyRef.current, {
         textContent: scrambleText({ chars: 'symbols', from: 'left', ease: 'outExpo' }),
-        duration: 1200,
-        delay: 600,
+        duration: 1800,
+        delay: 300,
+      });
+    }
+    if (prepdRef.current) {
+      animate(prepdRef.current, {
+        textContent: scrambleText({ chars: 'symbols', from: 'left', ease: 'outExpo' }),
+        duration: 1800,
+        delay: 1000,
       });
     }
   }, []);
@@ -152,9 +160,9 @@ export default function Home() {
                 The #1 AP Study Platform
               </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-ink leading-[1.1] tracking-tight">
-                Get Ready.
+                Get <span ref={readyRef}>Ready</span>.
                 <br />
-                <span ref={heroTextRef} className="text-wood">Get Prepd.</span>
+                <span className="text-wood">Get <span ref={prepdRef}>Prepd</span>.</span>
               </h1>
               <p className="text-lg text-taupe-600 leading-relaxed max-w-lg">
                 Making AP preparation more accessible, organized, and effective for students. Find resources, practice questions, and a community that helps you succeed.
