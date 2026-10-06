@@ -249,3 +249,226 @@
     animation: none;
   }
 }
+
+/* ===== Cinematic Book Section ===== */
+
+.book-scene {
+  perspective: 1400px;
+  perspective-origin: 50% 48%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+}
+
+/* Book block */
+.book {
+  position: relative;
+  transform-style: preserve-3d;
+  width: clamp(340px, 82vw, 720px);
+  height: clamp(240px, 44vh, 460px);
+  will-change: transform, opacity;
+  filter: drop-shadow(0 28px 52px rgba(var(--color-ink-rgb), 0.16));
+}
+
+/* Left/right background halves (absolutely positioned inside .book) */
+.book-half--left {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  right: calc(50% + 8px);
+  background: rgb(var(--color-parchment-rgb));
+  border-radius: 3px 0 0 3px;
+  box-shadow: inset -6px 0 16px rgba(0, 0, 0, 0.07);
+}
+.book-half--right {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  left: calc(50% + 8px);
+  background: rgb(var(--color-parchment-rgb));
+  border-radius: 0 3px 3px 0;
+  box-shadow: inset 3px 0 10px rgba(0, 0, 0, 0.04);
+}
+
+/* Spine */
+.book-spine {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: calc(50% - 8px);
+  width: 16px;
+  z-index: 10;
+  background: linear-gradient(
+    160deg,
+    rgb(var(--color-ink-rgb)) 0%,
+    rgba(var(--color-ink-rgb), 0.72) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.14), 3px 0 10px rgba(0, 0, 0, 0.09);
+}
+.book-spine-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  color: rgb(var(--color-parchment-rgb));
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+/* Turning pages — anchored at the spine (left edge of right half) */
+.book-page-turning {
+  position: absolute;
+  top: 0;
+  left: calc(50% + 8px);
+  width: calc(50% - 8px);
+  height: 100%;
+  transform-style: preserve-3d;
+  transform-origin: 0% 50%;
+  will-change: transform;
+}
+
+/* Page faces */
+.book-page-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: rgb(var(--color-parchment-rgb));
+  overflow: hidden;
+}
+.book-page-face--back {
+  transform: rotateY(180deg);
+}
+
+/* Static right page (Feature 4 — never turns, fades in) */
+.book-right-page-static {
+  position: absolute;
+  top: 0;
+  left: calc(50% + 8px);
+  width: calc(50% - 8px);
+  height: 100%;
+  background: rgb(var(--color-parchment-rgb));
+  overflow: hidden;
+}
+
+/* Inner content padding — same for turning + static */
+.book-page-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.75rem 1.5rem;
+}
+
+/* Cover front face */
+.book-cover-front {
+  background: rgb(var(--color-ink-rgb));
+  position: relative;
+}
+
+/* Ruled-line back texture */
+.book-page-lines {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 23px,
+    rgba(var(--color-stone-rgb), 0.22) 23px,
+    rgba(var(--color-stone-rgb), 0.22) 24px
+  );
+  background-position-y: 24px;
+  opacity: 0.7;
+}
+
+/* Label on the back of a turned page */
+.book-page-back-label {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(var(--color-ink-rgb), 0.25);
+}
+
+/* Right-edge paper highlight */
+.book-page-edge {
+  position: absolute;
+  right: 0;
+  top: 3px;
+  bottom: 3px;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--color-stone-rgb), 0.55),
+    rgba(var(--color-stone-rgb), 0.2) 50%,
+    rgba(var(--color-stone-rgb), 0.45)
+  );
+}
+
+/* Progress dots */
+.book-progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(var(--color-stone-rgb), 0.45);
+  transition: background 0.25s ease, transform 0.25s ease;
+  will-change: transform;
+}
+
+/* Responsive: narrow screens */
+@media (max-width: 639px) {
+  .book {
+    width: clamp(290px, 94vw, 380px);
+    height: clamp(196px, 54vh, 300px);
+  }
+  .book-spine {
+    width: 10px;
+    left: calc(50% - 5px);
+  }
+  .book-spine-text { display: none; }
+  .book-page-inner { padding: 1rem 0.875rem; }
+  .book-page-turning,
+  .book-right-page-static {
+    left: calc(50% + 5px);
+    width: calc(50% - 5px);
+  }
+  .book-half--right { left: calc(50% + 5px); }
+  .book-half--left { right: calc(50% + 5px); }
+}
+
+/* Dark mode */
+.dark .book-half--left,
+.dark .book-half--right,
+.dark .book-page-face,
+.dark .book-right-page-static {
+  background: #122040;
+}
+.dark .book-cover-front {
+  background: #0b1729;
+}
+.dark .book-page-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 23px,
+    rgba(var(--color-stone-rgb), 0.13) 23px,
+    rgba(var(--color-stone-rgb), 0.13) 24px
+  );
+}
+
+/* Reduced motion: skip scroll animation, show all content */
+@media (prefers-reduced-motion: reduce) {
+  .book-page-turning { transform: none !important; }
+  .book-page-face {
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+  }
+}
