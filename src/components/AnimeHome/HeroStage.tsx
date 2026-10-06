@@ -7,10 +7,9 @@ import ProgressTicker from './ProgressTicker';
 import { SCENES, SCROLL_VH, BG_LIGHT } from './constants';
 
 function getScrollProg(el: HTMLElement): number {
-  const rect = el.getBoundingClientRect();
-  const traveled = -rect.top;
+  const rect  = el.getBoundingClientRect();
   const total = el.offsetHeight - window.innerHeight;
-  return total > 0 ? Math.max(0, Math.min(1, traveled / total)) : 0;
+  return total > 0 ? Math.max(0, Math.min(1, -rect.top / total)) : 0;
 }
 
 function sceneAtProgress(p: number): number {
@@ -18,66 +17,68 @@ function sceneAtProgress(p: number): number {
 }
 
 export default function HeroStage() {
-  const wrapperRef   = useRef<HTMLDivElement>(null);
-  const canvasRef    = useRef<HTMLCanvasElement>(null);
-  const threeRef     = useRef<ThreeScene | null>(null);
-  const rafRef       = useRef<number>(0);
-  const sceneIdxRef  = useRef<number>(-1);
-  const transitRef   = useRef<boolean>(false);
-  const pendingRef   = useRef<number | null>(null);
-  const textRef      = useRef<HTMLDivElement>(null);
+  const wrapperRef  = useRef<HTMLDivElement>(null);
+  const canvasRef   = useRef<HTMLCanvasElement>(null);
+  const threeRef    = useRef<ThreeScene | null>(null);
+  const rafRef      = useRef<number>(0);
+  const sceneIdxRef = useRef<number>(-1);
+  const transitRef  = useRef<boolean>(false);
+  const pendingRef  = useRef<number | null>(null);
 
-  // Only lightweight state that drives non-animated elements
+  // DOM refs for animated regions
+  const textRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const barRef  = useRef<HTMLDivElement>(null);
+
   const [scrollP,  setScrollP]  = useState(0);
   const [bg,       setBg]       = useState('#1e1c1a');
+  const [blueprint, setBlueprint] = useState(false);
   const [ringData, setRingData] = useState({ active: [0,1,2,3,4,5] as number[], accent: null as string | null });
   const [sceneIdx, setSceneIdx] = useState(0);
 
-  // ── Animate scene text out → swap content → animate in ──────────────────
+  // ── Transition: exit current text+card → swap → enter new ────────────────
   function transitionTo(newIdx: number) {
-    const textEl = textRef.current;
-    if (!textEl) return;
-
-    // If mid-transition, queue and return
-    if (transitRef.current) {
-      pendingRef.current = newIdx;
-      return;
-    }
-
+    if (transitRef.current) { pendingRef.current = newIdx; return; }
     transitRef.current = true;
 
-    // Phase 1: exit current text
-    animate(textEl, {
-      opacity:    [1, 0],
-      translateY: [0, -8],
-      duration: 160,
-      ease: 'inQuad',
-    }).then(() => {
-      // Phase 2: swap React content
-      setSceneIdx(newIdx);
-      setRingData({
-        active: [...SCENES[newIdx].ringActive] as number[],
-        accent: SCENES[newIdx].accent as string | null,
-      });
-      setBg(SCENES[newIdx].bg as string);
+    const textEl = textRef.current;
+    const cardEl = cardRef.current;
 
-      // Phase 3: enter new text (after React paint)
+    // Exit phase (concurrent)
+    if (textEl) animate(textEl, { opacity: [1, 0], translateY: [0, -8],  duration: 160, ease: 'inQuad' });
+    if (cardEl) animate(cardEl, { opacity: [1, 0], translateX: [0, 14],  duration: 140, ease: 'inQuad' });
+
+    // After exit delay: swap state, enter
+    setTimeout(() => {
+      const s = SCENES[newIdx];
+      setSceneIdx(newIdx);
+      setRingData({ active: [...s.ringActive], accent: s.accent });
+      setBg(s.bg);
+      setBlueprint(s.bg === BG_LIGHT);
+
+      // Update accent bar color immediately
+      if (barRef.current) {
+        barRef.current.style.background = s.accent ?? 'transparent';
+        barRef.current.style.opacity    = s.accent ? '1' : '0';
+      }
+
+      // Enter phase (after React paint)
       requestAnimationFrame(() => {
-        animate(textEl, {
-          opacity:    [0, 1],
-          translateY: [12, 0],
-          duration: 420,
-          ease: 'outExpo',
-        }).then(() => {
+        if (textEl) animate(textEl, { opacity: [0, 1], translateY: [14, 0], duration: 420, ease: 'outExpo' });
+        if (cardEl && s.card) {
+          animate(cardEl, { opacity: [0, 1], translateX: [14, 0], duration: 400, delay: 60, ease: 'outExpo' });
+        }
+
+        setTimeout(() => {
           transitRef.current = false;
           if (pendingRef.current !== null) {
             const next = pendingRef.current;
             pendingRef.current = null;
             transitionTo(next);
           }
-        });
+        }, 440);
       });
-    });
+    }, 165);
   }
 
   useEffect(() => {
@@ -86,14 +87,12 @@ export default function HeroStage() {
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // ── Hero entrance animation (once, on mount) ──
+    // ── Hero entrance (text slides from left) ──
     if (!reduced && textRef.current) {
-      const heading  = textRef.current.querySelector('.ah-scene-heading');
-      const sub      = textRef.current.querySelector('.ah-scene-sub');
-      const link     = textRef.current.querySelector('.ah-scene-link');
-      if (heading) animate(heading, { translateX: [-60, 0], opacity: [0, 1], duration: 900, delay: 400, ease: 'outExpo' });
-      if (sub)     animate(sub,     { translateX: [-40, 0], opacity: [0, 1], duration: 900, delay: 560, ease: 'outExpo' });
-      if (link)    animate(link,    { opacity: [0, 1], duration: 600, delay: 760 });
+      const h = textRef.current.querySelector('.ah-scene-heading');
+      const s = textRef.current.querySelector('.ah-scene-sub');
+      if (h) animate(h, { translateX: [-60, 0], opacity: [0, 1], duration: 900, delay: 380, ease: 'outExpo' });
+      if (s) animate(s, { translateX: [-40, 0], opacity: [0, 1], duration: 900, delay: 540, ease: 'outExpo' });
     }
 
     if (reduced) return;
@@ -103,10 +102,10 @@ export default function HeroStage() {
     threeRef.current = three;
 
     let mx = 0, my = 0;
-    function onMouseMove(e: MouseEvent) {
+    const onMouseMove = (e: MouseEvent) => {
       mx = (e.clientX / window.innerWidth  - 0.5) * 2;
       my = (e.clientY / window.innerHeight - 0.5) * 2;
-    }
+    };
     window.addEventListener('mousemove', onMouseMove, { passive: true });
 
     // ── rAF loop ──
@@ -140,8 +139,7 @@ export default function HeroStage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const scene       = SCENES[sceneIdx];
-  const isBlueprint = bg === BG_LIGHT;
+  const scene = SCENES[sceneIdx];
 
   return (
     <div ref={wrapperRef} className="ah-scroll-wrapper" style={{ height: `${SCROLL_VH}vh` }}>
@@ -150,24 +148,60 @@ export default function HeroStage() {
         {/* Three.js canvas */}
         <canvas ref={canvasRef} className="ah-canvas" aria-hidden="true" />
 
-        {/* Ring */}
+        {/* Ring — blueprint prop flips segment colors for light bg */}
         <div className="ah-ring-wrap" aria-hidden="true">
-          <Ring activeSegments={ringData.active} accent={ringData.accent} />
+          <Ring
+            activeSegments={ringData.active}
+            accent={ringData.accent}
+            blueprint={blueprint}
+          />
         </div>
 
-        {/* Scene text — anime.js controls opacity/translateY, React swaps content */}
+        {/* Scene text block */}
         <div
           ref={textRef}
-          className={`ah-scene-text ${isBlueprint ? 'ah-scene-text--light' : ''}`}
+          className={`ah-scene-text ${blueprint ? 'ah-scene-text--light' : ''}`}
           aria-live="polite"
           aria-atomic="true"
         >
+          {/* Accent bar — colored strip above heading (feature scenes only) */}
+          <div
+            ref={barRef}
+            className="ah-accent-bar"
+            style={{ background: scene.accent ?? 'transparent', opacity: scene.accent ? 1 : 0 }}
+            aria-hidden="true"
+          />
+
+          {/* Monospace section tag */}
+          {scene.tag && (
+            <span
+              className="ah-scene-tag"
+              style={{ color: scene.accent ?? 'inherit' }}
+            >
+              {scene.tag}
+            </span>
+          )}
+
           <h2 className="ah-scene-heading">
             {scene.heading.split('\n').map((line, i, arr) => (
               <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
             ))}
           </h2>
+
           <p className="ah-scene-sub">{scene.subtext}</p>
+
+          {/* Step list — blueprint scenes only */}
+          {scene.steps && (
+            <ol className="ah-steps" aria-label="Steps">
+              {scene.steps.map((step, i) => (
+                <li key={i} className="ah-step">
+                  <span className="ah-step-num">0{i + 1}</span>
+                  <span className="ah-step-label">{step}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+
           {scene.link && scene.linkLabel && (
             <Link to={scene.link} className="ah-scene-link">
               {scene.linkLabel}
@@ -175,14 +209,19 @@ export default function HeroStage() {
           )}
         </div>
 
-        {/* Code card — fades with scene transition */}
-        {scene.card && (
-          <div className="ah-code-card" aria-label="Feature detail">
-            {scene.card.split('\n').map((line, i) => (
-              <span key={i} className="ah-code-line">{line}</span>
-            ))}
-          </div>
-        )}
+        {/* Code card — always in DOM, hidden when no card */}
+        <div
+          ref={cardRef}
+          className="ah-code-card"
+          aria-label="Feature detail"
+          style={{ opacity: scene.card ? 1 : 0, pointerEvents: scene.card ? 'none' : 'none' }}
+        >
+          {scene.card
+            ? scene.card.split('\n').map((line, i) => (
+                <span key={i} className="ah-code-line">{line}</span>
+              ))
+            : null}
+        </div>
 
         {/* Progress ticker */}
         <ProgressTicker progress={scrollP} />

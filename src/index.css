@@ -1117,6 +1117,28 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
 .ah-scene-text--light .ah-scene-sub { color: #1a1814; }
 .ah-scene-text--light .ah-scene-link { color: #2a2420; }
 
+/* Accent bar — 3px colored strip above heading */
+.ah-accent-bar {
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  margin-bottom: 14px;
+  transition: background 0.55s ease, opacity 0.55s ease;
+}
+
+/* Section tag — monospace label like "01 / Subjects" */
+.ah-scene-tag {
+  display: block;
+  font-family: var(--ah-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: 0.75;
+  transition: color 0.55s ease;
+}
+
 .ah-scene-heading {
   font-family: var(--ah-sans);
   font-size: clamp(28px, 3.8vw, 56px);
@@ -1125,7 +1147,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   letter-spacing: -0.03em;
   color: var(--ah-text);
   margin: 0 0 14px;
-  /* opacity set to 0 initially; anime.js slides it in */
+  /* opacity starts at 0; anime.js controls it */
   opacity: 0;
 }
 
@@ -1136,6 +1158,37 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   color: var(--ah-muted);
   margin: 0 0 18px;
   opacity: 0;
+}
+
+/* Step list — blueprint scenes */
+.ah-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ah-step {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.ah-step-num {
+  font-family: var(--ah-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0,0,0,0.35);
+  min-width: 20px;
+  flex-shrink: 0;
+}
+
+.ah-step-label {
+  font-family: var(--ah-sans);
+  font-size: 14px;
+  color: rgba(0,0,0,0.62);
 }
 
 .ah-scene-link {
@@ -1155,6 +1208,17 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
 .ah-scene-link:hover {
   color: rgba(255,255,255,0.88);
   border-color: rgba(255,255,255,0.5);
+}
+
+/* Blueprint (light bg) overrides for scene text */
+.ah-scene-text--light .ah-scene-tag  { color: rgba(0,0,0,0.5); }
+.ah-scene-text--light .ah-scene-link {
+  color: rgba(0,0,0,0.5);
+  border-color: rgba(0,0,0,0.2);
+}
+.ah-scene-text--light .ah-scene-link:hover {
+  color: rgba(0,0,0,0.82);
+  border-color: rgba(0,0,0,0.45);
 }
 
 @keyframes ah-fade-up {
@@ -1410,7 +1474,9 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .ah-stage { transition: none; }
-  .ah-scene-heading, .ah-scene-sub, .ah-scene-link, .ah-code-card { opacity: 1 !important; transform: none !important; }
+  .ah-stage, .ah-accent-bar { transition: none; }
+  .ah-scene-heading, .ah-scene-sub, .ah-scene-link,
+  .ah-code-card, .ah-scene-tag { opacity: 1 !important; transform: none !important; }
   .ah-progress-fill { transition: none; }
+  .ah-ring path, .ah-ring line { transition: none; }
 }

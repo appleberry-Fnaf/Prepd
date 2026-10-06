@@ -3,7 +3,8 @@ import { RING_ARC_COLORS } from './constants';
 
 interface RingProps {
   activeSegments?: number[];
-  accent?: string | null;
+  accent?:         string | null;
+  blueprint?:      boolean;
 }
 
 const SIZE = 560;
@@ -38,24 +39,37 @@ function arcPath(cx: number, cy: number, ri: number, ro: number, startDeg: numbe
   ].join(' ');
 }
 
-export default function Ring({ activeSegments, accent }: RingProps) {
+export default function Ring({ activeSegments, accent, blueprint = false }: RingProps) {
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
+  const tickRef  = useRef<SVGGElement>(null);
 
   useEffect(() => {
     const active = activeSegments ?? [0, 1, 2, 3, 4, 5];
     pathRefs.current.forEach((el, i) => {
       if (!el) return;
       const isActive = active.includes(i);
-      const color = accent && isActive ? accent : isActive ? RING_ARC_COLORS[i] : 'rgba(255,255,255,0.08)';
-      el.style.fill = color;
-      el.style.opacity = isActive ? '1' : '0.35';
+      let color: string;
+      if (blueprint) {
+        color = isActive ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.06)';
+      } else if (accent && isActive) {
+        color = accent;
+      } else {
+        color = isActive ? RING_ARC_COLORS[i] : 'rgba(255,255,255,0.07)';
+      }
+      el.style.fill    = color;
+      el.style.opacity = isActive ? '1' : '0.4';
     });
-  }, [activeSegments, accent]);
+    if (tickRef.current) {
+      tickRef.current.style.stroke = blueprint
+        ? 'rgba(0,0,0,0.18)'
+        : 'rgba(255,255,255,0.18)';
+    }
+  }, [activeSegments, accent, blueprint]);
 
   const segments = Array.from({ length: SEGS }, (_, i) => {
     const startDeg = i * (SEG_SPAN + GAP_DEG);
-    const endDeg = startDeg + SEG_SPAN;
-    return { startDeg, endDeg, color: RING_ARC_COLORS[i] };
+    const endDeg   = startDeg + SEG_SPAN;
+    return { startDeg, endDeg };
   });
 
   const ticks = Array.from({ length: TICK_COUNT }, (_, i) => {
@@ -73,26 +87,27 @@ export default function Ring({ activeSegments, accent }: RingProps) {
       style={{ width: SIZE, height: SIZE }}
     >
       {/* Arc segments */}
-      {segments.map(({ startDeg, endDeg, color }, i) => (
+      {segments.map(({ startDeg, endDeg }, i) => (
         <path
           key={i}
           ref={(el) => { pathRefs.current[i] = el; }}
           d={arcPath(CX, CY, INNER, OUTER, startDeg, endDeg)}
-          fill={color}
-          style={{ transition: 'fill 0.6s ease, opacity 0.6s ease' }}
+          fill={RING_ARC_COLORS[i]}
+          style={{ transition: 'fill 0.55s ease, opacity 0.55s ease' }}
         />
       ))}
       {/* Tick marks */}
-      {ticks.map((t, i) => (
-        <line
-          key={i}
-          x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-          stroke="rgba(255,255,255,0.18)"
-          strokeWidth="1"
-        />
-      ))}
-      {/* Inner dot */}
-      <circle cx={CX} cy={CY} r="4" fill="rgba(255,255,255,0.3)" />
+      <g ref={tickRef} stroke="rgba(255,255,255,0.18)" style={{ transition: 'stroke 0.55s ease' }}>
+        {ticks.map((t, i) => (
+          <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} strokeWidth="1" />
+        ))}
+      </g>
+      {/* Center dot */}
+      <circle
+        cx={CX} cy={CY} r="4"
+        fill={blueprint ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)'}
+        style={{ transition: 'fill 0.55s ease' }}
+      />
     </svg>
   );
 }
