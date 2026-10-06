@@ -983,7 +983,7 @@ body.cube-hero-bg::-webkit-scrollbar { display: none; }
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --ah-bg-dark:  #1e1c1a;
+  --ah-bg-dark:  #0a0f1e;
   --ah-bg-light: #d9d2cb;
   --ah-text:     rgba(255,255,255,0.88);
   --ah-muted:    rgba(255,255,255,0.44);
@@ -1014,7 +1014,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   align-items: center;
   gap: 32px;
   padding: 18px 40px;
-  background: linear-gradient(to bottom, rgba(30,28,26,0.92) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(8,14,28,0.95) 0%, transparent 100%);
 }
 
 .ah-nav-brand {
@@ -1056,15 +1056,15 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   letter-spacing: 0.04em;
   padding: 7px 16px;
   border-radius: 20px;
-  background: rgba(255, 100, 80, 0.18);
-  border: 1px solid rgba(255, 100, 80, 0.35);
-  color: #ff8870;
+  background: rgba(245, 200, 66, 0.14);
+  border: 1px solid rgba(245, 200, 66, 0.35);
+  color: #f5c842;
   text-decoration: none;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 .ah-nav-cta:hover {
-  background: rgba(255, 100, 80, 0.28);
-  border-color: rgba(255, 100, 80, 0.55);
+  background: rgba(245, 200, 66, 0.24);
+  border-color: rgba(245, 200, 66, 0.55);
 }
 
 /* ── Scroll wrapper ── */
@@ -1087,7 +1087,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 44% 54% at 50% 52%, rgba(200, 130, 20, 0.20) 0%, rgba(180, 100, 10, 0.08) 45%, transparent 72%);
+  background: radial-gradient(ellipse 44% 54% at 50% 52%, rgba(245, 200, 66, 0.22) 0%, rgba(59, 130, 246, 0.10) 45%, transparent 72%);
   mix-blend-mode: screen;
   z-index: 1;
 }
@@ -1260,7 +1260,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   bottom: 0;
   left: 0;
   right: 0;
-  background: #ef4444;
+  background: #f5c842;
   border-radius: 2px;
   transition: height 0.1s linear;
   min-height: 3px;
@@ -1418,7 +1418,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
 
 .ah-cta-btn--primary {
   background: rgba(255,255,255,0.94);
-  color: #1e1c1a;
+  color: #0a0f1e;
 }
 .ah-cta-btn--primary:hover {
   background: #ffffff;
@@ -1437,7 +1437,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
 
 /* ── Footer ── */
 .ah-footer {
-  background: #121110;
+  background: #060a14;
   border-top: 1px solid rgba(255,255,255,0.06);
   padding: 52px 0 44px;
 }
@@ -1841,7 +1841,7 @@ textarea.dk-input {
 
 .dk-btn-primary {
   background: rgba(255,255,255,0.92);
-  color: #1e1c1a;
+  color: #0a0f1e;
 }
 .dk-btn-primary:hover:not(:disabled) {
   background: #ffffff;
@@ -1935,10 +1935,10 @@ textarea.dk-input {
   border-radius: 20px;
 }
 .dk-badge-green  { background: rgba(74, 222, 128, 0.12); color: #4ade80; }
-.dk-badge-amber  { background: rgba(251, 191, 36, 0.12);  color: #fbbf24; }
+.dk-badge-amber  { background: rgba(245, 200, 66, 0.12);   color: #f5c842; }
 .dk-badge-red    { background: rgba(248, 113, 113, 0.12); color: #f87171; }
 .dk-badge-blue   { background: rgba(96, 165, 250, 0.12);  color: #60a5fa; }
-.dk-badge-purple { background: rgba(167, 139, 250, 0.12); color: #a78bfa; }
+.dk-badge-purple { background: rgba(96, 165, 250, 0.12); color: #60a5fa; }
 .dk-badge-muted  { background: rgba(255,255,255,0.07);    color: var(--ah-muted); }
 
 /* ── Difficulty dots ── */
@@ -1949,7 +1949,7 @@ textarea.dk-input {
   flex-shrink: 0;
 }
 .dk-diff-easy   { background: #4ade80; }
-.dk-diff-medium { background: #fbbf24; }
+.dk-diff-medium { background: #f5c842; }
 .dk-diff-hard   { background: #f87171; }
 
 /* ── Table ── */
@@ -1995,7 +1995,7 @@ textarea.dk-input {
 }
 .dk-alert-red    { background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.22); color: #f87171; }
 .dk-alert-green  { background: rgba(74, 222, 128, 0.1);  border: 1px solid rgba(74, 222, 128, 0.22);  color: #4ade80; }
-.dk-alert-amber  { background: rgba(251, 191, 36, 0.1);  border: 1px solid rgba(251, 191, 36, 0.22);  color: #fbbf24; }
+.dk-alert-amber  { background: rgba(245, 200, 66, 0.1);   border: 1px solid rgba(245, 200, 66, 0.22);   color: #f5c842; }
 
 /* ── Empty state ── */
 .dk-empty {
@@ -2019,10 +2019,10 @@ textarea.dk-input {
   height: 60px;
   padding: 0 clamp(20px, 4vw, 56px);
   gap: 28px;
-  background: rgba(30, 28, 26, 0.88);
+  background: rgba(8, 14, 28, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(59,130,246,0.12);
 }
 
 .dk-nav-brand {
@@ -2070,15 +2070,15 @@ textarea.dk-input {
   letter-spacing: 0.03em;
   padding: 7px 16px;
   border-radius: 20px;
-  background: rgba(255, 100, 80, 0.18);
-  border: 1px solid rgba(255, 100, 80, 0.35);
-  color: #ff8870;
+  background: rgba(245, 200, 66, 0.12);
+  border: 1px solid rgba(245, 200, 66, 0.30);
+  color: #f5c842;
   text-decoration: none;
   transition: all 0.15s;
 }
 .dk-nav-signin:hover {
-  background: rgba(255, 100, 80, 0.28);
-  border-color: rgba(255, 100, 80, 0.55);
+  background: rgba(245, 200, 66, 0.22);
+  border-color: rgba(245, 200, 66, 0.50);
 }
 
 .dk-nav-signout {
@@ -2113,7 +2113,7 @@ textarea.dk-input {
   position: fixed;
   top: 60px; left: 0; right: 0;
   z-index: 59;
-  background: rgba(22, 20, 18, 0.96);
+  background: rgba(6, 10, 20, 0.97);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   padding: 12px clamp(20px, 4vw, 56px) 20px;
@@ -2144,7 +2144,7 @@ textarea.dk-input {
 
 /* ── Dark footer ── */
 .dk-footer {
-  background: #121110;
+  background: #060a14;
   border-top: 1px solid rgba(255,255,255,0.06);
   padding: 44px 0 36px;
 }

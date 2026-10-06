@@ -136,7 +136,7 @@ export default function Profile() {
                 </div>
               )}
               {editing && (
-                <label style={{ position: 'absolute', bottom: -4, right: -4, width: 28, height: 28, borderRadius: '50%', background: 'var(--ah-text)', color: '#1e1c1a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px solid #1e1c1a' }} title="Change photo">
+                <label style={{ position: 'absolute', bottom: -4, right: -4, width: 28, height: 28, borderRadius: '50%', background: 'var(--ah-text)', color: '#0a0f1e', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px solid #0a0f1e' }} title="Change photo">
                   {uploadingAvatar ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
                   <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} disabled={uploadingAvatar} />
                 </label>
@@ -194,10 +194,10 @@ export default function Profile() {
 
             {/* Points + hours */}
             <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,176,64,0.08)', border: '1px solid rgba(245,176,64,0.2)', borderRadius: 10, padding: '10px 14px' }}>
-                <Zap className="w-4 h-4" style={{ color: '#f5b040', flexShrink: 0 }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,200,66,0.08)', border: '1px solid rgba(245,200,66,0.2)', borderRadius: 10, padding: '10px 14px' }}>
+                <Zap className="w-4 h-4" style={{ color: '#f5c842', flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 17, fontWeight: 800, color: '#f5b040', letterSpacing: '-0.02em' }}>{points}</div>
+                  <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 17, fontWeight: 800, color: '#f5c842', letterSpacing: '-0.02em' }}>{points}</div>
                   <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 9.5, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>points</div>
                 </div>
               </div>
@@ -219,7 +219,7 @@ export default function Profile() {
                 <span>{points} / {nextTier.min} pts</span>
               </div>
               <div style={{ width: '100%', height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden' }}>
-                <div style={{ height: '100%', background: '#f5b040', borderRadius: 4, width: `${tierPct}%`, transition: 'width 0.4s ease' }} />
+                <div style={{ height: '100%', background: '#f5c842', borderRadius: 4, width: `${tierPct}%`, transition: 'width 0.4s ease' }} />
               </div>
             </div>
           )}
@@ -228,10 +228,10 @@ export default function Profile() {
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
           {[
-            { icon: PenTool, label: 'Questions Answered', value: totalQuestions, color: '#a78bfa' },
+            { icon: PenTool, label: 'Questions Answered', value: totalQuestions, color: '#60a5fa' },
             { icon: CheckCircle, label: 'Accuracy', value: `${accuracy}%`, color: '#4ade80' },
             { icon: Upload, label: 'Resources Approved', value: approvedCount, color: '#60a5fa' },
-            { icon: Clock, label: 'Study Minutes', value: totalStudyTime, color: '#fbbf24' },
+            { icon: Clock, label: 'Study Minutes', value: totalStudyTime, color: '#f5c842' },
           ].map(({ icon: Icon, label, value, color }) => (
             <div key={label} className="dk-card" style={{ padding: '18px 20px' }}>
               <div style={{ width: 36, height: 36, borderRadius: 8, background: `${color}18`, border: `1px solid ${color}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
@@ -282,7 +282,7 @@ export default function Profile() {
           {/* My submissions */}
           <div className="dk-card" style={{ padding: '22px' }}>
             <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Upload className="w-4 h-4" style={{ color: '#fbbf24' }} /> My Submissions
+              <Upload className="w-4 h-4" style={{ color: '#f5c842' }} /> My Submissions
               {pendingCount > 0 && <span className="dk-badge dk-badge-amber" style={{ marginLeft: 'auto' }}>{pendingCount} pending</span>}
             </h2>
             {submissions.length === 0 ? (
@@ -295,12 +295,12 @@ export default function Profile() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {submissions.slice(0, 6).map(sub => (
                   <div key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: sub.status === 'approved' ? '#4ade80' : sub.status === 'rejected' ? '#f87171' : '#fbbf24' }} />
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: sub.status === 'approved' ? '#4ade80' : sub.status === 'rejected' ? '#f87171' : '#f5c842' }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 13, fontWeight: 600, color: 'var(--ah-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.title}</div>
                       <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', textTransform: 'capitalize' }}>{sub.type}</div>
                     </div>
-                    <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: sub.status === 'approved' ? '#4ade80' : sub.status === 'rejected' ? '#f87171' : '#fbbf24', textTransform: 'capitalize', flexShrink: 0 }}>{sub.status}</span>
+                    <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: sub.status === 'approved' ? '#4ade80' : sub.status === 'rejected' ? '#f87171' : '#f5c842', textTransform: 'capitalize', flexShrink: 0 }}>{sub.status}</span>
                   </div>
                 ))}
               </div>

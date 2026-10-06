@@ -5,11 +5,11 @@ import { CatMark } from '../Logo';
 import { AP_SUBJECTS } from './constants';
 
 const CATEGORY_COLOR: Record<string, string> = {
-  'Math & CS':  '#60a5fa',
-  'Sciences':   '#4ade80',
-  'English':    '#a78bfa',
-  'History':    '#fbbf24',
-  'Languages':  '#fb7185',
+  'Math & CS':  '#3b82f6',
+  'Sciences':   '#60a5fa',
+  'English':    '#f5c842',
+  'History':    '#f5c842',
+  'Languages':  '#60a5fa',
 };
 
 const STATS = [

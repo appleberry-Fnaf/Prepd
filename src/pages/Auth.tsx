@@ -148,7 +148,7 @@ export default function Auth() {
               </div>
             )}
             <button type="submit" disabled={loading} className="dk-btn dk-btn-primary" style={{ width: '100%', marginTop: 4 }}>
-              {loading ? <div className="dk-spin" style={{ width: 18, height: 18, borderTopColor: '#1e1c1a' }} /> : (isForgot ? 'Send reset link' : isSignUp ? 'Create account' : 'Sign in')}
+              {loading ? <div className="dk-spin" style={{ width: 18, height: 18, borderTopColor: '#0a0f1e' }} /> : (isForgot ? 'Send reset link' : isSignUp ? 'Create account' : 'Sign in')}
             </button>
           </form>
 

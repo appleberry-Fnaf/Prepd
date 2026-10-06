@@ -71,7 +71,7 @@ export default function Moderate() {
       <div className="dk-header">
         <span className="dk-page-tag">Moderate</span>
         <h1 className="dk-heading-xl" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <ShieldCheck className="w-8 h-8" style={{ color: '#a78bfa' }} /> Review queue
+          <ShieldCheck className="w-8 h-8" style={{ color: '#60a5fa' }} /> Review queue
         </h1>
         <p className="dk-sub" style={{ maxWidth: 480 }}>
           Approve or reject submissions. Approved resources publish automatically and award points.
@@ -82,7 +82,7 @@ export default function Moderate() {
         {/* Pending */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
           <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Clock className="w-4 h-4" style={{ color: '#fbbf24' }} /> Pending
+            <Clock className="w-4 h-4" style={{ color: '#f5c842' }} /> Pending
           </h2>
           <span className="dk-badge dk-badge-amber">{pending.length}</span>
         </div>

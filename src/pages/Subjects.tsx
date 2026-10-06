@@ -17,9 +17,9 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
-  'Math & CS': '#60a5fa', 'Sciences': '#4ade80',
-  'English': '#a78bfa', 'History & Social Sciences': '#fbbf24',
-  'Languages': '#fb7185',
+  'Math & CS': '#3b82f6', 'Sciences': '#60a5fa',
+  'English': '#f5c842', 'History & Social Sciences': '#f5c842',
+  'Languages': '#60a5fa',
 };
 
 export default function Subjects() {

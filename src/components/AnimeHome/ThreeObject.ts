@@ -27,40 +27,40 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   const ambient = new THREE.AmbientLight(0xffffff, 0.12);
   scene.add(ambient);
 
-  const rimLight = new THREE.DirectionalLight(0xf5b040, 3.2);
+  const rimLight = new THREE.DirectionalLight(0xf5c842, 3.2);
   rimLight.position.set(2, 3.5, 2);
   scene.add(rimLight);
 
-  const fillLight = new THREE.DirectionalLight(0x304870, 0.55);
+  const fillLight = new THREE.DirectionalLight(0x1a50d0, 0.65);
   fillLight.position.set(-2.5, -1, 3);
   scene.add(fillLight);
 
-  const backLight = new THREE.DirectionalLight(0x111833, 0.35);
+  const backLight = new THREE.DirectionalLight(0x0a1840, 0.45);
   backLight.position.set(0, -3, -2);
   scene.add(backLight);
 
   // Point light close to book surface creates the glow halo
-  const glowLight = new THREE.PointLight(0xf5a030, 2.8, 6, 2);
+  const glowLight = new THREE.PointLight(0xf5c842, 2.8, 6, 2);
   glowLight.position.set(0.3, 0.4, 1.8);
   scene.add(glowLight);
 
   // ── Materials ────────────────────────────────────────────────────────────
   const coverMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1410,
-    emissive: 0x3a2206,
-    emissiveIntensity: 0.6,
-    metalness: 0.08,
-    roughness: 0.88,
+    color: 0x070c1a,
+    emissive: 0x0d1a50,
+    emissiveIntensity: 0.7,
+    metalness: 0.15,
+    roughness: 0.82,
   });
   const pagesMat = new THREE.MeshStandardMaterial({
-    color: 0x2c2618,
-    emissive: 0x1a1006,
-    emissiveIntensity: 0.25,
+    color: 0x0a1020,
+    emissive: 0x081030,
+    emissiveIntensity: 0.3,
     roughness: 0.95,
     metalness: 0,
   });
-  const goldEdgeMat = new THREE.LineBasicMaterial({ color: 0xb08830 });
-  const bpEdgeMat   = new THREE.LineBasicMaterial({ color: 0x2a2824 });
+  const goldEdgeMat = new THREE.LineBasicMaterial({ color: 0xf5c842 });
+  const bpEdgeMat   = new THREE.LineBasicMaterial({ color: 0x1a2040 });
 
   // ── Geometry ─────────────────────────────────────────────────────────────
   // Spine center x = -0.775 (left edge), book face = x +0.775 from spine
@@ -137,7 +137,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     isBlueprintMode = on;
     allMeshes.forEach(m => { m.visible = !on; });
     allEdges.forEach(e => {
-      (e.material as THREE.LineBasicMaterial).color.setHex(on ? 0x2a2824 : 0xb08830);
+      (e.material as THREE.LineBasicMaterial).color.setHex(on ? 0x1a2040 : 0xf5c842);
     });
     ambient.intensity   = on ? 0 : 0.12;
     rimLight.intensity  = on ? 0 : 3.2;

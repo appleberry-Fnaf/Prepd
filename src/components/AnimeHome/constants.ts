@@ -1,11 +1,11 @@
-export const BG_DARK   = '#1e1c1a';
+export const BG_DARK   = '#0a0f1e';
 export const BG_LIGHT  = '#d9d2cb';
 
 export const ACCENT = {
   subjects:    '#60a5fa',
   practice:    '#4ade80',
-  contribute:  '#fbbf24',
-  leaderboard: '#a78bfa',
+  contribute:  '#f5c842',
+  leaderboard: '#60a5fa',
 } as const;
 
 // Arc segment colors for the ring (6 segments: red → orange → yellow → green → cyan → blue)

@@ -32,7 +32,7 @@ export default function HeroStage() {
   const barRef  = useRef<HTMLDivElement>(null);
 
   const [scrollP,  setScrollP]  = useState(0);
-  const [bg,       setBg]       = useState('#1e1c1a');
+  const [bg,       setBg]       = useState('#0a0f1e');
   const [blueprint, setBlueprint] = useState(false);
   const [ringData, setRingData] = useState({ active: [0,1,2,3,4,5] as number[], accent: null as string | null });
   const [sceneIdx, setSceneIdx] = useState(0);

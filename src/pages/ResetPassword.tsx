@@ -84,7 +84,7 @@ export default function ResetPassword() {
                   </div>
                 </div>
                 <button type="submit" disabled={saving} className="dk-btn dk-btn-primary" style={{ width: '100%', marginTop: 4 }}>
-                  {saving ? <div className="dk-spin" style={{ width: 18, height: 18, borderTopColor: '#1e1c1a' }} /> : 'Update password'}
+                  {saving ? <div className="dk-spin" style={{ width: 18, height: 18, borderTopColor: '#0a0f1e' }} /> : 'Update password'}
                 </button>
               </form>
             </>

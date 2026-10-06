@@ -93,8 +93,8 @@ export default function Contribute() {
   if (!user) {
     return (
       <div className="dk-empty" style={{ minHeight: '70vh' }}>
-        <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <Upload className="w-7 h-7" style={{ color: '#fbbf24' }} />
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(245,200,66,0.1)', border: '1px solid rgba(245,200,66,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <Upload className="w-7 h-7" style={{ color: '#f5c842' }} />
         </div>
         <h2 className="dk-heading-lg" style={{ marginBottom: 8 }}>Contribute</h2>
         <p style={{ color: 'var(--ah-muted)', marginBottom: 24, maxWidth: 360, lineHeight: 1.6 }}>
@@ -122,7 +122,7 @@ export default function Contribute() {
           {/* Submit form */}
           <div className="dk-card" style={{ padding: '28px' }}>
             <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 16, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Send className="w-4 h-4" style={{ color: '#fbbf24' }} /> Submit a Resource
+              <Send className="w-4 h-4" style={{ color: '#f5c842' }} /> Submit a Resource
             </h2>
 
             {success && <div className="dk-alert dk-alert-green" style={{ marginBottom: 18 }}><CheckCircle className="w-4 h-4 shrink-0" /> Submitted! A moderator will review it soon.</div>}
@@ -145,9 +145,9 @@ export default function Contribute() {
                     const active = form.type === t.value;
                     return (
                       <button key={t.value} type="button" onClick={() => setForm(p => ({ ...p, type: t.value }))}
-                        style={{ padding: '12px 8px', borderRadius: 8, border: `1px solid ${active ? 'rgba(251,191,36,0.45)' : 'rgba(255,255,255,0.1)'}`, background: active ? 'rgba(251,191,36,0.08)' : 'transparent', cursor: 'pointer', textAlign: 'center' }}>
-                        <Icon className="w-4 h-4 mx-auto mb-1" style={{ color: active ? '#fbbf24' : 'var(--ah-muted)' }} />
-                        <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: active ? '#fbbf24' : 'var(--ah-muted)' }}>{t.label}</div>
+                        style={{ padding: '12px 8px', borderRadius: 8, border: `1px solid ${active ? 'rgba(245,200,66,0.45)' : 'rgba(255,255,255,0.1)'}`, background: active ? 'rgba(245,200,66,0.08)' : 'transparent', cursor: 'pointer', textAlign: 'center' }}>
+                        <Icon className="w-4 h-4 mx-auto mb-1" style={{ color: active ? '#f5c842' : 'var(--ah-muted)' }} />
+                        <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: active ? '#f5c842' : 'var(--ah-muted)' }}>{t.label}</div>
                       </button>
                     );
                   })}
@@ -242,7 +242,7 @@ export default function Contribute() {
             {/* Why contribute */}
             <div className="dk-card" style={{ padding: '22px 24px' }}>
               <h3 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Star className="w-4 h-4" style={{ color: '#fbbf24' }} /> Why contribute?
+                <Star className="w-4 h-4" style={{ color: '#f5c842' }} /> Why contribute?
               </h3>
               {[
                 'Help fellow students succeed on their exams',

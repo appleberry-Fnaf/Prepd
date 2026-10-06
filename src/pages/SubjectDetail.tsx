@@ -196,7 +196,7 @@ export default function SubjectDetail() {
             {featured.length > 0 && (
               <div>
                 <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Star className="w-4 h-4" style={{ color: '#fbbf24' }} /> Featured Resources
+                  <Star className="w-4 h-4" style={{ color: '#f5c842' }} /> Featured Resources
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 }}>
                   {featured.map(resource => {
@@ -204,8 +204,8 @@ export default function SubjectDetail() {
                     return (
                       <div key={resource.id} className="dk-card dk-card-hover" style={{ padding: '18px 20px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(245,176,64,0.1)', border: '1px solid rgba(245,176,64,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <RIcon className="w-4 h-4" style={{ color: '#f5b040' }} />
+                          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(245,200,66,0.1)', border: '1px solid rgba(245,200,66,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <RIcon className="w-4 h-4" style={{ color: '#f5c842' }} />
                           </div>
                           <span className="dk-badge dk-badge-amber">{typeLabel[resource.type] || resource.type}</span>
                           {canDelete(resource) && (
@@ -292,8 +292,8 @@ export default function SubjectDetail() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {/* Start card */}
                 <div className="dk-card" style={{ padding: '36px', textAlign: 'center' }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                    <PenTool className="w-7 h-7" style={{ color: '#4ade80' }} />
+                  <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <PenTool className="w-7 h-7" style={{ color: '#60a5fa' }} />
                   </div>
                   <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 20, fontWeight: 800, color: 'var(--ah-text)', marginBottom: 8, letterSpacing: '-0.02em' }}>Practice Mode</h2>
                   <p style={{ fontSize: 13, color: 'var(--ah-muted)', marginBottom: questions.length === 0 ? 0 : 20, maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>

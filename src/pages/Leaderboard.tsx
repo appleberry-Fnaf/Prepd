@@ -9,14 +9,14 @@ interface LeaderboardProfile {
   total_points: number; volunteer_hours: number;
 }
 
-const MEDAL = ['#f5b040', '#a0a8b8', '#b06030'];
+const MEDAL = ['#f5c842', '#a0a8b8', '#60a5fa'];
 const RANK_LABEL = ['Top Contributor', 'Rising Star', 'Active Scholar', 'Contributor'];
 
 const POINT_ITEMS = [
   { icon: Upload,       label: 'Submit a resource',  points: 10, color: '#60a5fa' },
-  { icon: BookOpen,     label: 'Resource approved',  points: 25, color: '#4ade80' },
-  { icon: Star,         label: 'Get an upvote',      points: 5,  color: '#fbbf24' },
-  { icon: PenTool,      label: 'Answer a question',  points: 2,  color: '#a78bfa' },
+  { icon: BookOpen,     label: 'Resource approved',  points: 25, color: '#f5c842' },
+  { icon: Star,         label: 'Get an upvote',      points: 5,  color: '#f5c842' },
+  { icon: PenTool,      label: 'Answer a question',  points: 2,  color: '#60a5fa' },
   { icon: CheckCircle,  label: 'Correct answer',     points: 5,  color: '#4ade80' },
 ];
 
@@ -92,7 +92,7 @@ export default function Leaderboard() {
           <div className="dk-card" style={{ overflow: 'hidden', gridColumn: 'span 2', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
               <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Trophy className="w-4 h-4" style={{ color: '#f5b040' }} /> Top Contributors
+                <Trophy className="w-4 h-4" style={{ color: '#f5c842' }} /> Top Contributors
               </h2>
               <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: 3 }}>
                 {(['points', 'hours'] as const).map(s => (
@@ -153,7 +153,7 @@ export default function Leaderboard() {
             {/* Points guide */}
             <div className="dk-card" style={{ padding: '22px' }}>
               <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Zap className="w-4 h-4" style={{ color: '#fbbf24' }} /> How to earn
+                <Zap className="w-4 h-4" style={{ color: '#f5c842' }} /> How to earn
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {POINT_ITEMS.map(item => (
