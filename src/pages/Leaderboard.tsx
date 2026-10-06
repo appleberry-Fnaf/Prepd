@@ -2,40 +2,23 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Contribution } from '../lib/supabase';
-import {
-  Trophy, Medal, Crown, Star, ArrowUp, Award, Zap,
-  BookOpen, PenTool, Upload, CheckCircle, Loader,
-} from 'lucide-react';
+import { Trophy, Crown, Star, Upload, BookOpen, PenTool, CheckCircle, Zap } from 'lucide-react';
 
 interface LeaderboardProfile {
-  id: string;
-  display_name: string;
-  avatar_url: string | null;
-  total_points: number;
-  volunteer_hours: number;
+  id: string; display_name: string; avatar_url: string | null;
+  total_points: number; volunteer_hours: number;
 }
 
-const rankStyles = [
-  { bg: 'bg-parchment border-taupe-300/50', icon: Crown, color: 'text-wood', medal: 'bg-wood' },
-  { bg: 'bg-cream-200/50 border-taupe-300/50', icon: Medal, color: 'text-taupe-600', medal: 'bg-taupe-600' },
-  { bg: 'bg-cream-200/30 border-taupe-300/50', icon: Award, color: 'text-wood', medal: 'bg-taupe-400' },
+const MEDAL = ['#f5b040', '#a0a8b8', '#b06030'];
+const RANK_LABEL = ['Top Contributor', 'Rising Star', 'Active Scholar', 'Contributor'];
+
+const POINT_ITEMS = [
+  { icon: Upload,       label: 'Submit a resource',  points: 10, color: '#60a5fa' },
+  { icon: BookOpen,     label: 'Resource approved',  points: 25, color: '#4ade80' },
+  { icon: Star,         label: 'Get an upvote',      points: 5,  color: '#fbbf24' },
+  { icon: PenTool,      label: 'Answer a question',  points: 2,  color: '#a78bfa' },
+  { icon: CheckCircle,  label: 'Correct answer',     points: 5,  color: '#4ade80' },
 ];
-
-const badgeColors: Record<string, string> = {
-  'submission': 'bg-parchment text-ink',
-  'resource_approved': 'bg-green-50 text-green-700',
-  'upvote': 'bg-amber-50 text-amber-700',
-  'question_answered': 'bg-wood/20 text-wood',
-  'question_correct': 'bg-teal-50 text-teal-700',
-};
-
-const badgeIcons: Record<string, React.ElementType> = {
-  'submission': Upload,
-  'resource_approved': BookOpen,
-  'upvote': Star,
-  'question_answered': PenTool,
-  'question_correct': CheckCircle,
-};
 
 export default function Leaderboard() {
   const [topProfiles, setTopProfiles] = useState<LeaderboardProfile[]>([]);
@@ -46,213 +29,161 @@ export default function Leaderboard() {
   useEffect(() => {
     async function loadData() {
       const orderCol = sortBy === 'hours' ? 'volunteer_hours' : 'total_points';
-      const { data: profilesData } = await supabase
-        .from('profiles')
+      const { data: profilesData } = await supabase.from('profiles')
         .select('id, display_name, avatar_url, total_points, volunteer_hours')
-        .order(orderCol, { ascending: false })
-        .limit(20);
+        .order(orderCol, { ascending: false }).limit(20);
       setTopProfiles(profilesData || []);
-      const { data: contributionsData } = await supabase
-        .from('contributions')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-      setRecentContributions(contributionsData || []);
+      const { data: cData } = await supabase.from('contributions').select('*').order('created_at', { ascending: false }).limit(10);
+      setRecentContributions(cData || []);
       setLoading(false);
     }
     loadData();
   }, [sortBy]);
 
-  const val = (p: LeaderboardProfile) => (sortBy === 'hours' ? (p.volunteer_hours || 0) : (p.total_points || 0));
+  const val = (p: LeaderboardProfile) => sortBy === 'hours' ? (p.volunteer_hours || 0) : (p.total_points || 0);
   const unit = sortBy === 'hours' ? 'hrs' : 'pts';
-  const unitLong = sortBy === 'hours' ? 'hours' : 'points';
+  const getInitials = (name: string | null) => name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??';
 
-  const getInitials = (name: string | null) => {
-    if (!name) return '??';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
-  const getRankStyle = (index: number) => {
-    if (index < 3) return rankStyles[index];
-    return { bg: 'bg-white border-taupe-300/50', icon: ArrowUp, color: 'text-taupe-400', medal: 'bg-taupe-300' };
-  };
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-stone/40 border-t-ink rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="dk-empty" style={{ minHeight: '60vh' }}><div className="dk-spin" /></div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-10">
-        <div className="accent-strip mb-4" />
-        <h1 className="text-4xl font-bold text-ink mb-3">Leaderboard</h1>
-        <p className="text-lg text-taupe-600 max-w-2xl">
-          Top contributors who help the AP community thrive. Earn points by submitting resources, answering questions, and more.
+    <div>
+      <div className="dk-header">
+        <span className="dk-page-tag">Leaderboard</span>
+        <h1 className="dk-heading-xl">Rise through<br />the ranks.</h1>
+        <p className="dk-sub" style={{ maxWidth: 460 }}>
+          Every contribution earns points. See where you stand.
         </p>
       </div>
 
-      {topProfiles.length > 0 && (
-        <div className="mb-12">
-          <div className="flex flex-col sm:flex-row items-end justify-center gap-4 sm:gap-6">
-            {topProfiles[1] && (
-              <div className="order-2 sm:order-1 flex flex-col items-center">
-                {topProfiles[1].avatar_url ? (
-                  <img src={topProfiles[1].avatar_url} alt="" className="w-20 h-20 rounded-full object-cover mb-3" />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-taupe-300/50 flex items-center justify-center text-xl font-bold text-ink mb-3">
-                    {getInitials(topProfiles[1].display_name)}
+      <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
+
+        {/* Top 3 podium */}
+        {topProfiles.length >= 2 && (
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16, marginBottom: 48, flexWrap: 'wrap' }}>
+            {[1, 0, 2].map(idx => {
+              const p = topProfiles[idx];
+              if (!p) return null;
+              const isFirst = idx === 0;
+              const size = isFirst ? 72 : 56;
+              const medalColor = MEDAL[idx];
+              return (
+                <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, order: idx === 1 ? 0 : idx === 0 ? 1 : 2 }}>
+                  {p.avatar_url ? (
+                    <img src={p.avatar_url} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${medalColor}44` }} />
+                  ) : (
+                    <div style={{ width: size, height: size, borderRadius: '50%', background: `${medalColor}18`, border: `1px solid ${medalColor}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--ah-sans)', fontSize: isFirst ? 20 : 16, fontWeight: 700, color: medalColor }}>
+                      {getInitials(p.display_name)}
+                    </div>
+                  )}
+                  <div style={{ width: isFirst ? 44 : 36, height: isFirst ? 44 : 36, borderRadius: '50%', background: `${medalColor}22`, border: `1px solid ${medalColor}55`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {isFirst ? <Crown className="w-5 h-5" style={{ color: medalColor }} /> : <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 13, fontWeight: 700, color: medalColor }}>{idx + 1}</span>}
                   </div>
-                )}
-                <div className="w-12 h-12 rounded-full bg-taupe-600 flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-parchment">2</span>
+                  <span style={{ fontFamily: 'var(--ah-sans)', fontSize: 13, fontWeight: 600, color: 'var(--ah-text)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.display_name || 'Student'}</span>
+                  <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: medalColor }}>{val(p)} {unit}</span>
                 </div>
-                <p className="font-semibold text-ink text-sm text-center max-w-[120px] truncate">{topProfiles[1].display_name || 'Student'}</p>
-                <p className="text-sm text-taupe-500">{val(topProfiles[1])} {unit}</p>
+              );
+            })}
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, alignItems: 'start' }}>
+          {/* Rankings table */}
+          <div className="dk-card" style={{ overflow: 'hidden', gridColumn: 'span 2', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Trophy className="w-4 h-4" style={{ color: '#f5b040' }} /> Top Contributors
+              </h2>
+              <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: 3 }}>
+                {(['points', 'hours'] as const).map(s => (
+                  <button key={s} onClick={() => setSortBy(s)}
+                    className={`dk-tab ${sortBy === s ? 'dk-tab-active' : 'dk-tab-inactive'}`}
+                    style={{ padding: '5px 12px', fontSize: 11 }}>
+                    {s === 'points' ? 'Points' : 'Vol. hrs'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {topProfiles.length === 0 ? (
+              <div className="dk-empty"><Trophy className="w-8 h-8" /><p>No contributors yet. <Link to="/contribute" style={{ color: '#60a5fa' }}>Start contributing</Link></p></div>
+            ) : (
+              <table className="dk-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 48 }}>#</th>
+                    <th>Contributor</th>
+                    <th style={{ textAlign: 'right' }}>{sortBy === 'hours' ? 'Hours' : 'Points'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topProfiles.map((p, i) => (
+                    <tr key={p.id}>
+                      <td>
+                        <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 12, color: i < 3 ? MEDAL[i] : 'var(--ah-muted)', fontWeight: 700 }}>{i + 1}</span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          {p.avatar_url ? (
+                            <img src={p.avatar_url} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                          ) : (
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--ah-mono)', fontSize: 11, fontWeight: 700, color: 'var(--ah-muted)', flexShrink: 0 }}>
+                              {getInitials(p.display_name)}
+                            </div>
+                          )}
+                          <div>
+                            <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 13.5, fontWeight: 600 }}>{p.display_name || 'Anonymous'}</div>
+                            <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{RANK_LABEL[Math.min(i, 3)]}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <span style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 800, color: i < 3 ? MEDAL[i] : 'var(--ah-text)', letterSpacing: '-0.02em' }}>{val(p)}</span>
+                        <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', marginLeft: 4 }}>{unit}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Points guide */}
+            <div className="dk-card" style={{ padding: '22px' }}>
+              <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Zap className="w-4 h-4" style={{ color: '#fbbf24' }} /> How to earn
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {POINT_ITEMS.map(item => (
+                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.03)' }}>
+                    <item.icon className="w-4 h-4 shrink-0" style={{ color: item.color }} />
+                    <span style={{ fontSize: 12.5, color: 'var(--ah-muted)', flex: 1 }}>{item.label}</span>
+                    <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, fontWeight: 700, color: item.color }}>+{item.points}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent activity */}
+            {recentContributions.length > 0 && (
+              <div className="dk-card" style={{ padding: '22px' }}>
+                <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 16 }}>Recent activity</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {recentContributions.slice(0, 6).map(c => (
+                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12.5, color: 'var(--ah-muted)', textTransform: 'capitalize' }}>{c.action_type.replace(/_/g, ' ')}</div>
+                        <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{new Date(c.created_at).toLocaleDateString()}</div>
+                      </div>
+                      <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: '#4ade80', fontWeight: 700 }}>+{c.points}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-            <div className="order-1 sm:order-2 flex flex-col items-center -mt-4">
-              {topProfiles[0].avatar_url ? (
-                <img src={topProfiles[0].avatar_url} alt="" className="w-24 h-24 rounded-full object-cover mb-3 ring-4 ring-wood/20" />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-wood/20 flex items-center justify-center text-xl font-bold text-ink mb-3 ring-4 ring-wood/20">
-                  {getInitials(topProfiles[0].display_name)}
-                </div>
-              )}
-              <div className="w-14 h-14 rounded-full bg-wood flex items-center justify-center mb-2 shadow-lg shadow-wood/30">
-                <Crown className="w-7 h-7 text-parchment" />
-              </div>
-              <p className="font-semibold text-ink text-sm text-center max-w-[120px] truncate">{topProfiles[0].display_name || 'Student'}</p>
-              <p className="text-sm text-wood font-semibold">{val(topProfiles[0])} {unit}</p>
-            </div>
-            {topProfiles[2] && (
-              <div className="order-3 flex flex-col items-center">
-                {topProfiles[2].avatar_url ? (
-                  <img src={topProfiles[2].avatar_url} alt="" className="w-20 h-20 rounded-full object-cover mb-3" />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-taupe-300/30 flex items-center justify-center text-xl font-bold text-ink mb-3">
-                    {getInitials(topProfiles[2].display_name)}
-                  </div>
-                )}
-                <div className="w-12 h-12 rounded-full bg-taupe-400 flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-parchment">3</span>
-                </div>
-                <p className="font-semibold text-ink text-sm text-center max-w-[120px] truncate">{topProfiles[2].display_name || 'Student'}</p>
-                <p className="text-sm text-taupe-500">{val(topProfiles[2])} {unit}</p>
-              </div>
-            )}
           </div>
-        </div>
-      )}
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <div className="card-warm overflow-hidden">
-            <div className="px-6 py-4 border-b border-taupe-300/30 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-wood" />Top Contributors
-              </h2>
-              <div className="flex items-center gap-1 bg-parchment rounded-lg p-0.5 border border-taupe-300/30">
-                <button onClick={() => setSortBy('points')} className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${sortBy === 'points' ? 'bg-ink text-parchment' : 'text-taupe-600 hover:text-ink'}`}>Points</button>
-                <button onClick={() => setSortBy('hours')} className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${sortBy === 'hours' ? 'bg-ink text-parchment' : 'text-taupe-600 hover:text-ink'}`}>Volunteer hrs</button>
-              </div>
-            </div>
-            <div className="divide-y divide-taupe-300/20">
-              {topProfiles.length === 0 ? (
-                <div className="px-6 py-12 text-center">
-                  <Trophy className="w-10 h-10 text-taupe-300 mx-auto mb-3" />
-                  <p className="text-sm text-taupe-500">No contributors yet. Be the first to earn points!</p>
-                  <Link to="/contribute" className="text-ink hover:underline text-sm font-medium mt-2 inline-block">Start contributing</Link>
-                </div>
-              ) : (
-                topProfiles.map((profile, index) => {
-                  const style = getRankStyle(index);
-                  const Icon = style.icon;
-                  return (
-                    <div key={profile.id} className={`flex items-center gap-4 px-6 py-4 ${index < 3 ? style.bg : ''}`}>
-                      <div className={`w-8 h-8 rounded-full ${style.medal} flex items-center justify-center shrink-0`}>
-                        <span className={`text-sm font-bold ${index < 3 ? 'text-parchment' : 'text-ink'}`}>{index + 1}</span>
-                      </div>
-                      {profile.avatar_url ? (
-                        <img src={profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-taupe-300/50 flex items-center justify-center text-sm font-bold text-ink shrink-0">
-                          {getInitials(profile.display_name)}
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-ink text-sm truncate">{profile.display_name || 'Anonymous'}</p>
-                        <div className="flex items-center gap-2 text-xs text-taupe-500">
-                          <Icon className={`w-3 h-3 ${style.color}`} />
-                          <span>{index === 0 ? 'Top Contributor' : index === 1 ? 'Rising Star' : index === 2 ? 'Active Scholar' : 'Contributor'}</span>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-lg font-bold text-ink">{val(profile)}</div>
-                        <div className="text-xs text-taupe-500">{unitLong}</div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="card-warm p-6">
-            <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-ink" />How to Earn Points
-            </h2>
-            <div className="space-y-3">
-              {[
-                { icon: Upload, label: 'Submit a resource', points: 10, color: 'text-ink' },
-                { icon: BookOpen, label: 'Resource approved', points: 25, color: 'text-green-700' },
-                { icon: Star, label: 'Get an upvote', points: 5, color: 'text-wood' },
-                { icon: PenTool, label: 'Answer a question', points: 2, color: 'text-ink' },
-                { icon: CheckCircle, label: 'Correct answer', points: 5, color: 'text-green-700' },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                  <div className="flex items-center gap-3">
-                    <item.icon className={`w-5 h-5 ${item.color}`} />
-                    <span className="text-sm text-ink">{item.label}</span>
-                  </div>
-                  <span className="text-sm font-semibold text-ink">+{item.points}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {recentContributions.length > 0 && (
-            <div className="card-warm p-6">
-              <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
-                <Loader className="w-5 h-5 text-ink" />Recent Activity
-              </h2>
-              <div className="space-y-3">
-                {recentContributions.map((c) => {
-                  const badgeColor = badgeColors[c.action_type] || 'bg-parchment text-ink';
-                  const BadgeIcon = badgeIcons[c.action_type] || Star;
-                  return (
-                    <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                      <div className={`w-8 h-8 rounded-lg ${badgeColor} flex items-center justify-center shrink-0`}>
-                        <BadgeIcon className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-ink capitalize">{c.action_type.replace(/_/g, ' ')}</p>
-                        <p className="text-xs text-taupe-500">{new Date(c.created_at).toLocaleDateString()}</p>
-                      </div>
-                      <span className="text-sm font-semibold text-green-700">+{c.points}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

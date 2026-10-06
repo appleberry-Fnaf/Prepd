@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import type { APSubject, Submission } from '../lib/supabase';
-import {
-  ShieldCheck, CheckCircle, XCircle, Clock, ExternalLink, Loader2, Inbox,
-} from 'lucide-react';
+import { ShieldCheck, CheckCircle, XCircle, Clock, ExternalLink, Loader2, Inbox } from 'lucide-react';
 
 export default function Moderate() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -21,10 +19,7 @@ export default function Moderate() {
   async function loadData() {
     const { data: subjectsData } = await supabase.from('ap_subjects').select('*');
     setSubjects(subjectsData || []);
-    const { data: subData } = await supabase
-      .from('submissions')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data: subData } = await supabase.from('submissions').select('*').order('created_at', { ascending: false });
     setSubmissions(subData || []);
     setLoading(false);
   }
@@ -34,14 +29,13 @@ export default function Moderate() {
     else if (!authLoading) setLoading(false);
   }, [isModerator, authLoading]);
 
-  const subjectName = (id: string) => subjects.find(s => s.id === id)?.name || 'Unknown subject';
+  const subjectName = (id: string) => subjects.find(s => s.id === id)?.name || 'Unknown';
 
   async function decide(sub: Submission, status: 'approved' | 'rejected') {
     setBusy(sub.id);
     const vh = status === 'approved' ? parseFloat(hours[sub.id] || '0') || 0 : 0;
     await supabase.from('submissions').update({
-      status,
-      volunteer_hours: vh,
+      status, volunteer_hours: vh,
       moderator_notes: notes[sub.id] || null,
       reviewed_by: user?.id || null,
       reviewed_at: new Date().toISOString(),
@@ -50,122 +44,139 @@ export default function Moderate() {
     setBusy(null);
   }
 
-  if (authLoading || loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-stone/40 border-t-ink rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  if (authLoading || loading) return <div className="dk-empty" style={{ minHeight: '60vh' }}><div className="dk-spin" /></div>;
 
   if (!user || !isModerator) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-2xl mx-auto text-center py-20">
-          <div className="w-16 h-16 rounded-2xl bg-parchment flex items-center justify-center mx-auto mb-6 border border-taupe-300/50">
-            <ShieldCheck className="w-8 h-8 text-ink" />
-          </div>
-          <h1 className="text-3xl font-bold text-ink mb-3">Moderators only</h1>
-          <p className="text-taupe-600 mb-8 max-w-md mx-auto">This page is for moderators. If you should have access, ask an admin to enable it on your account.</p>
-          <Link to="/" className="btn-warm inline-flex items-center gap-2">Back to home</Link>
+      <div className="dk-empty" style={{ minHeight: '70vh' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <ShieldCheck className="w-7 h-7" style={{ color: 'var(--ah-muted)' }} />
         </div>
+        <h2 className="dk-heading-lg" style={{ marginBottom: 8 }}>Moderators only</h2>
+        <p style={{ color: 'var(--ah-muted)', marginBottom: 24, maxWidth: 340, lineHeight: 1.6 }}>
+          Ask an admin to enable moderator access on your account.
+        </p>
+        <Link to="/" className="dk-btn dk-btn-ghost">Back to home</Link>
       </div>
     );
   }
 
-  const pending = submissions.filter(s => s.status === 'pending');
+  const pending  = submissions.filter(s => s.status === 'pending');
   const reviewed = submissions.filter(s => s.status !== 'pending').slice(0, 10);
 
+  const fieldLabel = { fontSize: 11, fontFamily: 'var(--ah-mono)', letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'var(--ah-muted)', marginBottom: 6, display: 'block' };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-10">
-        <div className="accent-strip mb-4" />
-        <h1 className="text-4xl font-bold text-ink mb-3 flex items-center gap-3">
-          <ShieldCheck className="w-8 h-8 text-ink" /> Moderate
+    <div>
+      <div className="dk-header">
+        <span className="dk-page-tag">Moderate</span>
+        <h1 className="dk-heading-xl" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <ShieldCheck className="w-8 h-8" style={{ color: '#a78bfa' }} /> Review queue
         </h1>
-        <p className="text-lg text-taupe-600 max-w-2xl">Review submissions, set volunteer hours, and approve or reject. Approved resources publish automatically and award points.</p>
+        <p className="dk-sub" style={{ maxWidth: 480 }}>
+          Approve or reject submissions. Approved resources publish automatically and award points.
+        </p>
       </div>
 
-      <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
-        <Clock className="w-5 h-5 text-amber-500" /> Pending
-        <span className="ml-1 text-xs text-taupe-500 bg-parchment px-2 py-0.5 rounded-full border border-taupe-300/30">{pending.length}</span>
-      </h2>
-
-      {pending.length === 0 ? (
-        <div className="card-warm p-10 text-center mb-10">
-          <Inbox className="w-10 h-10 text-taupe-300 mx-auto mb-3" />
-          <p className="text-sm text-taupe-500">Nothing waiting for review. Nice work! 🎉</p>
+      <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
+        {/* Pending */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Clock className="w-4 h-4" style={{ color: '#fbbf24' }} /> Pending
+          </h2>
+          <span className="dk-badge dk-badge-amber">{pending.length}</span>
         </div>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-5 mb-12">
-          {pending.map((sub) => (
-            <div key={sub.id} className="card-warm p-5">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-ink">{sub.title}</h3>
-                  <p className="text-xs text-taupe-500">{subjectName(sub.subject_id)} · <span className="capitalize">{sub.type}</span></p>
+
+        {pending.length === 0 ? (
+          <div className="dk-empty dk-card" style={{ marginBottom: 40, padding: '36px' }}>
+            <Inbox className="w-8 h-8" />
+            <p>Nothing to review — queue is clear.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12, marginBottom: 40 }}>
+            {pending.map(sub => (
+              <div key={sub.id} className="dk-card" style={{ padding: '20px 22px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 3 }}>{sub.title}</div>
+                    <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {subjectName(sub.subject_id)} · {sub.type}
+                    </div>
+                  </div>
+                  {sub.file_url && (
+                    <a href={sub.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: '#60a5fa', textDecoration: 'none', flexShrink: 0 }}>
+                      Open <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
                 </div>
-                {sub.file_url && (
-                  <a href={sub.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-ink/70 shrink-0">
-                    Open <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
-              {sub.description && <p className="text-sm text-taupe-600 mb-4">{sub.description}</p>}
 
-              <div className="flex items-center gap-2 mb-3">
-                <label className="text-xs font-medium text-taupe-600">Volunteer hours</label>
-                <input
-                  type="number" min="0" step="0.5" value={hours[sub.id] || ''}
-                  onChange={(e) => setHours(prev => ({ ...prev, [sub.id]: e.target.value }))}
-                  placeholder="0"
-                  className="w-20 px-2 py-1 rounded-lg border border-taupe-300/50 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink/20"
-                />
-              </div>
-              <input
-                type="text" value={notes[sub.id] || ''}
-                onChange={(e) => setNotes(prev => ({ ...prev, [sub.id]: e.target.value }))}
-                placeholder="Note to the contributor (optional)"
-                className="w-full mb-3 px-3 py-2 rounded-lg border border-taupe-300/50 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink/20"
-              />
+                {sub.description && <p style={{ fontSize: 12.5, color: 'var(--ah-muted)', marginBottom: 14, lineHeight: 1.5 }}>{sub.description}</p>}
 
-              <div className="flex gap-2">
-                <button onClick={() => decide(sub, 'approved')} disabled={busy === sub.id}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-ink text-parchment text-sm font-semibold hover:bg-ink/90 transition-all disabled:opacity-50">
-                  {busy === sub.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />} Approve
-                </button>
-                <button onClick={() => decide(sub, 'rejected')} disabled={busy === sub.id}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-parchment text-ink text-sm font-semibold border border-taupe-300/50 hover:bg-cream-200 transition-all disabled:opacity-50">
-                  <XCircle className="w-4 h-4" /> Reject
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {reviewed.length > 0 && (
-        <>
-          <h2 className="text-lg font-semibold text-ink mb-4">Recently reviewed</h2>
-          <div className="card-warm divide-y divide-taupe-300/20">
-            {reviewed.map((sub) => (
-              <div key={sub.id} className="flex items-center gap-3 px-5 py-3">
-                <div className={`w-2 h-2 rounded-full shrink-0 ${sub.status === 'approved' ? 'bg-green-600' : 'bg-red-500'}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-ink truncate">{sub.title}</p>
-                  <p className="text-xs text-taupe-500">{subjectName(sub.subject_id)}</p>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                  <div style={{ flex: '0 0 auto' }}>
+                    <label style={fieldLabel}>Vol. hours</label>
+                    <input type="number" min="0" step="0.5" value={hours[sub.id] || ''}
+                      onChange={e => setHours(p => ({ ...p, [sub.id]: e.target.value }))}
+                      placeholder="0" className="dk-input" style={{ width: 80, padding: '8px 10px', fontSize: 13 }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={fieldLabel}>Note (optional)</label>
+                    <input type="text" value={notes[sub.id] || ''}
+                      onChange={e => setNotes(p => ({ ...p, [sub.id]: e.target.value }))}
+                      placeholder="Note to contributor…"
+                      className="dk-input" style={{ padding: '8px 10px', fontSize: 13 }} />
+                  </div>
                 </div>
-                <span className="text-xs text-taupe-500 capitalize flex items-center gap-1">
-                  {sub.status === 'approved' ? <CheckCircle className="w-3.5 h-3.5 text-green-600" /> : <XCircle className="w-3.5 h-3.5 text-red-500" />}
-                  {sub.status}{sub.status === 'approved' && sub.volunteer_hours ? ` · ${sub.volunteer_hours}h` : ''}
-                </span>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => decide(sub, 'approved')} disabled={busy === sub.id}
+                    className="dk-btn dk-btn-primary" style={{ flex: 1, fontSize: 12 }}>
+                    {busy === sub.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />} Approve
+                  </button>
+                  <button onClick={() => decide(sub, 'rejected')} disabled={busy === sub.id}
+                    className="dk-btn dk-btn-danger" style={{ flex: 1, fontSize: 12 }}>
+                    <XCircle className="w-4 h-4" /> Reject
+                  </button>
+                </div>
               </div>
             ))}
           </div>
-        </>
-      )}
+        )}
+
+        {/* Recently reviewed */}
+        {reviewed.length > 0 && (
+          <>
+            <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 14 }}>Recently reviewed</h2>
+            <div className="dk-card" style={{ overflow: 'hidden' }}>
+              <table className="dk-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Hrs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reviewed.map(sub => (
+                    <tr key={sub.id}>
+                      <td style={{ fontWeight: 600 }}>{sub.title}</td>
+                      <td style={{ color: 'var(--ah-muted)', fontSize: 12 }}>{subjectName(sub.subject_id)}</td>
+                      <td>
+                        <span className={`dk-badge ${sub.status === 'approved' ? 'dk-badge-green' : 'dk-badge-red'}`}>
+                          {sub.status === 'approved' ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                          {sub.status}
+                        </span>
+                      </td>
+                      <td style={{ fontFamily: 'var(--ah-mono)', fontSize: 12 }}>{sub.volunteer_hours ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

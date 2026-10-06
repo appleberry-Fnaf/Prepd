@@ -92,228 +92,220 @@ export default function Profile() {
   const getInitials = (name: string | null) => { if (!name) return '??'; return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2); };
   const displayAvatar = editing ? editForm.avatar_url : (profile?.avatar_url || '');
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-stone/40 border-t-ink rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  const fieldLabel: React.CSSProperties = { fontSize: 11, fontFamily: 'var(--ah-mono)', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--ah-muted)', marginBottom: 6, display: 'block' };
+
+  if (loading) return <div className="dk-empty" style={{ minHeight: '60vh' }}><div className="dk-spin" /></div>;
 
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-2xl mx-auto text-center py-20">
-          <div className="w-16 h-16 rounded-2xl bg-parchment flex items-center justify-center mx-auto mb-6 border border-taupe-300/50">
-            <User className="w-8 h-8 text-ink" />
-          </div>
-          <h1 className="text-3xl font-bold text-ink mb-3">Your Profile</h1>
-          <p className="text-taupe-600 mb-8 max-w-md mx-auto">Sign in to track your progress, view your submissions, and manage your profile.</p>
-          <Link to="/auth" className="btn-warm inline-flex items-center gap-2">
-            Sign In <ChevronRight className="w-4 h-4" />
-          </Link>
+      <div className="dk-empty" style={{ minHeight: '70vh' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <User className="w-7 h-7" style={{ color: 'var(--ah-muted)' }} />
         </div>
+        <h2 className="dk-heading-lg" style={{ marginBottom: 8 }}>Your Profile</h2>
+        <p style={{ color: 'var(--ah-muted)', marginBottom: 24, maxWidth: 360, lineHeight: 1.6 }}>
+          Sign in to track your progress, view your submissions, and manage your profile.
+        </p>
+        <Link to="/auth" className="dk-btn dk-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          Sign In <ChevronRight className="w-4 h-4" />
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="card-warm p-6 sm:p-8 mb-8">
-        <div className="flex flex-col sm:flex-row items-start gap-6">
-          <div className="relative shrink-0">
-            {displayAvatar ? (
-              <img src={displayAvatar} alt="Profile" className="w-20 h-20 rounded-full object-cover border-2 border-taupe-300/50" />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-parchment border-2 border-taupe-300/50 flex items-center justify-center text-2xl font-bold text-ink">
-                {getInitials(profile?.display_name || 'Student')}
-              </div>
-            )}
-            {editing && (
-              <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-ink text-parchment flex items-center justify-center cursor-pointer border-2 border-white shadow-md hover:bg-ink/90 transition-all" title="Change photo">
-                {uploadingAvatar ? <Loader className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} disabled={uploadingAvatar} />
-              </label>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            {!editing ? (
-              <div>
-                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                  <h1 className="text-2xl font-bold text-ink">{profile?.display_name || 'Student'}</h1>
-                  <TierBadge points={points} />
-                  <button onClick={() => setEditing(true)} className="p-2 rounded-lg text-taupe-400 hover:bg-parchment hover:text-ink transition-all">
-                    <Edit className="w-4 h-4" />
-                  </button>
-                </div>
-                <p className="text-taupe-500 text-sm mb-2">{user.email}</p>
-                {profile?.bio && <p className="text-taupe-600 text-sm mb-2">{profile.bio}</p>}
-                <div className="flex flex-wrap gap-2 text-xs text-taupe-500">
-                  {profile?.school_name && <span className="bg-parchment px-2 py-1 rounded border border-taupe-300/30">{profile.school_name}</span>}
-                  {profile?.grade_level && <span className="bg-parchment px-2 py-1 rounded border border-taupe-300/30">{profile.grade_level}</span>}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 max-w-lg">
-                <p className="text-xs text-taupe-500">Tap the camera icon on your photo to upload a picture.</p>
-                {avatarError && <p className="text-xs text-red-600">{avatarError}</p>}
-                <div>
-                  <label className="block text-sm font-medium text-ink mb-1">Display Name</label>
-                  <input type="text" value={editForm.display_name} onChange={(e) => setEditForm(prev => ({ ...prev, display_name: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl border border-taupe-300/50 text-ink focus:outline-none focus:ring-2 focus:ring-ink/20" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-ink mb-1">Bio</label>
-                  <textarea value={editForm.bio} onChange={(e) => setEditForm(prev => ({ ...prev, bio: e.target.value }))} rows={2}
-                    className="w-full px-4 py-2.5 rounded-xl border border-taupe-300/50 text-ink focus:outline-none focus:ring-2 focus:ring-ink/20 resize-none" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-ink mb-1">School</label>
-                    <input type="text" value={editForm.school_name} onChange={(e) => setEditForm(prev => ({ ...prev, school_name: e.target.value }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-taupe-300/50 text-ink focus:outline-none focus:ring-2 focus:ring-ink/20" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-ink mb-1">Grade</label>
-                    <input type="text" value={editForm.grade_level} onChange={(e) => setEditForm(prev => ({ ...prev, grade_level: e.target.value }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-taupe-300/50 text-ink focus:outline-none focus:ring-2 focus:ring-ink/20" />
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={saveProfile} disabled={saving}
-                    className="px-4 py-2 rounded-xl bg-ink text-parchment text-sm font-medium hover:bg-ink/90 transition-all disabled:opacity-50">
-                    {saving ? 'Saving...' : 'Save'}
-                  </button>
-                  <button onClick={() => setEditing(false)}
-                    className="px-4 py-2 rounded-xl bg-parchment text-ink text-sm font-medium border border-taupe-300/50 hover:bg-cream-200 transition-all">
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="flex gap-3 shrink-0">
-            <div className="flex items-center gap-2 bg-parchment px-4 py-2 rounded-xl border border-taupe-300/50">
-              <Zap className="w-5 h-5 text-wood" />
-              <div>
-                <div className="text-lg font-bold text-ink">{points}</div>
-                <div className="text-xs text-taupe-500">points</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 bg-parchment px-4 py-2 rounded-xl border border-taupe-300/50">
-              <HeartHandshake className="w-5 h-5 text-ink" />
-              <div>
-                <div className="text-lg font-bold text-ink">{volunteerHours}</div>
-                <div className="text-xs text-taupe-500">volunteer hrs</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {nextTier && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between text-xs text-taupe-500 mb-1.5">
-              <span>Progress to {nextTier.name}</span>
-              <span>{points} / {nextTier.min} pts</span>
-            </div>
-            <div className="w-full h-2 bg-taupe-300/30 rounded-full overflow-hidden">
-              <div className="h-full bg-ink rounded-full transition-all" style={{ width: `${tierPct}%` }} />
-            </div>
-          </div>
-        )}
+    <div>
+      <div className="dk-header">
+        <span className="dk-page-tag">Profile</span>
+        <h1 className="dk-heading-xl">{profile?.display_name || 'Student'}</h1>
+        <p className="dk-sub">{user.email}</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="card-warm p-5">
-          <div className="w-10 h-10 rounded-xl bg-parchment flex items-center justify-center mb-3 border border-taupe-300/30">
-            <PenTool className="w-5 h-5 text-ink" />
-          </div>
-          <div className="text-2xl font-bold text-ink">{totalQuestions}</div>
-          <div className="text-sm text-taupe-500">Questions Answered</div>
-        </div>
-        <div className="card-warm p-5">
-          <div className="w-10 h-10 rounded-xl bg-parchment flex items-center justify-center mb-3 border border-taupe-300/30">
-            <CheckCircle className="w-5 h-5 text-green-700" />
-          </div>
-          <div className="text-2xl font-bold text-ink">{accuracy}%</div>
-          <div className="text-sm text-taupe-500">Accuracy</div>
-        </div>
-        <div className="card-warm p-5">
-          <div className="w-10 h-10 rounded-xl bg-parchment flex items-center justify-center mb-3 border border-taupe-300/30">
-            <Upload className="w-5 h-5 text-ink" />
-          </div>
-          <div className="text-2xl font-bold text-ink">{approvedCount}</div>
-          <div className="text-sm text-taupe-500">Resources Approved</div>
-        </div>
-        <div className="card-warm p-5">
-          <div className="w-10 h-10 rounded-xl bg-parchment flex items-center justify-center mb-3 border border-taupe-300/30">
-            <Clock className="w-5 h-5 text-wood" />
-          </div>
-          <div className="text-2xl font-bold text-ink">{totalStudyTime}</div>
-          <div className="text-sm text-taupe-500">Study Minutes</div>
-        </div>
-      </div>
+      <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-        <div className="card-warm p-6">
-          <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-ink" />Study Progress
-          </h2>
-          {progress.length === 0 ? (
-            <div className="text-center py-8">
-              <BookOpen className="w-10 h-10 text-taupe-300 mx-auto mb-3" />
-              <p className="text-sm text-taupe-500">No progress yet. Start practicing to see your stats!</p>
+        {/* Profile card */}
+        <div className="dk-card" style={{ padding: '28px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap' }}>
+            {/* Avatar */}
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              {displayAvatar ? (
+                <img src={displayAvatar} alt="Profile" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.12)' }} />
+              ) : (
+                <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--ah-sans)', fontSize: 22, fontWeight: 700, color: 'var(--ah-text)' }}>
+                  {getInitials(profile?.display_name || 'Student')}
+                </div>
+              )}
+              {editing && (
+                <label style={{ position: 'absolute', bottom: -4, right: -4, width: 28, height: 28, borderRadius: '50%', background: 'var(--ah-text)', color: '#1e1c1a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px solid #1e1c1a' }} title="Change photo">
+                  {uploadingAvatar ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} disabled={uploadingAvatar} />
+                </label>
+              )}
             </div>
-          ) : (
-            <div className="space-y-4">
-              {progress.map((p) => (
-                <div key={p.id} className="p-4 rounded-xl bg-parchment/60 border border-taupe-300/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-sm text-ink">{getSubjectName(p.subject_id)}</span>
-                    <span className="text-xs text-taupe-500">{p.questions_correct}/{p.questions_answered} correct</span>
+
+            {/* Info / edit form */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {!editing ? (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+                    <span style={{ fontFamily: 'var(--ah-sans)', fontSize: 18, fontWeight: 700, color: 'var(--ah-text)' }}>{profile?.display_name || 'Student'}</span>
+                    <TierBadge points={points} />
+                    <button onClick={() => setEditing(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ah-muted)', padding: 4, borderRadius: 6, display: 'flex', alignItems: 'center' }}>
+                      <Edit className="w-4 h-4" />
+                    </button>
                   </div>
-                  <div className="w-full h-2 bg-taupe-300/30 rounded-full overflow-hidden mb-2">
-                    <div className="h-full bg-ink rounded-full" style={{ width: `${p.questions_answered > 0 ? (p.questions_correct / p.questions_answered) * 100 : 0}%` }} />
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-taupe-500">
-                    <span>{p.resources_viewed} resources viewed</span>
-                    <span>{p.study_time_minutes} min studied</span>
+                  {profile?.bio && <p style={{ fontSize: 13, color: 'var(--ah-muted)', marginBottom: 6, lineHeight: 1.55 }}>{profile.bio}</p>}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {profile?.school_name && <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 6, padding: '3px 8px' }}>{profile.school_name}</span>}
+                    {profile?.grade_level && <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 6, padding: '3px 8px' }}>{profile.grade_level}</span>}
                   </div>
                 </div>
-              ))}
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 480 }}>
+                  <p style={{ fontSize: 11.5, color: 'var(--ah-muted)' }}>Tap the camera icon on your photo to upload a picture.</p>
+                  {avatarError && <p style={{ fontSize: 11.5, color: '#f87171' }}>{avatarError}</p>}
+                  <div>
+                    <label style={fieldLabel}>Display Name</label>
+                    <input type="text" value={editForm.display_name} onChange={e => setEditForm(p => ({ ...p, display_name: e.target.value }))} className="dk-input" />
+                  </div>
+                  <div>
+                    <label style={fieldLabel}>Bio</label>
+                    <textarea value={editForm.bio} onChange={e => setEditForm(p => ({ ...p, bio: e.target.value }))} rows={2} className="dk-input" style={{ resize: 'none' }} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <div>
+                      <label style={fieldLabel}>School</label>
+                      <input type="text" value={editForm.school_name} onChange={e => setEditForm(p => ({ ...p, school_name: e.target.value }))} className="dk-input" />
+                    </div>
+                    <div>
+                      <label style={fieldLabel}>Grade</label>
+                      <input type="text" value={editForm.grade_level} onChange={e => setEditForm(p => ({ ...p, grade_level: e.target.value }))} className="dk-input" />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={saveProfile} disabled={saving} className="dk-btn dk-btn-primary dk-btn-sm">
+                      {saving ? 'Saving…' : 'Save'}
+                    </button>
+                    <button onClick={() => setEditing(false)} className="dk-btn dk-btn-ghost dk-btn-sm">Cancel</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Points + hours */}
+            <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,176,64,0.08)', border: '1px solid rgba(245,176,64,0.2)', borderRadius: 10, padding: '10px 14px' }}>
+                <Zap className="w-4 h-4" style={{ color: '#f5b040', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 17, fontWeight: 800, color: '#f5b040', letterSpacing: '-0.02em' }}>{points}</div>
+                  <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 9.5, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>points</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 10, padding: '10px 14px' }}>
+                <HeartHandshake className="w-4 h-4" style={{ color: 'var(--ah-muted)', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 17, fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em' }}>{volunteerHours}</div>
+                  <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 9.5, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>vol hrs</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tier progress */}
+          {nextTier && (
+            <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: 'var(--ah-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <span>Progress to {nextTier.name}</span>
+                <span>{points} / {nextTier.min} pts</span>
+              </div>
+              <div style={{ width: '100%', height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: '#f5b040', borderRadius: 4, width: `${tierPct}%`, transition: 'width 0.4s ease' }} />
+              </div>
             </div>
           )}
         </div>
 
-        <div className="card-warm p-6">
-          <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
-            <Upload className="w-5 h-5 text-ink" />My Submissions
-            <span className="ml-auto text-xs text-taupe-500 bg-parchment px-2 py-0.5 rounded-full border border-taupe-300/30">{pendingCount} pending</span>
-          </h2>
-          {submissions.length === 0 ? (
-            <div className="text-center py-8">
-              <Upload className="w-10 h-10 text-taupe-300 mx-auto mb-3" />
-              <p className="text-sm text-taupe-500 mb-3">No submissions yet.</p>
-              <Link to="/contribute" className="text-ink hover:underline text-sm font-medium">Submit your first resource</Link>
+        {/* Stats grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
+          {[
+            { icon: PenTool, label: 'Questions Answered', value: totalQuestions, color: '#a78bfa' },
+            { icon: CheckCircle, label: 'Accuracy', value: `${accuracy}%`, color: '#4ade80' },
+            { icon: Upload, label: 'Resources Approved', value: approvedCount, color: '#60a5fa' },
+            { icon: Clock, label: 'Study Minutes', value: totalStudyTime, color: '#fbbf24' },
+          ].map(({ icon: Icon, label, value, color }) => (
+            <div key={label} className="dk-card" style={{ padding: '18px 20px' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: `${color}18`, border: `1px solid ${color}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+                <Icon className="w-4 h-4" style={{ color }} />
+              </div>
+              <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 22, fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em' }}>{value}</div>
+              <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 2 }}>{label}</div>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {submissions.slice(0, 6).map((sub) => (
-                <div key={sub.id} className="flex items-center gap-3 p-3 rounded-xl bg-parchment/60 border border-taupe-300/30">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${sub.status === 'approved' ? 'bg-green-600' : sub.status === 'rejected' ? 'bg-red-500' : 'bg-amber-500'}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink truncate">{sub.title}</p>
-                    <p className="text-xs text-taupe-500 capitalize">{sub.type}</p>
+          ))}
+        </div>
+
+        {/* Progress + Submissions */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12 }}>
+          {/* Study progress */}
+          <div className="dk-card" style={{ padding: '22px' }}>
+            <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <BookOpen className="w-4 h-4" style={{ color: '#60a5fa' }} /> Study Progress
+            </h2>
+            {progress.length === 0 ? (
+              <div className="dk-empty" style={{ padding: '28px 0' }}>
+                <BookOpen className="w-8 h-8" />
+                <p>No progress yet. Start practicing!</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {progress.map(p => {
+                  const acc = p.questions_answered > 0 ? (p.questions_correct / p.questions_answered) * 100 : 0;
+                  return (
+                    <div key={p.id} style={{ padding: '12px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontFamily: 'var(--ah-sans)', fontSize: 13, fontWeight: 600, color: 'var(--ah-text)' }}>{getSubjectName(p.subject_id)}</span>
+                        <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: 'var(--ah-muted)' }}>{p.questions_correct}/{p.questions_answered}</span>
+                      </div>
+                      <div style={{ width: '100%', height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
+                        <div style={{ height: '100%', background: '#4ade80', borderRadius: 3, width: `${acc}%` }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        <span>{p.resources_viewed} resources viewed</span>
+                        <span>{p.study_time_minutes} min</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* My submissions */}
+          <div className="dk-card" style={{ padding: '22px' }}>
+            <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Upload className="w-4 h-4" style={{ color: '#fbbf24' }} /> My Submissions
+              {pendingCount > 0 && <span className="dk-badge dk-badge-amber" style={{ marginLeft: 'auto' }}>{pendingCount} pending</span>}
+            </h2>
+            {submissions.length === 0 ? (
+              <div className="dk-empty" style={{ padding: '28px 0' }}>
+                <Upload className="w-8 h-8" />
+                <p style={{ marginBottom: 12 }}>No submissions yet.</p>
+                <Link to="/contribute" style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: '#60a5fa', textDecoration: 'none' }}>Submit your first resource →</Link>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {submissions.slice(0, 6).map(sub => (
+                  <div key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: sub.status === 'approved' ? '#4ade80' : sub.status === 'rejected' ? '#f87171' : '#fbbf24' }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 13, fontWeight: 600, color: 'var(--ah-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.title}</div>
+                      <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', textTransform: 'capitalize' }}>{sub.type}</div>
+                    </div>
+                    <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: sub.status === 'approved' ? '#4ade80' : sub.status === 'rejected' ? '#f87171' : '#fbbf24', textTransform: 'capitalize', flexShrink: 0 }}>{sub.status}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-taupe-500 shrink-0 capitalize">
-                    {sub.status}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

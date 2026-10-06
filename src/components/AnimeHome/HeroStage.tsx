@@ -155,6 +155,9 @@ export default function HeroStage() {
         {/* Three.js canvas */}
         <canvas ref={canvasRef} className="ah-canvas" aria-hidden="true" />
 
+        {/* Warm glow halo behind the book */}
+        <div className="ah-book-glow" aria-hidden="true" />
+
         {/* Ring — blueprint prop flips segment colors for light bg */}
         <div className="ah-ring-wrap" aria-hidden="true">
           <Ring

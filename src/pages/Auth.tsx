@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {
-  Mail, Lock, User, ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle,
-} from 'lucide-react';
+import { Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { CatMark } from '../components/Logo';
 
 function GoogleIcon({ className = '' }: { className?: string }) {
@@ -35,31 +33,20 @@ export default function Auth() {
   const isSignUp = mode === 'signup';
   const isForgot = mode === 'forgot';
 
-  function switchMode(next: Mode) {
-    setMode(next);
-    setError('');
-    setInfo('');
-  }
+  function switchMode(next: Mode) { setMode(next); setError(''); setInfo(''); }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
-    setInfo('');
-    setLoading(true);
-
+    setError(''); setInfo(''); setLoading(true);
     if (isForgot) {
       const { error } = await resetPassword(email);
       if (error) setError(error);
-      else setInfo("If an account exists for that email, we've sent a password reset link. Check your inbox.");
+      else setInfo("If an account exists for that email, we've sent a reset link.");
     } else if (isSignUp) {
       const { error, needsConfirmation } = await signUp(email, password, displayName);
       if (error) setError(error);
-      else if (needsConfirmation) {
-        setInfo('Account created! Check your email for a confirmation link, then sign in.');
-        setMode('signin');
-      } else {
-        navigate('/profile');
-      }
+      else if (needsConfirmation) { setInfo('Check your email for a confirmation link, then sign in.'); setMode('signin'); }
+      else navigate('/profile');
     } else {
       const { error } = await signIn(email, password);
       if (error) setError(error);
@@ -69,132 +56,109 @@ export default function Auth() {
   }
 
   async function handleGoogle() {
-    setError('');
-    setInfo('');
-    setGoogleLoading(true);
+    setError(''); setInfo(''); setGoogleLoading(true);
     const { error } = await signInWithGoogle();
-    if (error) {
-      setError(error);
-      setGoogleLoading(false);
-    }
+    if (error) { setError(error); setGoogleLoading(false); }
   }
 
-  const heading = isForgot ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back';
+  const heading = isForgot ? 'Reset password' : isSignUp ? 'Create account' : 'Welcome back';
   const subtitle = isForgot
-    ? "Enter your email and we'll send you a link to reset your password."
-    : isSignUp
-      ? 'Join the AP student community today.'
-      : 'Sign in to access your study progress and submissions.';
-  const submitLabel = isForgot ? 'Send reset link' : isSignUp ? 'Create Account' : 'Sign In';
+    ? "Enter your email and we'll send a reset link."
+    : isSignUp ? 'Join the AP student community.' : 'Sign in to track your progress.';
+
+  const fieldLabel = { fontSize: 11, fontFamily: 'var(--ah-mono)', letterSpacing: '0.05em', textTransform: 'uppercase' as const, color: 'var(--ah-muted)', marginBottom: 8, display: 'block' };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-parchment px-4 py-12">
-      <div className="w-full max-w-md">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-taupe-600 hover:text-ink mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" />Back to home
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', padding: '32px 20px' }}>
+      <div style={{ width: '100%', maxWidth: 420 }}>
+        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--ah-mono)', fontSize: 12, color: 'var(--ah-muted)', textDecoration: 'none', marginBottom: 28, transition: 'color 0.15s' }}>
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to home
         </Link>
 
-        <div className="bg-white rounded-2xl border border-taupe-300/50 p-8 shadow-sm">
-          <div className="flex items-center gap-2.5 mb-6">
-            <CatMark className="w-10 h-10" />
+        <div className="dk-card" style={{ padding: '32px' }}>
+          {/* Brand */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
+            <CatMark className="w-9 h-9" />
             <div>
-              <h1 className="text-xl font-bold text-ink">Prepd</h1>
-              <p className="text-xs text-taupe-500">AP Study Platform</p>
+              <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 16, fontWeight: 700, color: 'var(--ah-text)' }}>Prepd</div>
+              <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', letterSpacing: '0.04em' }}>AP STUDY PLATFORM</div>
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold text-ink mb-2">{heading}</h2>
-          <p className="text-sm text-taupe-500 mb-6">{subtitle}</p>
+          <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--ah-text)', marginBottom: 6 }}>{heading}</h2>
+          <p style={{ fontSize: 13, color: 'var(--ah-muted)', marginBottom: 22, lineHeight: 1.55 }}>{subtitle}</p>
 
-          {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
-          {info && (
-            <div className="mb-4 p-3 rounded-xl bg-green-50 border border-green-200 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
-              <p className="text-sm text-green-800">{info}</p>
-            </div>
-          )}
+          {error && <div className="dk-alert dk-alert-red" style={{ marginBottom: 16 }}><span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span> {error}</div>}
+          {info  && <div className="dk-alert dk-alert-green" style={{ marginBottom: 16 }}><span style={{ flexShrink: 0, marginTop: 1 }}>✓</span> {info}</div>}
 
           {!isForgot && (
             <>
-              <button
-                type="button"
-                onClick={handleGoogle}
-                disabled={googleLoading || loading}
-                className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl border border-taupe-300/60 bg-white text-ink font-semibold text-sm hover:bg-parchment/60 transition-all disabled:opacity-50"
-              >
-                {googleLoading ? (
-                  <div className="w-5 h-5 border-2 border-taupe-300 border-t-ink rounded-full animate-spin" />
-                ) : (
-                  <GoogleIcon className="w-5 h-5" />
-                )}
+              <button type="button" onClick={handleGoogle} disabled={googleLoading || loading}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '11px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.04)', color: 'var(--ah-text)', fontFamily: 'var(--ah-mono)', fontSize: 12.5, cursor: 'pointer', transition: 'all 0.15s', opacity: (googleLoading || loading) ? 0.5 : 1, marginBottom: 16 }}>
+                {googleLoading ? <div className="dk-spin" style={{ width: 18, height: 18 }} /> : <GoogleIcon className="w-4 h-4" />}
                 Continue with Google
               </button>
-
-              <div className="flex items-center gap-3 my-5">
-                <div className="h-px flex-1 bg-taupe-300/50" />
-                <span className="text-xs text-taupe-400">or use email</span>
-                <div className="h-px flex-1 bg-taupe-300/50" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div className="dk-sep" />
+                <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'rgba(255,255,255,0.2)', whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.05em' }}>or email</span>
+                <div className="dk-sep" />
               </div>
             </>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {isSignUp && (
               <div>
-                <label className="block text-sm font-medium text-ink mb-1.5">Display Name</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-taupe-400" />
-                  <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" required
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-taupe-300/50 text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400" />
+                <label style={fieldLabel}>Display name</label>
+                <div className="dk-input-icon">
+                  <User className="w-4 h-4" />
+                  <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
+                    placeholder="Your name" required className="dk-input" style={{ paddingLeft: 40 }} />
                 </div>
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-ink mb-1.5">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-taupe-400" />
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@school.edu" required
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-taupe-300/50 text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400" />
+              <label style={fieldLabel}>Email</label>
+              <div className="dk-input-icon">
+                <Mail className="w-4 h-4" />
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="you@school.edu" required className="dk-input" style={{ paddingLeft: 40 }} />
               </div>
             </div>
             {!isForgot && (
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm font-medium text-ink">Password</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <label style={{ ...fieldLabel, marginBottom: 0 }}>Password</label>
                   {!isSignUp && (
-                    <button type="button" onClick={() => switchMode('forgot')} className="text-xs text-ink hover:text-ink/70 font-medium">
-                      Forgot password?
+                    <button type="button" onClick={() => switchMode('forgot')} style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                      Forgot?
                     </button>
                   )}
                 </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-taupe-400" />
-                  <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" required minLength={6}
-                    className="w-full pl-10 pr-12 py-3 rounded-xl border border-taupe-300/50 text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-taupe-400 hover:text-ink">
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                <div style={{ position: 'relative' }}>
+                  <div className="dk-input-icon">
+                    <Lock className="w-4 h-4" />
+                    <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                      placeholder="Min 6 characters" required minLength={6} className="dk-input" style={{ paddingLeft: 40, paddingRight: 44 }} />
+                  </div>
+                  <button type="button" onClick={() => setShowPassword(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ah-muted)' }}>
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
             )}
-            <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ink text-parchment font-semibold text-sm hover:bg-ink/90 transition-all disabled:opacity-50 shadow-md shadow-ink/15">
-              {loading ? <div className="w-5 h-5 border-2 border-parchment/30 border-t-parchment rounded-full animate-spin" /> : submitLabel}
+            <button type="submit" disabled={loading} className="dk-btn dk-btn-primary" style={{ width: '100%', marginTop: 4 }}>
+              {loading ? <div className="dk-spin" style={{ width: 18, height: 18, borderTopColor: '#1e1c1a' }} /> : (isForgot ? 'Send reset link' : isSignUp ? 'Create account' : 'Sign in')}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
             {isForgot ? (
-              <button onClick={() => switchMode('signin')} className="text-sm text-ink hover:text-ink/80 font-medium">
+              <button onClick={() => switchMode('signin')} style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: 'var(--ah-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
                 Back to sign in
               </button>
             ) : (
-              <button onClick={() => switchMode(isSignUp ? 'signin' : 'signup')} className="text-sm text-ink hover:text-ink/80 font-medium">
+              <button onClick={() => switchMode(isSignUp ? 'signin' : 'signup')} style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: 'var(--ah-muted)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.15s' }}>
                 {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
               </button>
             )}

@@ -118,23 +118,14 @@ export default function SubjectDetail() {
     setShowExplanation(false);
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-stone/40 border-t-ink rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="dk-empty" style={{ minHeight: '60vh' }}><div className="dk-spin" /></div>;
 
   if (!subject) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <p className="text-taupe-500">Subject not found.</p>
-        <Link to="/subjects" className="text-ink hover:underline mt-4 inline-block">
-          Back to Subjects
-        </Link>
+      <div className="dk-empty" style={{ minHeight: '60vh' }}>
+        <FileText className="w-8 h-8" />
+        <p style={{ marginBottom: 16 }}>Subject not found.</p>
+        <Link to="/subjects" className="dk-btn dk-btn-ghost">Back to Subjects</Link>
       </div>
     );
   }
@@ -145,362 +136,279 @@ export default function SubjectDetail() {
 
   const canDelete = (r: Resource) => !!user && (r.user_id === user.id || !!profile?.is_moderator);
   async function handleDelete(id: string) {
-    if (!window.confirm('Delete this note? This can’t be undone.')) return;
+    if (!window.confirm('Delete this note? This can\'t be undone.')) return;
     const { error } = await supabase.from('resources').delete().eq('id', id);
     if (error) window.alert('Could not delete: ' + error.message);
     else setResources(prev => prev.filter(r => r.id !== id));
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Link
-        to="/subjects"
-        className="inline-flex items-center gap-2 text-sm text-taupe-500 hover:text-ink mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Subjects
-      </Link>
-
-      <div className="flex items-start gap-4 mb-8">
-        <div className={`w-16 h-16 rounded-2xl ${subject.color} flex items-center justify-center shrink-0`}>
-          <Icon className="w-8 h-8 text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-ink">{subject.name}</h1>
-          <p className="text-taupe-600 mt-1">{subject.description}</p>
-          <div className="flex items-center gap-4 mt-3">
-            <span className="text-xs font-medium text-taupe-500 bg-parchment px-2.5 py-1 rounded-md">
-              {subject.category}
-            </span>
-            <span className="text-xs text-taupe-500 flex items-center gap-1">
-              <FileText className="w-3.5 h-3.5" />
-              {resources.length} resources
-            </span>
-            <span className="text-xs text-taupe-500 flex items-center gap-1">
-              <PenTool className="w-3.5 h-3.5" />
-              {questions.length} questions
-            </span>
+    <div>
+      {/* Header */}
+      <div className="dk-header">
+        <Link to="/subjects" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: 'var(--ah-muted)', textDecoration: 'none', marginBottom: 16 }}>
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Subjects
+        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon className="w-7 h-7" style={{ color: 'var(--ah-text)' }} />
+          </div>
+          <div>
+            <h1 className="dk-heading-xl" style={{ marginBottom: 4 }}>{subject.name}</h1>
+            {subject.description && <p className="dk-sub" style={{ margin: 0 }}>{subject.description}</p>}
           </div>
         </div>
-      </div>
-
-      <div className="flex gap-2 mb-8">
-        <button
-          onClick={() => { setActiveTab('resources'); setActiveQuestion(null); setSelectedAnswer(null); setShowExplanation(false); }}
-          className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-            activeTab === 'resources'
-              ? 'bg-ink text-parchment'
-              : 'bg-white text-taupe-600 border border-taupe-300/50 hover:bg-parchment'
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4" />
-            Resources
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
+          <span className="dk-badge dk-badge-muted">{subject.category}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)' }}>
+            <FileText className="w-3.5 h-3.5" /> {resources.length} resources
           </span>
-        </button>
-        <button
-          onClick={() => { setActiveTab('practice'); setActiveQuestion(null); setSelectedAnswer(null); setShowExplanation(false); }}
-          className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-            activeTab === 'practice'
-              ? 'bg-ink text-parchment'
-              : 'bg-white text-taupe-600 border border-taupe-300/50 hover:bg-parchment'
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <PenTool className="w-4 h-4" />
-            Practice
-            {score.total > 0 && (
-              <span className="bg-white/20 px-1.5 py-0.5 rounded text-xs">{score.correct}/{score.total}</span>
-            )}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)' }}>
+            <PenTool className="w-3.5 h-3.5" /> {questions.length} questions
           </span>
-        </button>
-      </div>
-
-      {activeTab === 'resources' && (
-        <div className="space-y-6">
-          {featured.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-ink mb-4 flex items-center gap-2">
-                <Star className="w-5 h-5 text-wood" />
-                Featured Resources
-              </h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {featured.map((resource) => {
-                  const RIcon = typeIcon[resource.type] || FileText;
-                  return (
-                    <div key={resource.id} className="p-5 card-warm border-taupe-300/50">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-parchment flex items-center justify-center">
-                          <RIcon className="w-5 h-5 text-ink" />
-                        </div>
-                        <span className="text-xs font-medium text-ink bg-parchment px-2 py-0.5 rounded">
-                          {typeLabel[resource.type] || resource.type}
-                        </span>
-                        {canDelete(resource) && (
-                          <button onClick={() => handleDelete(resource.id)} title="Delete note"
-                            className="ml-auto p-1.5 rounded-lg text-taupe-400 hover:text-red-600 hover:bg-red-50 transition-all">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-ink mb-1">{resource.title}</h3>
-                      <p className="text-sm text-taupe-500 mb-4">{resource.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-sm text-taupe-400">
-                          <span className="flex items-center gap-1">
-                            <ThumbsUp className="w-3.5 h-3.5" />
-                            {resource.upvotes}
-                          </span>
-                        </div>
-                        {(resource.external_url || resource.file_url) && (
-                          <a
-                            href={resource.external_url || resource.file_url || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-sm text-ink font-medium hover:text-ink/80"
-                          >
-                            View <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {regular.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-ink mb-4">All Resources</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {regular.map((resource) => {
-                  const RIcon = typeIcon[resource.type] || FileText;
-                  return (
-                    <div key={resource.id} className="p-5 card-warm card-warm-hover">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-parchment flex items-center justify-center">
-                          <RIcon className="w-5 h-5 text-ink" />
-                        </div>
-                        <span className="text-xs font-medium text-ink bg-parchment px-2 py-0.5 rounded">
-                          {typeLabel[resource.type] || resource.type}
-                        </span>
-                        {canDelete(resource) && (
-                          <button onClick={() => handleDelete(resource.id)} title="Delete note"
-                            className="ml-auto p-1.5 rounded-lg text-taupe-400 hover:text-red-600 hover:bg-red-50 transition-all">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-ink mb-1">{resource.title}</h3>
-                      <p className="text-sm text-taupe-500 mb-4">{resource.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-sm text-taupe-400">
-                          <span className="flex items-center gap-1">
-                            <ThumbsUp className="w-3.5 h-3.5" />
-                            {resource.upvotes}
-                          </span>
-                        </div>
-                        {(resource.external_url || resource.file_url) && (
-                          <a
-                            href={resource.external_url || resource.file_url || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-sm text-ink font-medium hover:text-ink/80"
-                          >
-                            View <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {resources.length === 0 && (
-            <div className="text-center py-16 card-warm">
-              <FileText className="w-12 h-12 text-taupe-300 mx-auto mb-4" />
-              <p className="text-taupe-500 mb-2">No resources available yet.</p>
-              <Link to="/contribute" className="text-ink hover:underline text-sm font-medium inline-flex items-center gap-1">
-                Be the first to contribute <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
-          )}
         </div>
-      )}
+      </div>
 
-      {activeTab === 'practice' && (
-        <div>
-          {activeQuestion === null ? (
-            <div className="space-y-6">
-              <div className="card-warm p-8 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-parchment flex items-center justify-center mx-auto mb-4">
-                  <PenTool className="w-8 h-8 text-ink" />
-                </div>
-                <h2 className="text-2xl font-bold text-ink mb-2">Practice Mode</h2>
-                <p className="text-taupe-600 mb-6 max-w-md mx-auto">
-                  Test your knowledge with {questions.length} AP-style questions. Get instant feedback and detailed explanations.
-                </p>
-                {score.total > 0 && (
-                  <div className="flex items-center justify-center gap-6 mb-6">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-ink">{score.correct}</div>
-                      <div className="text-xs text-taupe-500">Correct</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-ink">{score.total}</div>
-                      <div className="text-xs text-taupe-500">Answered</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-ink">{Math.round((score.correct / score.total) * 100)}%</div>
-                      <div className="text-xs text-taupe-500">Accuracy</div>
-                    </div>
-                  </div>
-                )}
-                <button
-                  onClick={nextQuestion}
-                  className="btn-warm inline-flex items-center gap-2"
-                >
-                  Start Practicing <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+      <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {questions.map((q, idx) => (
-                  <button
-                    key={q.id}
-                    onClick={() => {
-                      setActiveQuestion(idx);
-                      setSelectedAnswer(null);
-                      setShowExplanation(false);
-                    }}
-                    className="p-4 card-warm card-warm-hover text-left"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-medium text-taupe-500 bg-parchment px-2 py-0.5 rounded">Q{idx + 1}</span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                        q.difficulty === 'easy' ? 'bg-green-50 text-green-700' :
-                        q.difficulty === 'medium' ? 'bg-amber-50 text-amber-700' :
-                        'bg-red-50 text-red-700'
-                      }`}>
-                        {q.difficulty}
-                      </span>
-                    </div>
-                    <p className="text-sm text-ink line-clamp-2">{q.question}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="max-w-2xl mx-auto">
-              <div className="card-warm p-6 sm:p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-taupe-500 bg-parchment px-2 py-0.5 rounded">
-                      Question {activeQuestion + 1} of {questions.length}
-                    </span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                      questions[activeQuestion].difficulty === 'easy' ? 'bg-green-50 text-green-700' :
-                      questions[activeQuestion].difficulty === 'medium' ? 'bg-amber-50 text-amber-700' :
-                      'bg-red-50 text-red-700'
-                    }`}>
-                      {questions[activeQuestion].difficulty}
-                    </span>
-                  </div>
-                  <button onClick={() => { setActiveQuestion(null); setSelectedAnswer(null); setShowExplanation(false); }}
-                    className="text-sm text-taupe-500 hover:text-ink">
-                    Exit
-                  </button>
-                </div>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 24, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 4, width: 'fit-content' }}>
+          <button
+            onClick={() => { setActiveTab('resources'); setActiveQuestion(null); setSelectedAnswer(null); setShowExplanation(false); }}
+            className={`dk-tab ${activeTab === 'resources' ? 'dk-tab-active' : 'dk-tab-inactive'}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px' }}
+          >
+            <BookOpen className="w-4 h-4" /> Resources
+          </button>
+          <button
+            onClick={() => { setActiveTab('practice'); setActiveQuestion(null); setSelectedAnswer(null); setShowExplanation(false); }}
+            className={`dk-tab ${activeTab === 'practice' ? 'dk-tab-active' : 'dk-tab-inactive'}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px' }}
+          >
+            <PenTool className="w-4 h-4" /> Practice
+            {score.total > 0 && <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, background: 'rgba(255,255,255,0.15)', borderRadius: 4, padding: '1px 5px' }}>{score.correct}/{score.total}</span>}
+          </button>
+        </div>
 
-                <h3 className="text-lg font-semibold text-ink mb-6">{questions[activeQuestion].question}</h3>
-
-                <div className="space-y-3">
-                  {questions[activeQuestion].options.map((option, idx) => {
-                    const isSelected = selectedAnswer === option;
-                    const isCorrect = option === questions[activeQuestion].correct_answer;
-                    let btnClass = 'p-4 rounded-xl border text-left transition-all w-full flex items-center gap-3 ';
-                    if (selectedAnswer === null) {
-                      btnClass += 'border-taupe-300/50 hover:border-ink/30 hover:bg-parchment/60 cursor-pointer';
-                    } else if (isCorrect) {
-                      btnClass += 'border-green-500/50 bg-green-50';
-                    } else if (isSelected && !isCorrect) {
-                      btnClass += 'border-red-500/50 bg-red-50';
-                    } else {
-                      btnClass += 'border-taupe-300/30 opacity-50';
-                    }
-
+        {/* Resources tab */}
+        {activeTab === 'resources' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+            {featured.length > 0 && (
+              <div>
+                <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Star className="w-4 h-4" style={{ color: '#fbbf24' }} /> Featured Resources
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 }}>
+                  {featured.map(resource => {
+                    const RIcon = typeIcon[resource.type] || FileText;
                     return (
-                      <button
-                        key={idx}
-                        disabled={selectedAnswer !== null}
-                        onClick={() => handleAnswer(option)}
-                        className={btnClass}
-                      >
-                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold shrink-0 ${
-                          selectedAnswer === null ? 'bg-parchment text-ink' :
-                          isCorrect ? 'bg-green-100 text-green-800' :
-                          isSelected ? 'bg-red-100 text-red-800' :
-                          'bg-parchment text-taupe-400'
-                        }`}>
-                          {String.fromCharCode(65 + idx)}
-                        </span>
-                        <span className="text-sm text-ink">{option}</span>
-                        {selectedAnswer !== null && isCorrect && <CheckCircle className="w-5 h-5 text-green-600 ml-auto shrink-0" />}
-                        {selectedAnswer !== null && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-500 ml-auto shrink-0" />}
-                      </button>
+                      <div key={resource.id} className="dk-card dk-card-hover" style={{ padding: '18px 20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(245,176,64,0.1)', border: '1px solid rgba(245,176,64,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <RIcon className="w-4 h-4" style={{ color: '#f5b040' }} />
+                          </div>
+                          <span className="dk-badge dk-badge-amber">{typeLabel[resource.type] || resource.type}</span>
+                          {canDelete(resource) && (
+                            <button onClick={() => handleDelete(resource.id)} title="Delete" style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ah-muted)', padding: 4, borderRadius: 6, display: 'flex' }}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                        <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 600, color: 'var(--ah-text)', marginBottom: 4 }}>{resource.title}</div>
+                        {resource.description && <p style={{ fontSize: 12.5, color: 'var(--ah-muted)', marginBottom: 12, lineHeight: 1.5 }}>{resource.description}</p>}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)' }}>
+                            <ThumbsUp className="w-3 h-3" /> {resource.upvotes}
+                          </span>
+                          {(resource.external_url || resource.file_url) && (
+                            <a href={resource.external_url || resource.file_url || '#'} target="_blank" rel="noopener noreferrer"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: '#60a5fa', textDecoration: 'none' }}>
+                              View <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
+              </div>
+            )}
 
-                {showExplanation && (
-                  <div className="mt-6 p-4 rounded-xl bg-parchment border border-taupe-300/50">
-                    <p className="text-sm text-ink">
-                      <span className="font-semibold">Explanation: </span>
-                      {questions[activeQuestion].explanation}
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between mt-6">
-                  <button
-                    onClick={() => {
-                      if (activeQuestion > 0) {
-                        setActiveQuestion(activeQuestion - 1);
-                        setSelectedAnswer(null);
-                        setShowExplanation(false);
-                      }
-                    }}
-                    disabled={activeQuestion === 0}
-                    className="text-sm text-taupe-500 hover:text-ink disabled:opacity-30"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (activeQuestion < questions.length - 1) {
-                        setActiveQuestion(activeQuestion + 1);
-                        setSelectedAnswer(null);
-                        setShowExplanation(false);
-                      } else {
-                        setActiveQuestion(null);
-                        setSelectedAnswer(null);
-                        setShowExplanation(false);
-                      }
-                    }}
-                    className="btn-warm inline-flex items-center gap-2 text-sm"
-                  >
-                    {activeQuestion < questions.length - 1 ? 'Next Question' : 'Finish'}
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+            {regular.length > 0 && (
+              <div>
+                <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 14 }}>All Resources</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 }}>
+                  {regular.map(resource => {
+                    const RIcon = typeIcon[resource.type] || FileText;
+                    return (
+                      <div key={resource.id} className="dk-card dk-card-hover" style={{ padding: '18px 20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <RIcon className="w-4 h-4" style={{ color: 'var(--ah-muted)' }} />
+                          </div>
+                          <span className="dk-badge dk-badge-muted">{typeLabel[resource.type] || resource.type}</span>
+                          {canDelete(resource) && (
+                            <button onClick={() => handleDelete(resource.id)} title="Delete" style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ah-muted)', padding: 4, borderRadius: 6, display: 'flex' }}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                        <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 600, color: 'var(--ah-text)', marginBottom: 4 }}>{resource.title}</div>
+                        {resource.description && <p style={{ fontSize: 12.5, color: 'var(--ah-muted)', marginBottom: 12, lineHeight: 1.5 }}>{resource.description}</p>}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)' }}>
+                            <ThumbsUp className="w-3 h-3" /> {resource.upvotes}
+                          </span>
+                          {(resource.external_url || resource.file_url) && (
+                            <a href={resource.external_url || resource.file_url || '#'} target="_blank" rel="noopener noreferrer"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: '#60a5fa', textDecoration: 'none' }}>
+                              View <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+
+            {resources.length === 0 && (
+              <div className="dk-empty dk-card" style={{ padding: '48px 24px' }}>
+                <FileText className="w-8 h-8" />
+                <p style={{ marginBottom: 12 }}>No resources available yet.</p>
+                <Link to="/contribute" className="dk-btn dk-btn-ghost" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                  Be the first to contribute <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Practice tab */}
+        {activeTab === 'practice' && (
+          <div>
+            {activeQuestion === null ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Start card */}
+                <div className="dk-card" style={{ padding: '36px', textAlign: 'center' }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <PenTool className="w-7 h-7" style={{ color: '#4ade80' }} />
+                  </div>
+                  <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 20, fontWeight: 800, color: 'var(--ah-text)', marginBottom: 8, letterSpacing: '-0.02em' }}>Practice Mode</h2>
+                  <p style={{ fontSize: 13, color: 'var(--ah-muted)', marginBottom: questions.length === 0 ? 0 : 20, maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
+                    Test your knowledge with {questions.length} AP-style questions. Get instant feedback and detailed explanations.
+                  </p>
+                  {score.total > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 32, margin: '20px 0' }}>
+                      {[['Correct', score.correct, '#4ade80'], ['Answered', score.total, 'var(--ah-text)'], ['Accuracy', `${Math.round((score.correct / score.total) * 100)}%`, '#60a5fa']].map(([label, val, color]) => (
+                        <div key={String(label)} style={{ textAlign: 'center' }}>
+                          <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 22, fontWeight: 800, color: String(color), letterSpacing: '-0.02em' }}>{val}</div>
+                          <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {questions.length > 0 && (
+                    <button onClick={nextQuestion} className="dk-btn dk-btn-primary" style={{ marginTop: 20, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      Start Practicing <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Question grid */}
+                {questions.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
+                    {questions.map((q, idx) => (
+                      <button key={q.id} onClick={() => { setActiveQuestion(idx); setSelectedAnswer(null); setShowExplanation(false); }}
+                        className="dk-card dk-card-hover" style={{ padding: '14px 16px', textAlign: 'left', cursor: 'pointer', background: 'none', border: undefined, width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                          <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: 'var(--ah-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: 4, padding: '2px 6px' }}>Q{idx + 1}</span>
+                          <span className={`dk-diff ${q.difficulty === 'easy' ? 'dk-diff-easy' : q.difficulty === 'medium' ? 'dk-diff-medium' : 'dk-diff-hard'}`}>{q.difficulty}</span>
+                        </div>
+                        <p style={{ fontSize: 12.5, color: 'var(--ah-muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{q.question}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ maxWidth: 640, margin: '0 auto' }}>
+                <div className="dk-card" style={{ padding: '28px' }}>
+                  {/* Question header */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: 'var(--ah-muted)', background: 'rgba(255,255,255,0.06)', borderRadius: 4, padding: '3px 7px' }}>
+                        {activeQuestion + 1} / {questions.length}
+                      </span>
+                      <span className={`dk-diff ${questions[activeQuestion].difficulty === 'easy' ? 'dk-diff-easy' : questions[activeQuestion].difficulty === 'medium' ? 'dk-diff-medium' : 'dk-diff-hard'}`}>
+                        {questions[activeQuestion].difficulty}
+                      </span>
+                    </div>
+                    <button onClick={() => { setActiveQuestion(null); setSelectedAnswer(null); setShowExplanation(false); }}
+                      style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                      Exit
+                    </button>
+                  </div>
+
+                  <h3 style={{ fontFamily: 'var(--ah-sans)', fontSize: 16, fontWeight: 600, color: 'var(--ah-text)', marginBottom: 20, lineHeight: 1.55 }}>{questions[activeQuestion].question}</h3>
+
+                  {/* Options */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {questions[activeQuestion].options.map((option, idx) => {
+                      const isSelected = selectedAnswer === option;
+                      const isCorrect = option === questions[activeQuestion].correct_answer;
+                      let borderColor = 'rgba(255,255,255,0.1)';
+                      let bg = 'transparent';
+                      let labelBg = 'rgba(255,255,255,0.07)';
+                      let labelColor = 'var(--ah-muted)';
+                      let opacity = 1;
+                      if (selectedAnswer !== null) {
+                        if (isCorrect) { borderColor = 'rgba(74,222,128,0.45)'; bg = 'rgba(74,222,128,0.06)'; labelBg = 'rgba(74,222,128,0.18)'; labelColor = '#4ade80'; }
+                        else if (isSelected) { borderColor = 'rgba(248,113,113,0.45)'; bg = 'rgba(248,113,113,0.06)'; labelBg = 'rgba(248,113,113,0.18)'; labelColor = '#f87171'; }
+                        else opacity = 0.45;
+                      }
+                      return (
+                        <button key={idx} disabled={selectedAnswer !== null} onClick={() => handleAnswer(option)}
+                          style={{ width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: 8, border: `1px solid ${borderColor}`, background: bg, cursor: selectedAnswer === null ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: 10, opacity, transition: 'all 0.15s' }}>
+                          <span style={{ width: 28, height: 28, borderRadius: 6, background: labelBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--ah-mono)', fontSize: 11, fontWeight: 700, color: labelColor, flexShrink: 0 }}>
+                            {String.fromCharCode(65 + idx)}
+                          </span>
+                          <span style={{ fontSize: 13.5, color: 'var(--ah-text)', flex: 1, lineHeight: 1.5 }}>{option}</span>
+                          {selectedAnswer !== null && isCorrect && <CheckCircle className="w-4 h-4 shrink-0" style={{ color: '#4ade80' }} />}
+                          {selectedAnswer !== null && isSelected && !isCorrect && <XCircle className="w-4 h-4 shrink-0" style={{ color: '#f87171' }} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Explanation */}
+                  {showExplanation && (
+                    <div className="dk-alert dk-alert-amber" style={{ marginTop: 16 }}>
+                      <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>Explanation</span>
+                      <span style={{ fontSize: 13, color: 'var(--ah-text)', lineHeight: 1.55 }}>{questions[activeQuestion].explanation}</span>
+                    </div>
+                  )}
+
+                  {/* Nav */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 }}>
+                    <button onClick={() => { if (activeQuestion > 0) { setActiveQuestion(activeQuestion - 1); setSelectedAnswer(null); setShowExplanation(false); } }}
+                      disabled={activeQuestion === 0}
+                      style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: 'var(--ah-muted)', background: 'none', border: 'none', cursor: activeQuestion === 0 ? 'default' : 'pointer', opacity: activeQuestion === 0 ? 0.3 : 1 }}>
+                      Previous
+                    </button>
+                    <button onClick={() => { if (activeQuestion < questions.length - 1) { setActiveQuestion(activeQuestion + 1); setSelectedAnswer(null); setShowExplanation(false); } else { setActiveQuestion(null); setSelectedAnswer(null); setShowExplanation(false); } }}
+                      className="dk-btn dk-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                      {activeQuestion < questions.length - 1 ? 'Next Question' : 'Finish'}
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

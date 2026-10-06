@@ -3,52 +3,24 @@ import { CatMark } from './Logo';
 
 export default function Footer() {
   return (
-    <footer className="bg-ink dark:bg-[#07111e] border-t border-taupe-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-parchment flex items-center justify-center p-1">
-                <CatMark className="w-full h-full" />
-              </div>
-              <span className="text-lg font-bold text-parchment">Prepd</span>
-            </Link>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              Making AP preparation more accessible, organized, and effective for students everywhere.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-parchment text-sm mb-3">Explore</h4>
-            <ul className="space-y-2">
-              <li><Link to="/subjects" className="text-sm text-slate-300 hover:text-parchment transition-colors">Subjects</Link></li>
-              <li><Link to="/practice" className="text-sm text-slate-300 hover:text-parchment transition-colors">Practice</Link></li>
-              <li><Link to="/leaderboard" className="text-sm text-slate-300 hover:text-parchment transition-colors">Leaderboard</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-parchment text-sm mb-3">Contribute</h4>
-            <ul className="space-y-2">
-              <li><Link to="/contribute" className="text-sm text-slate-300 hover:text-parchment transition-colors">Submit Resources</Link></li>
-              <li><Link to="/contribute" className="text-sm text-slate-300 hover:text-parchment transition-colors">Share Study Guides</Link></li>
-              <li><Link to="/contribute" className="text-sm text-slate-300 hover:text-parchment transition-colors">Upload Notes</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-parchment text-sm mb-3">Community</h4>
-            <ul className="space-y-2">
-              <li><Link to="/leaderboard" className="text-sm text-slate-300 hover:text-parchment transition-colors">Top Contributors</Link></li>
-              <li><Link to="/profile" className="text-sm text-slate-300 hover:text-parchment transition-colors">Your Profile</Link></li>
-            </ul>
-          </div>
+    <footer className="dk-footer">
+      <div className="dk-footer-inner">
+        <div className="dk-footer-brand">
+          <CatMark className="w-6 h-6" />
+          <span className="dk-footer-name">Prepd</span>
         </div>
-        <div className="mt-8 pt-8 border-t border-taupe-800 dark:border-[#0f2040] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-400">2026 Prepd. Built for AP students.</p>
-          <div className="flex items-center gap-6">
-            <Link to="/subjects" className="text-sm text-slate-400 hover:text-slate-300 transition-colors">Subjects</Link>
-            <Link to="/practice" className="text-sm text-slate-400 hover:text-slate-300 transition-colors">Practice</Link>
-            <Link to="/contribute" className="text-sm text-slate-400 hover:text-slate-300 transition-colors">Contribute</Link>
-          </div>
-        </div>
+        <p className="dk-footer-mission">
+          Free AP preparation, built and maintained by students.
+          No ads, no paywall, no nonsense.
+        </p>
+        <nav className="dk-footer-links" aria-label="Footer navigation">
+          <Link to="/subjects">Subjects</Link>
+          <Link to="/practice">Practice</Link>
+          <Link to="/contribute">Contribute</Link>
+          <Link to="/leaderboard">Leaderboard</Link>
+          <Link to="/profile">Profile</Link>
+        </nav>
+        <p className="dk-footer-copy">© 2026 Prepd · Student-run nonprofit</p>
       </div>
     </footer>
   );

@@ -4,37 +4,22 @@ import { supabase } from '../lib/supabase';
 import type { APSubject } from '../lib/supabase';
 import { animate, stagger } from 'animejs';
 import {
-  Search,
-  BookOpen,
-  Calculator,
-  BarChart3,
-  Leaf,
-  FlaskConical,
-  Atom,
-  Landmark,
-  Globe,
-  Scale,
-  Brain,
-  Code,
-  Castle,
-  ChevronRight,
-  FileText,
-  GraduationCap,
+  Search, BookOpen, Calculator, BarChart3, Leaf, FlaskConical,
+  Atom, Landmark, Globe, Scale, Brain, Code, Castle, ChevronRight,
+  FileText, GraduationCap,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ElementType> = {
-  'calculator': Calculator,
-  'bar-chart': BarChart3,
-  'leaf': Leaf,
-  'flask-conical': FlaskConical,
-  'atom': Atom,
-  'book-open': BookOpen,
-  'landmark': Landmark,
-  'globe': Globe,
-  'scale': Scale,
-  'brain': Brain,
-  'code': Code,
-  'castle': Castle,
+  'calculator': Calculator, 'bar-chart': BarChart3, 'leaf': Leaf,
+  'flask-conical': FlaskConical, 'atom': Atom, 'book-open': BookOpen,
+  'landmark': Landmark, 'globe': Globe, 'scale': Scale,
+  'brain': Brain, 'code': Code, 'castle': Castle,
+};
+
+const CATEGORY_COLOR: Record<string, string> = {
+  'Math & CS': '#60a5fa', 'Sciences': '#4ade80',
+  'English': '#a78bfa', 'History & Social Sciences': '#fbbf24',
+  'Languages': '#fb7185',
 };
 
 export default function Subjects() {
@@ -45,125 +30,122 @@ export default function Subjects() {
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    async function loadSubjects() {
-      const { data } = await supabase.from('ap_subjects').select('*').order('name');
+    supabase.from('ap_subjects').select('*').order('name').then(({ data }) => {
       setSubjects(data || []);
       setLoading(false);
-    }
-    loadSubjects();
+    });
   }, []);
 
-  // Stagger cards each time the visible set changes (initial load + filter)
   useEffect(() => {
     if (loading || !gridRef.current) return;
     const cards = gridRef.current.querySelectorAll('.subject-card');
-    if (cards.length === 0) return;
-    animate(cards, {
-      opacity: [0, 1],
-      translateY: [20, 0],
-      delay: stagger(50),
-      duration: 400,
-      ease: 'outQuad',
-    });
+    if (!cards.length) return;
+    animate(cards, { opacity: [0, 1], translateY: [16, 0], delay: stagger(40), duration: 380, ease: 'outExpo' });
   }, [loading, search, activeCategory]);
 
   const categories = ['All', ...Array.from(new Set(subjects.map(s => s.category)))];
-
   const filtered = subjects.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.description.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = activeCategory === 'All' || s.category === activeCategory;
-    return matchesSearch && matchesCategory;
+    const q = search.toLowerCase();
+    return (s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q))
+      && (activeCategory === 'All' || s.category === activeCategory);
   });
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-stone/40 border-t-ink rounded-full animate-spin" />
-        </div>
+      <div className="dk-empty" style={{ minHeight: '60vh' }}>
+        <div className="dk-spin" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-10">
-        <div className="accent-strip mb-4" />
-        <h1 className="text-4xl font-bold text-ink mb-3">AP Subjects</h1>
-        <p className="text-lg text-taupe-600 max-w-2xl">
-          Browse all available AP subjects. Click on any subject to find resources, practice questions, and study guides.
+    <div>
+      <div className="dk-header">
+        <span className="dk-page-tag">AP Subjects</span>
+        <h1 className="dk-heading-xl">Every course,<br />organized.</h1>
+        <p className="dk-sub" style={{ maxWidth: 480 }}>
+          Browse all 15 AP subjects — curated notes, guides, and practice questions for each.
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-taupe-400" />
-          <input
-            type="text"
-            placeholder="Search subjects..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-taupe-300/50 bg-white text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400"
-          />
+      <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
+        {/* Search + filter row */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 28 }}>
+          <div className="dk-input-icon" style={{ flex: '1 1 240px', minWidth: 0 }}>
+            <Search className="w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search subjects…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="dk-input"
+              style={{ paddingLeft: 40 }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`dk-filter ${activeCategory === cat ? 'dk-filter-active' : ''}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeCategory === cat
-                  ? 'bg-ink text-parchment'
-                  : 'bg-white text-taupe-600 border border-taupe-300/50 hover:bg-parchment'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      <div ref={gridRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filtered.map((subject) => {
-          const Icon = iconMap[subject.icon] || BookOpen;
-          return (
-            <Link
-              key={subject.id}
-              to={`/subjects/${subject.slug}`}
-              className="subject-card group p-6 card-warm card-warm-hover"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl ${subject.color} flex items-center justify-center`}>
-                  <Icon className="w-6 h-6 text-white" />
+        {/* Grid */}
+        <div ref={gridRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+          {filtered.map(subject => {
+            const Icon = iconMap[subject.icon] || BookOpen;
+            const accent = CATEGORY_COLOR[subject.category] ?? '#888';
+            return (
+              <Link
+                key={subject.id}
+                to={`/subjects/${subject.slug}`}
+                className="subject-card dk-card dk-card-hover"
+                style={{ padding: '20px 22px', display: 'block', textDecoration: 'none' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 10,
+                    background: `${accent}22`, border: `1px solid ${accent}44`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                    <Icon className="w-5 h-5" style={{ color: accent }} />
+                  </div>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)' }}>
+                    <FileText className="w-3.5 h-3.5" />
+                    {subject.resource_count}
+                  </span>
                 </div>
-                <div className="flex items-center gap-1 text-sm text-taupe-400">
-                  <FileText className="w-4 h-4" />
-                  <span>{subject.resource_count}</span>
-                </div>
-              </div>
-              <h3 className="font-semibold text-ink text-lg mb-1">{subject.name}</h3>
-              <p className="text-sm text-taupe-500 mb-3">{subject.description}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-taupe-500 bg-parchment px-2 py-1 rounded-md">
-                  {subject.category}
-                </span>
-                <span className="flex items-center gap-1 text-sm text-ink font-medium group-hover:translate-x-1 transition-transform">
-                  Explore
-                  <ChevronRight className="w-4 h-4" />
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
 
-      {filtered.length === 0 && (
-        <div className="text-center py-20">
-          <GraduationCap className="w-12 h-12 text-taupe-300 mx-auto mb-4" />
-          <p className="text-taupe-500">No subjects found matching your criteria.</p>
+                <h3 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 4, letterSpacing: '-0.01em' }}>
+                  {subject.name}
+                </h3>
+                <p style={{ fontSize: 12.5, color: 'var(--ah-muted)', marginBottom: 14, lineHeight: 1.55 }}>
+                  {subject.description}
+                </p>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span className="dk-badge dk-badge-muted">{subject.category}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontFamily: 'var(--ah-mono)', fontSize: 11, color: accent }}>
+                    Explore <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-      )}
+
+        {filtered.length === 0 && (
+          <div className="dk-empty">
+            <GraduationCap className="w-10 h-10" />
+            <p>No subjects match your search.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

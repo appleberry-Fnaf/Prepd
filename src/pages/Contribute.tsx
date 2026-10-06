@@ -4,9 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import type { APSubject, Submission } from '../lib/supabase';
 import {
-  Upload, FileText, BookOpen, PenTool, ArrowLeft,
-  CheckCircle, Clock, AlertCircle, XCircle, Send, Star, Inbox, Loader2,
-  Paperclip, X as XIcon,
+  Upload, FileText, BookOpen, PenTool,
+  CheckCircle, Clock, XCircle, Send, Star, Inbox, Loader2, Paperclip, X as XIcon,
 } from 'lucide-react';
 
 const typeOptions = [
@@ -16,14 +15,9 @@ const typeOptions = [
 ];
 
 const statusBadge = (status: string) => {
-  switch (status) {
-    case 'approved':
-      return <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded"><CheckCircle className="w-3 h-3" />Approved</span>;
-    case 'rejected':
-      return <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 px-2 py-1 rounded"><XCircle className="w-3 h-3" />Rejected</span>;
-    default:
-      return <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded"><Clock className="w-3 h-3" />Pending</span>;
-  }
+  if (status === 'approved') return <span className="dk-badge dk-badge-green"><CheckCircle className="w-3 h-3" />Approved</span>;
+  if (status === 'rejected') return <span className="dk-badge dk-badge-red"><XCircle className="w-3 h-3" />Rejected</span>;
+  return <span className="dk-badge dk-badge-amber"><Clock className="w-3 h-3" />Pending</span>;
 };
 
 export default function Contribute() {
@@ -32,7 +26,7 @@ export default function Contribute() {
   const [mySubmissions, setMySubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ subjectId: '', type: 'notes', title: '', description: '', fileUrl: '', externalUrl: '' });
+  const [form, setForm] = useState({ subjectId: '', type: 'notes', title: '', description: '', fileUrl: '' });
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -56,21 +50,13 @@ export default function Contribute() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     setFileError('');
-    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-      setFileError('Only PDF files are supported.');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      setFileError('File must be under 10 MB.');
-      return;
-    }
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) { setFileError('Only PDF files are supported.'); return; }
+    if (file.size > 10 * 1024 * 1024) { setFileError('File must be under 10 MB.'); return; }
     setUploadingFile(true);
     const path = `${user.id}/${crypto.randomUUID()}.pdf`;
-    const { error: upErr } = await supabase.storage
-      .from('pdf-contributions')
-      .upload(path, file, { cacheControl: '3600' });
+    const { error: upErr } = await supabase.storage.from('pdf-contributions').upload(path, file, { cacheControl: '3600' });
     if (upErr) {
-      setFileError('Upload failed — make sure the "pdf-contributions" storage bucket exists in Supabase.');
+      setFileError('Upload failed — check "pdf-contributions" bucket in Supabase.');
     } else {
       const { data } = supabase.storage.from('pdf-contributions').getPublicUrl(path);
       setForm(prev => ({ ...prev, fileUrl: data.publicUrl }));
@@ -79,213 +65,197 @@ export default function Contribute() {
     setUploadingFile(false);
   }
 
-  function clearUploadedFile() {
-    setUploadedFileName('');
-    setForm(prev => ({ ...prev, fileUrl: '' }));
-    setFileError('');
-  }
+  function clearUploadedFile() { setUploadedFileName(''); setForm(prev => ({ ...prev, fileUrl: '' })); setFileError(''); }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) { setError('Please sign in to submit resources.'); return; }
-    if (!form.subjectId || !form.title) { setError('Please fill in all required fields.'); return; }
+    if (!form.subjectId || !form.title) { setError('Fill in all required fields.'); return; }
     setSubmitting(true); setError('');
     const { error: submitError } = await supabase.from('submissions').insert({
-      user_id: user.id, subject_id: form.subjectId, title: form.title, description: form.description,
-      type: form.type, file_url: form.fileUrl || null, status: 'pending',
+      user_id: user.id, subject_id: form.subjectId, title: form.title,
+      description: form.description, type: form.type, file_url: form.fileUrl || null, status: 'pending',
     });
     if (submitError) { setError(submitError.message); }
     else {
       setSuccess(true);
-      setForm({ subjectId: '', type: 'notes', title: '', description: '', fileUrl: '', externalUrl: '' });
-      setUploadedFileName('');
-      setFileError('');
-      const { data: subData } = await supabase.from('submissions').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-      setMySubmissions(subData || []);
+      setForm({ subjectId: '', type: 'notes', title: '', description: '', fileUrl: '' });
+      setUploadedFileName(''); setFileError('');
+      const { data } = await supabase.from('submissions').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      setMySubmissions(data || []);
       setTimeout(() => setSuccess(false), 4000);
     }
     setSubmitting(false);
   }
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-stone/40 border-t-ink rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="dk-empty" style={{ minHeight: '60vh' }}><div className="dk-spin" /></div>;
 
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-2xl mx-auto text-center py-20">
-          <div className="w-16 h-16 rounded-2xl bg-parchment flex items-center justify-center mx-auto mb-6 border border-taupe-300/50">
-            <Upload className="w-8 h-8 text-ink" />
-          </div>
-          <h1 className="text-3xl font-bold text-ink mb-3">Contribute</h1>
-          <p className="text-taupe-600 mb-8 max-w-md mx-auto">Share your notes, study guides, and practice tests with the AP community. Sign in to get started.</p>
-          <Link to="/auth" className="btn-warm inline-flex items-center gap-2">
-            Sign In to Contribute <ArrowLeft className="w-4 h-4 rotate-180" />
-          </Link>
+      <div className="dk-empty" style={{ minHeight: '70vh' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <Upload className="w-7 h-7" style={{ color: '#fbbf24' }} />
         </div>
+        <h2 className="dk-heading-lg" style={{ marginBottom: 8 }}>Contribute</h2>
+        <p style={{ color: 'var(--ah-muted)', marginBottom: 24, maxWidth: 360, lineHeight: 1.6 }}>
+          Share notes, study guides, and practice tests. Sign in to get started.
+        </p>
+        <Link to="/auth" className="dk-btn dk-btn-primary">Sign in to contribute</Link>
       </div>
     );
   }
 
+  const labelStyle = { fontSize: 12, fontFamily: 'var(--ah-mono)', letterSpacing: '0.04em', color: 'var(--ah-muted)', textTransform: 'uppercase' as const, marginBottom: 8, display: 'block' };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-10">
-        <div className="accent-strip mb-4" />
-        <h1 className="text-4xl font-bold text-ink mb-3">Contribute</h1>
-        <p className="text-lg text-taupe-600 max-w-2xl">Share your notes, study guides, and practice tests. Your submissions will be reviewed by moderators before being published.</p>
+    <div>
+      <div className="dk-header">
+        <span className="dk-page-tag">Contribute</span>
+        <h1 className="dk-heading-xl">Share your work.<br />Earn real credit.</h1>
+        <p className="dk-sub" style={{ maxWidth: 460 }}>
+          Upload notes and study guides — approved submissions earn points and volunteer hours.
+        </p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-        <div>
-          <div className="card-warm p-6 sm:p-8">
-            <h2 className="text-xl font-semibold text-ink mb-6 flex items-center gap-2">
-              <Send className="w-5 h-5 text-ink" />Submit a Resource
+      <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, alignItems: 'start' }}>
+          {/* Submit form */}
+          <div className="dk-card" style={{ padding: '28px' }}>
+            <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 16, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Send className="w-4 h-4" style={{ color: '#fbbf24' }} /> Submit a Resource
             </h2>
-            {success && (
-              <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
-                <p className="text-sm text-green-800">Submission received! It will be reviewed by a moderator soon.</p>
-              </div>
-            )}
-            {error && (
-              <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-5">
+
+            {success && <div className="dk-alert dk-alert-green" style={{ marginBottom: 18 }}><CheckCircle className="w-4 h-4 shrink-0" /> Submitted! A moderator will review it soon.</div>}
+            {error  && <div className="dk-alert dk-alert-red"   style={{ marginBottom: 18 }}><span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span> {error}</div>}
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">AP Subject <span className="text-red-500">*</span></label>
-                <select value={form.subjectId} onChange={(e) => setForm(prev => ({ ...prev, subjectId: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-taupe-300/50 bg-white text-ink focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400">
-                  <option value="">Select a subject...</option>
-                  {subjects.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
+                <label style={labelStyle}>AP Subject *</label>
+                <select value={form.subjectId} onChange={e => setForm(p => ({ ...p, subjectId: e.target.value }))} className="dk-input">
+                  <option value="">Select a subject…</option>
+                  {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">Resource Type</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {typeOptions.map((t) => {
+                <label style={labelStyle}>Resource Type</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  {typeOptions.map(t => {
                     const Icon = t.icon;
+                    const active = form.type === t.value;
                     return (
-                      <button key={t.value} type="button" onClick={() => setForm(prev => ({ ...prev, type: t.value }))}
-                        className={`p-3 rounded-xl border text-center transition-all ${form.type === t.value ? 'border-ink bg-ink/5' : 'border-taupe-300/50 hover:bg-parchment/60'}`}>
-                        <Icon className={`w-5 h-5 mx-auto mb-1 ${form.type === t.value ? 'text-ink' : 'text-taupe-400'}`} />
-                        <div className={`text-xs font-medium ${form.type === t.value ? 'text-ink' : 'text-taupe-600'}`}>{t.label}</div>
+                      <button key={t.value} type="button" onClick={() => setForm(p => ({ ...p, type: t.value }))}
+                        style={{ padding: '12px 8px', borderRadius: 8, border: `1px solid ${active ? 'rgba(251,191,36,0.45)' : 'rgba(255,255,255,0.1)'}`, background: active ? 'rgba(251,191,36,0.08)' : 'transparent', cursor: 'pointer', textAlign: 'center' }}>
+                        <Icon className="w-4 h-4 mx-auto mb-1" style={{ color: active ? '#fbbf24' : 'var(--ah-muted)' }} />
+                        <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: active ? '#fbbf24' : 'var(--ah-muted)' }}>{t.label}</div>
                       </button>
                     );
                   })}
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">Title <span className="text-red-500">*</span></label>
-                <input type="text" value={form.title} onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="e.g., Unit 3 Comprehensive Notes"
-                  className="w-full px-4 py-3 rounded-xl border border-taupe-300/50 bg-white text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400" />
+                <label style={labelStyle}>Title *</label>
+                <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+                  placeholder="e.g., Unit 3 Comprehensive Notes" className="dk-input" required />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">Description</label>
-                <textarea value={form.description} onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Briefly describe what this resource covers..." rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-taupe-300/50 bg-white text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400 resize-none" />
+                <label style={labelStyle}>Description</label>
+                <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                  placeholder="Briefly describe what this covers…" rows={3} className="dk-input" />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">
-                  <Paperclip className="w-4 h-4 inline mr-1" />Upload PDF (optional)
+                <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Paperclip className="w-3 h-3" /> Upload PDF (optional)
                 </label>
                 {uploadedFileName ? (
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-taupe-300/50 bg-parchment/60">
-                    <FileText className="w-5 h-5 text-ink shrink-0" />
-                    <span className="text-sm text-ink flex-1 truncate">{uploadedFileName}</span>
-                    <button type="button" onClick={clearUploadedFile} className="p-1 rounded text-taupe-400 hover:text-ink transition-colors">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 8, border: '1px solid rgba(74,222,128,0.25)', background: 'rgba(74,222,128,0.07)' }}>
+                    <FileText className="w-4 h-4 shrink-0" style={{ color: '#4ade80' }} />
+                    <span style={{ fontSize: 13, color: 'var(--ah-text)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{uploadedFileName}</span>
+                    <button type="button" onClick={clearUploadedFile} style={{ background: 'none', border: 'none', color: 'var(--ah-muted)', cursor: 'pointer', padding: 0 }}>
                       <XIcon className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl border-2 border-dashed border-taupe-300/50 bg-parchment/40 hover:bg-parchment/70 hover:border-taupe-400 transition-all cursor-pointer">
-                    {uploadingFile ? (
-                      <Loader2 className="w-6 h-6 animate-spin text-taupe-400" />
-                    ) : (
-                      <Upload className="w-6 h-6 text-taupe-400" />
-                    )}
-                    <span className="text-sm font-medium text-taupe-600">
-                      {uploadingFile ? 'Uploading…' : 'Click to upload PDF'}
-                    </span>
-                    <span className="text-xs text-taupe-400">PDF only · max 10 MB</span>
+                  <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '20px 16px', borderRadius: 8, border: '1px dashed rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.02)', cursor: 'pointer' }}>
+                    {uploadingFile ? <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--ah-muted)' }} /> : <Upload className="w-5 h-5" style={{ color: 'var(--ah-muted)' }} />}
+                    <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: 'var(--ah-muted)' }}>{uploadingFile ? 'Uploading…' : 'Click to upload PDF'}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)' }}>PDF only · max 10 MB</span>
                     <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFileUpload} disabled={uploadingFile} />
                   </label>
                 )}
-                {fileError && <p className="text-xs text-red-600 mt-1">{fileError}</p>}
+                {fileError && <p style={{ fontSize: 11.5, color: '#f87171', marginTop: 6 }}>{fileError}</p>}
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">Or paste a link (optional)</label>
-                <input type="url" value={uploadedFileName ? '' : form.fileUrl} onChange={(e) => setForm(prev => ({ ...prev, fileUrl: e.target.value }))}
-                  placeholder="https://drive.google.com/…"
-                  disabled={!!uploadedFileName}
-                  className="w-full px-4 py-3 rounded-xl border border-taupe-300/50 bg-white text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400 disabled:opacity-40 disabled:cursor-not-allowed" />
-                <p className="text-xs text-taupe-500 mt-1">Google Drive, Dropbox, or any file sharing link.</p>
+                <label style={labelStyle}>Or paste a link (optional)</label>
+                <input type="url" value={uploadedFileName ? '' : form.fileUrl} onChange={e => setForm(p => ({ ...p, fileUrl: e.target.value }))}
+                  placeholder="https://drive.google.com/…" disabled={!!uploadedFileName}
+                  className="dk-input" style={{ opacity: uploadedFileName ? 0.4 : 1 }} />
               </div>
-              <button type="submit" disabled={submitting}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ink text-parchment font-semibold text-sm hover:bg-ink/90 transition-all disabled:opacity-50 shadow-md shadow-ink/15">
-                {submitting ? (<><Loader2 className="w-4 h-4 animate-spin" />Submitting...</>) : (<><Upload className="w-4 h-4" />Submit Resource</>)}
+
+              <button type="submit" disabled={submitting} className="dk-btn dk-btn-primary" style={{ width: '100%' }}>
+                {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</> : <><Upload className="w-4 h-4" /> Submit Resource</>}
               </button>
             </form>
           </div>
-        </div>
 
-        <div>
-          <div className="card-warm p-6 sm:p-8">
-            <h2 className="text-xl font-semibold text-ink mb-6 flex items-center gap-2">
-              <Inbox className="w-5 h-5 text-ink" />My Submissions
-            </h2>
-            {mySubmissions.length === 0 ? (
-              <div className="text-center py-12">
-                <Inbox className="w-10 h-10 text-taupe-300 mx-auto mb-3" />
-                <p className="text-sm text-taupe-500">No submissions yet. Share your first resource!</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {mySubmissions.map((sub) => (
-                  <div key={sub.id} className="p-4 rounded-xl border border-taupe-300/30 bg-parchment/60">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-semibold text-ink text-sm">{sub.title}</h3>
-                        <p className="text-xs text-taupe-500 mt-0.5">{sub.description}</p>
+          {/* Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {/* My submissions */}
+            <div className="dk-card" style={{ padding: '24px' }}>
+              <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Inbox className="w-4 h-4" style={{ color: 'var(--ah-muted)' }} /> My Submissions
+              </h2>
+              {mySubmissions.length === 0 ? (
+                <div className="dk-empty" style={{ padding: '28px 0' }}>
+                  <Inbox className="w-8 h-8" /><p>No submissions yet.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {mySubmissions.map(sub => (
+                    <div key={sub.id} style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+                        <div>
+                          <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 13.5, fontWeight: 600, color: 'var(--ah-text)', marginBottom: 2 }}>{sub.title}</div>
+                          {sub.description && <div style={{ fontSize: 11.5, color: 'var(--ah-muted)' }}>{sub.description}</div>}
+                        </div>
+                        {statusBadge(sub.status)}
                       </div>
-                      {statusBadge(sub.status)}
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-taupe-400">
-                      <span className="capitalize">{sub.type}</span>
-                      <span>{new Date(sub.created_at).toLocaleDateString()}</span>
-                    </div>
-                    {sub.moderator_notes && (
-                      <div className="mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
-                        <span className="font-semibold">Moderator note: </span>{sub.moderator_notes}
+                      <div style={{ display: 'flex', gap: 12, fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        <span>{sub.type}</span>
+                        <span>{new Date(sub.created_at).toLocaleDateString()}</span>
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                      {sub.moderator_notes && (
+                        <div className="dk-alert dk-alert-amber" style={{ marginTop: 8, fontSize: 12 }}>
+                          <span style={{ flexShrink: 0 }}>Mod:</span> {sub.moderator_notes}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <div className="mt-6 card-warm p-6 border-taupe-300/50 bg-parchment/60">
-            <h3 className="font-semibold text-ink mb-2 flex items-center gap-2">
-              <Star className="w-4 h-4 text-wood" />Why Contribute?
-            </h3>
-            <ul className="space-y-2 text-sm text-taupe-600">
-              <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />Help fellow students succeed on their exams</li>
-              <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />Earn points and climb the leaderboard</li>
-              <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />Reinforce your own understanding by teaching</li>
-              <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />Build your academic portfolio</li>
-            </ul>
+            {/* Why contribute */}
+            <div className="dk-card" style={{ padding: '22px 24px' }}>
+              <h3 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Star className="w-4 h-4" style={{ color: '#fbbf24' }} /> Why contribute?
+              </h3>
+              {[
+                'Help fellow students succeed on their exams',
+                'Earn points and climb the leaderboard',
+                'Earn verified volunteer hours for college apps',
+                'Build your academic portfolio',
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10 }}>
+                  <CheckCircle className="w-4 h-4 shrink-0" style={{ color: '#4ade80', marginTop: 1 }} />
+                  <span style={{ fontSize: 13, color: 'var(--ah-muted)', lineHeight: 1.5 }}>{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

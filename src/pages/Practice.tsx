@@ -2,15 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { APSubject, PracticeQuestion } from '../lib/supabase';
-import {
-  PenTool,
-  CheckCircle,
-  XCircle,
-  ChevronRight,
-  ArrowRight,
-  BookOpen,
-  Zap,
-} from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, ArrowRight, BookOpen, Zap } from 'lucide-react';
 
 export default function Practice() {
   const [subjects, setSubjects] = useState<APSubject[]>([]);
@@ -35,13 +27,12 @@ export default function Practice() {
     loadData();
   }, []);
 
-  const subjectQuestionCount = (subjectId: string) =>
-    questions.filter(q => q.subject_id === subjectId).length;
+  const subjectQuestionCount = (id: string) => questions.filter(q => q.subject_id === id).length;
 
-  const startQuiz = (subjectId: string) => {
-    const sq = questions.filter(q => q.subject_id === subjectId);
+  const startQuiz = (id: string) => {
+    const sq = questions.filter(q => q.subject_id === id);
     setSubjectQuestions(sq);
-    setSelectedSubject(subjectId);
+    setSelectedSubject(id);
     setActiveQuestion(0);
     setSelectedAnswer(null);
     setShowExplanation(false);
@@ -53,15 +44,12 @@ export default function Practice() {
     setSelectedAnswer(answer);
     setShowExplanation(true);
     const isCorrect = answer === subjectQuestions[activeQuestion].correct_answer;
-    setScore(prev => ({
-      correct: prev.correct + (isCorrect ? 1 : 0),
-      total: prev.total + 1,
-    }));
+    setScore(prev => ({ correct: prev.correct + (isCorrect ? 1 : 0), total: prev.total + 1 }));
   };
 
   const nextQuestion = () => {
     if (activeQuestion < subjectQuestions.length - 1) {
-      setActiveQuestion(prev => prev + 1);
+      setActiveQuestion(p => p + 1);
       setSelectedAnswer(null);
       setShowExplanation(false);
     } else {
@@ -79,98 +67,84 @@ export default function Practice() {
   };
 
   if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-stone/40 border-t-ink rounded-full animate-spin" />
-        </div>
-      </div>
-    );
+    return <div className="dk-empty" style={{ minHeight: '60vh' }}><div className="dk-spin" /></div>;
   }
 
+  // ── Select screen ──────────────────────────────────────────────────────────
   if (mode === 'select') {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-10">
-          <div className="accent-strip mb-4" />
-          <h1 className="text-4xl font-bold text-ink mb-3">Practice</h1>
-          <p className="text-lg text-taupe-600 max-w-2xl">
-            Choose an AP subject and test your knowledge with real exam-style questions.
+      <div>
+        <div className="dk-header">
+          <span className="dk-page-tag">Practice</span>
+          <h1 className="dk-heading-xl">Practice like<br />it's the real exam.</h1>
+          <p className="dk-sub" style={{ maxWidth: 460 }}>
+            AP-style multiple choice with instant feedback. Pick a subject to begin.
           </p>
         </div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {subjects.map((subject) => {
-            const count = subjectQuestionCount(subject.id);
-            if (count === 0) return null;
-            return (
-              <button
-                key={subject.id}
-                onClick={() => startQuiz(subject.id)}
-                className="p-6 card-warm card-warm-hover text-left"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-10 h-10 rounded-xl ${subject.color} flex items-center justify-center`}>
-                    <Zap className="w-5 h-5 text-white" />
+        <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 }}>
+            {subjects.map(subject => {
+              const count = subjectQuestionCount(subject.id);
+              if (!count) return null;
+              return (
+                <button
+                  key={subject.id}
+                  onClick={() => startQuiz(subject.id)}
+                  className="dk-card dk-card-hover"
+                  style={{ padding: '20px', textAlign: 'left', border: 'none', cursor: 'pointer', width: '100%' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Zap className="w-4 h-4" style={{ color: '#4ade80' }} />
+                    </div>
+                    <span className="dk-badge dk-badge-muted">{count} q's</span>
                   </div>
-                  <span className="text-xs font-medium text-taupe-500 bg-parchment px-2 py-1 rounded-md">
-                    {count} questions
+                  <h3 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 4 }}>{subject.name}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ah-muted)', marginBottom: 14, lineHeight: 1.5 }}>{subject.description}</p>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 11, color: '#4ade80' }}>
+                    Start <ArrowRight className="w-3.5 h-3.5" />
                   </span>
-                </div>
-                <h3 className="font-semibold text-ink text-lg mb-1">{subject.name}</h3>
-                <p className="text-sm text-taupe-500 mb-4">{subject.description}</p>
-                <div className="flex items-center gap-2 text-sm text-ink font-medium">
-                  Start Practice
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
   }
 
+  // ── Done screen ────────────────────────────────────────────────────────────
   if (mode === 'done') {
     const subject = subjects.find(s => s.id === selectedSubject);
     const accuracy = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
     return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="card-warm p-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-parchment flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-ink" />
+      <div style={{ maxWidth: 520, margin: '0 auto', padding: 'clamp(40px, 8vh, 80px) 24px' }}>
+        <div className="dk-card" style={{ padding: '36px 32px', textAlign: 'center' }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <CheckCircle className="w-8 h-8" style={{ color: '#4ade80' }} />
           </div>
-          <h2 className="text-2xl font-bold text-ink mb-2">Quiz Complete!</h2>
-          <p className="text-taupe-600 mb-8">
-            You finished practicing {subject?.name}
+          <h2 className="dk-heading-lg" style={{ marginBottom: 8 }}>Quiz complete</h2>
+          <p style={{ fontSize: 13, color: 'var(--ah-muted)', marginBottom: 28 }}>
+            Finished practicing {subject?.name}
           </p>
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="p-4 bg-parchment rounded-xl">
-              <div className="text-2xl font-bold text-ink">{score.total}</div>
-              <div className="text-xs text-taupe-500">Questions</div>
-            </div>
-            <div className="p-4 bg-parchment rounded-xl">
-              <div className="text-2xl font-bold text-green-700">{score.correct}</div>
-              <div className="text-xs text-taupe-500">Correct</div>
-            </div>
-            <div className="p-4 bg-parchment rounded-xl">
-              <div className="text-2xl font-bold text-ink">{accuracy}%</div>
-              <div className="text-xs text-taupe-500">Accuracy</div>
-            </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 28 }}>
+            {[
+              { value: score.total, label: 'Questions' },
+              { value: score.correct, label: 'Correct', color: '#4ade80' },
+              { value: `${accuracy}%`, label: 'Accuracy' },
+            ].map(({ value, label, color }) => (
+              <div key={label} className="dk-card" style={{ padding: '12px 8px', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', color: color ?? 'var(--ah-text)' }}>{value}</div>
+                <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+              </div>
+            ))}
           </div>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <button
-              onClick={reset}
-              className="btn-warm inline-flex items-center gap-2"
-            >
-              Practice Another Subject
-            </button>
-            <Link
-              to={`/subjects/${subject?.slug}`}
-              className="btn-warm-outline inline-flex items-center gap-2"
-            >
-              <BookOpen className="w-4 h-4" />
-              View Resources
+
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={reset} className="dk-btn dk-btn-primary">Practice another</button>
+            <Link to={`/subjects/${subject?.slug}`} className="dk-btn dk-btn-ghost">
+              <BookOpen className="w-4 h-4" /> Resources
             </Link>
           </div>
         </div>
@@ -178,109 +152,97 @@ export default function Practice() {
     );
   }
 
+  // ── Quiz screen ────────────────────────────────────────────────────────────
   const currentQ = subjectQuestions[activeQuestion];
+  const progress = ((activeQuestion + 1) / subjectQuestions.length) * 100;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="card-warm p-6 sm:p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-medium text-taupe-500 bg-parchment px-2 py-0.5 rounded">
-                Question {activeQuestion + 1} of {subjectQuestions.length}
-              </span>
-              <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                currentQ.difficulty === 'easy' ? 'bg-green-50 text-green-700' :
-                currentQ.difficulty === 'medium' ? 'bg-amber-50 text-amber-700' :
-                'bg-red-50 text-red-700'
-              }`}>
-                {currentQ.difficulty}
-              </span>
-            </div>
-            <div className="text-sm text-taupe-500">
-              Score: {score.correct}/{score.total}
-            </div>
+    <div style={{ maxWidth: 620, margin: '0 auto', padding: 'clamp(32px, 6vh, 64px) 24px' }}>
+      <div className="dk-card" style={{ padding: '28px 28px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="dk-badge dk-badge-muted">
+              {activeQuestion + 1} / {subjectQuestions.length}
+            </span>
+            <span className={`dk-badge ${
+              currentQ.difficulty === 'easy' ? 'dk-badge-green' :
+              currentQ.difficulty === 'medium' ? 'dk-badge-amber' : 'dk-badge-red'
+            }`}>
+              {currentQ.difficulty}
+            </span>
           </div>
-          <button onClick={reset} className="text-sm text-taupe-500 hover:text-ink">
-            Exit
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: 'var(--ah-muted)' }}>
+              {score.correct}/{score.total} correct
+            </span>
+            <button onClick={reset} className="dk-btn dk-btn-ghost dk-btn-sm">Exit</button>
+          </div>
         </div>
 
-        <div className="w-full h-2 bg-parchment rounded-full mb-6 overflow-hidden">
-          <div
-            className="h-full bg-ink rounded-full transition-all duration-300"
-            style={{ width: `${((activeQuestion + 1) / subjectQuestions.length) * 100}%` }}
-          />
+        {/* Progress bar */}
+        <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, marginBottom: 24, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${progress}%`, background: '#4ade80', borderRadius: 2, transition: 'width 0.3s ease' }} />
         </div>
 
-        <h3 className="text-xl font-semibold text-ink mb-6">{currentQ.question}</h3>
+        <h3 style={{ fontFamily: 'var(--ah-sans)', fontSize: 17, fontWeight: 600, color: 'var(--ah-text)', lineHeight: 1.5, marginBottom: 20 }}>
+          {currentQ.question}
+        </h3>
 
-        <div className="space-y-3">
+        {/* Options */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {currentQ.options.map((option, idx) => {
             const isSelected = selectedAnswer === option;
-            const isCorrect = option === currentQ.correct_answer;
-            let btnClass = 'p-4 rounded-xl border text-left transition-all w-full flex items-center gap-3 ';
-            if (selectedAnswer === null) {
-              btnClass += 'border-taupe-300/50 hover:border-ink/30 hover:bg-parchment/60 cursor-pointer';
-            } else if (isCorrect) {
-              btnClass += 'border-green-500/50 bg-green-50';
-            } else if (isSelected && !isCorrect) {
-              btnClass += 'border-red-500/50 bg-red-50';
-            } else {
-              btnClass += 'border-taupe-300/30 opacity-50';
+            const isCorrect  = option === currentQ.correct_answer;
+            const answered   = selectedAnswer !== null;
+
+            let bg = 'rgba(255,255,255,0.04)', border = 'rgba(255,255,255,0.08)';
+            let textColor = 'var(--ah-text)', cursor = 'pointer';
+            let dotBg = 'rgba(255,255,255,0.1)', dotColor = 'var(--ah-muted)';
+
+            if (answered) {
+              cursor = 'default';
+              if (isCorrect)          { bg = 'rgba(74,222,128,0.1)';  border = 'rgba(74,222,128,0.35)';  dotBg = 'rgba(74,222,128,0.2)';  dotColor = '#4ade80'; }
+              else if (isSelected)    { bg = 'rgba(248,113,113,0.1)'; border = 'rgba(248,113,113,0.35)'; dotBg = 'rgba(248,113,113,0.2)'; dotColor = '#f87171'; }
+              else                    { textColor = 'var(--ah-muted)'; }
             }
 
             return (
               <button
                 key={idx}
-                disabled={selectedAnswer !== null}
+                disabled={answered}
                 onClick={() => handleAnswer(option)}
-                className={btnClass}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 8, border: `1px solid ${border}`, background: bg, cursor, textAlign: 'left', transition: 'all 0.15s', width: '100%' }}
               >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold shrink-0 ${
-                  selectedAnswer === null ? 'bg-parchment text-ink' :
-                  isCorrect ? 'bg-green-100 text-green-800' :
-                  isSelected ? 'bg-red-100 text-red-800' :
-                  'bg-parchment text-taupe-400'
-                }`}>
+                <span style={{ width: 28, height: 28, borderRadius: 7, background: dotBg, color: dotColor, fontFamily: 'var(--ah-mono)', fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   {String.fromCharCode(65 + idx)}
                 </span>
-                <span className="text-sm text-ink">{option}</span>
-                {selectedAnswer !== null && isCorrect && <CheckCircle className="w-5 h-5 text-green-600 ml-auto shrink-0" />}
-                {selectedAnswer !== null && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-500 ml-auto shrink-0" />}
+                <span style={{ fontSize: 13.5, color: textColor, lineHeight: 1.45 }}>{option}</span>
+                {answered && isCorrect  && <CheckCircle className="w-4 h-4 ml-auto shrink-0" style={{ color: '#4ade80' }} />}
+                {answered && isSelected && !isCorrect && <XCircle className="w-4 h-4 ml-auto shrink-0" style={{ color: '#f87171' }} />}
               </button>
             );
           })}
         </div>
 
         {showExplanation && (
-          <div className="mt-6 p-4 rounded-xl bg-parchment border border-taupe-300/50">
-            <p className="text-sm text-ink">
-              <span className="font-semibold">Explanation: </span>
-              {currentQ.explanation}
-            </p>
+          <div className="dk-alert dk-alert-amber" style={{ marginTop: 18 }}>
+            <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0, marginTop: 2 }}>Explanation</span>
+            <span style={{ fontSize: 13, lineHeight: 1.55 }}>{currentQ.explanation}</span>
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-8">
+        {/* Navigation */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 22 }}>
           <button
-            onClick={() => {
-              if (activeQuestion > 0) {
-                setActiveQuestion(prev => prev - 1);
-                setSelectedAnswer(null);
-                setShowExplanation(false);
-              }
-            }}
+            onClick={() => { if (activeQuestion > 0) { setActiveQuestion(p => p - 1); setSelectedAnswer(null); setShowExplanation(false); } }}
             disabled={activeQuestion === 0}
-            className="text-sm text-taupe-500 hover:text-ink disabled:opacity-30"
+            className="dk-btn dk-btn-ghost dk-btn-sm"
           >
             Previous
           </button>
-          <button
-            onClick={nextQuestion}
-            className="btn-warm inline-flex items-center gap-2 text-sm"
-          >
-            {activeQuestion < subjectQuestions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+          <button onClick={nextQuestion} className="dk-btn dk-btn-primary dk-btn-sm">
+            {activeQuestion < subjectQuestions.length - 1 ? 'Next' : 'Finish'}
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

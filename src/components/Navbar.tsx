@@ -1,187 +1,113 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { CatMark } from './Logo';
 import { animate, scrambleText } from 'animejs';
-import {
-  BookOpen,
-  PenTool,
-  Upload,
-  Trophy,
-  User,
-  Menu,
-  X,
-  LogOut,
-  Sparkles,
-  ShieldCheck,
-  Sun,
-  Moon,
-} from 'lucide-react';
+import { Menu, X, ShieldCheck } from 'lucide-react';
 
-const navItems = [
-  { path: '/', label: 'Home', icon: Sparkles },
-  { path: '/subjects', label: 'Subjects', icon: BookOpen },
-  { path: '/practice', label: 'Practice', icon: PenTool },
-  { path: '/contribute', label: 'Contribute', icon: Upload },
-  { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-  { path: '/profile', label: 'Profile', icon: User },
+const NAV_LINKS = [
+  { path: '/subjects',    label: 'Subjects' },
+  { path: '/practice',   label: 'Practice' },
+  { path: '/contribute', label: 'Contribute' },
+  { path: '/leaderboard',label: 'Leaderboard' },
+  { path: '/profile',    label: 'Profile' },
 ];
 
 export default function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
-  const { theme, toggle } = useTheme();
-  const iconRef = useRef<HTMLSpanElement>(null);
   const brandRef = useRef<HTMLSpanElement>(null);
   const location = useLocation();
 
-  useEffect(() => {
+  // Scramble brand text on first mount
+  useRef<boolean>((() => {
     if (brandRef.current) {
       animate(brandRef.current, {
         textContent: scrambleText({ chars: 'symbols', from: 'left', ease: 'outExpo' }),
         duration: 900,
-        delay: 300,
+        delay: 400,
       });
     }
-  }, []);
+    return true;
+  }) as unknown as boolean);
 
-  function handleThemeToggle() {
-    toggle();
-    if (iconRef.current) {
-      animate(iconRef.current, {
-        rotate: '1turn',
-        scale: [{ to: 1.35 }, { to: 1 }],
-        duration: 500,
-        ease: 'outBack',
-      });
-    }
-  }
+  const links = profile?.is_moderator
+    ? [...NAV_LINKS, { path: '/moderate', label: 'Moderate' }]
+    : NAV_LINKS;
 
-  const isActive = (path: string) => location.pathname === path;
-
-  const items = profile?.is_moderator
-    ? [...navItems, { path: '/moderate', label: 'Moderate', icon: ShieldCheck }]
-    : navItems;
+  const isActive = (p: string) => location.pathname === p;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-warm border-b border-taupe-300/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2 group">
-            <CatMark className="w-9 h-9 group-hover:scale-105 transition-transform" />
-            <span ref={brandRef} className="text-xl font-bold text-ink tracking-tight">Prepd</span>
-          </Link>
+    <>
+      <nav className="dk-nav">
+        <Link to="/" className="dk-nav-brand" aria-label="Prepd home">
+          <CatMark className="w-7 h-7" />
+          <span ref={brandRef}>Prepd</span>
+        </Link>
 
-          <div className="hidden md:flex items-center gap-1">
-            {items.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isActive(item.path)
-                      ? 'bg-ink/8 text-ink'
-                      : 'text-taupe-600 hover:bg-ink/5 hover:text-ink'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-
-            <button
-              onClick={handleThemeToggle}
-              className="p-2 rounded-lg text-taupe-600 hover:bg-ink/5 hover:text-ink transition-colors duration-200 ml-1"
-              aria-label="Toggle dark mode"
+        <div className="dk-nav-links" role="list">
+          {links.map(({ path, label }) => (
+            <Link
+              key={path}
+              to={path}
+              role="listitem"
+              className={`dk-nav-link ${isActive(path) ? 'dk-nav-link-active' : ''}`}
             >
-              <span ref={iconRef} className="inline-flex">
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </span>
-            </button>
-
-            {user ? (
-              <button
-                onClick={signOut}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-taupe-600 hover:bg-ink/5 hover:text-ink transition-all duration-200 ml-1"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </button>
-            ) : (
-              <Link
-                to="/auth"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-ink text-parchment hover:bg-ink/90 transition-all duration-200 ml-1 shadow-md shadow-ink/15 hover:shadow-lg hover:shadow-ink/25"
-              >
-                <User className="w-4 h-4" />
-                Sign In
-              </Link>
-            )}
-          </div>
-
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-lg text-ink hover:bg-ink/5"
-          >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+              {path === '/moderate' && <ShieldCheck className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />}
+              {label}
+            </Link>
+          ))}
         </div>
-      </div>
 
-      {mobileOpen && (
-        <div className="md:hidden glass-warm border-b border-taupe-300/30">
-          <div className="px-4 py-3 space-y-1">
-            {items.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    isActive(item.path)
-                      ? 'bg-ink/8 text-ink'
-                      : 'text-taupe-600 hover:bg-ink/5'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-            <button
-              onClick={handleThemeToggle}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-taupe-600 hover:bg-ink/5 w-full"
-            >
-              <span ref={null} className="inline-flex">
-                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </span>
-              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        <div className="dk-nav-actions">
+          {user ? (
+            <button onClick={signOut} className="dk-nav-signout">
+              Sign out
             </button>
+          ) : (
+            <Link to="/auth" className="dk-nav-signin">
+              Sign in
+            </Link>
+          )}
+        </div>
 
-            {user ? (
-              <button
-                onClick={() => { signOut(); setMobileOpen(false); }}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-taupe-600 hover:bg-ink/5 w-full"
-              >
-                <LogOut className="w-5 h-5" />
-                Sign Out
-              </button>
-            ) : (
-              <Link
-                to="/auth"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-ink text-parchment shadow-md shadow-ink/15"
-              >
-                <User className="w-5 h-5" />
-                Sign In
-              </Link>
-            )}
-          </div>
+        <button
+          className="dk-nav-mobile-toggle"
+          onClick={() => setOpen(v => !v)}
+          aria-label="Toggle menu"
+        >
+          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </nav>
+
+      {open && (
+        <div className="dk-nav-mobile-drawer">
+          {links.map(({ path, label }) => (
+            <Link
+              key={path}
+              to={path}
+              onClick={() => setOpen(false)}
+              className={`dk-nav-mobile-link ${isActive(path) ? 'active' : ''}`}
+            >
+              {label}
+            </Link>
+          ))}
+          <div className="dk-sep" style={{ margin: '8px 0' }} />
+          {user ? (
+            <button
+              onClick={() => { signOut(); setOpen(false); }}
+              className="dk-nav-mobile-link"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+            >
+              Sign out
+            </button>
+          ) : (
+            <Link to="/auth" onClick={() => setOpen(false)} className="dk-nav-mobile-link">
+              Sign in
+            </Link>
+          )}
         </div>
       )}
-    </nav>
+    </>
   );
 }
