@@ -65,14 +65,14 @@ export default function Contribute() {
       return;
     }
     setUploadingFile(true);
-    const path = `${user.id}/${Date.now()}_${file.name}`;
+    const path = `${user.id}/${crypto.randomUUID()}.pdf`;
     const { error: upErr } = await supabase.storage
-      .from('submissions')
+      .from('pdf-contributions')
       .upload(path, file, { cacheControl: '3600' });
     if (upErr) {
-      setFileError('Upload failed — make sure the "submissions" storage bucket exists in Supabase.');
+      setFileError('Upload failed — make sure the "pdf-contributions" storage bucket exists in Supabase.');
     } else {
-      const { data } = supabase.storage.from('submissions').getPublicUrl(path);
+      const { data } = supabase.storage.from('pdf-contributions').getPublicUrl(path);
       setForm(prev => ({ ...prev, fileUrl: data.publicUrl }));
       setUploadedFileName(file.name);
     }
