@@ -158,14 +158,12 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
       d.edges.position.y = d.baseY + dir * explodeAmt;
     });
 
-    // Fade out: p 0.92–1.0
+    // Fade out: p 0.92–1.0 — drive via group opacity using renderer alpha + scale trick
     const fadeOut = 1 - Math.max(0, Math.min(1, (p - 0.92) / 0.08));
-    group.children.forEach(c => {
-      if ((c as THREE.Mesh).isMesh || (c as THREE.LineSegments).isLineSegments) {
-        ((c as THREE.Mesh | THREE.LineSegments).material as THREE.Material).opacity = fadeOut;
-        ((c as THREE.Mesh | THREE.LineSegments).material as THREE.Material).transparent = true;
-      }
-    });
+    group.scale.setScalar(scaleIn * fadeOut);
+    // Dim lights instead of per-material opacity (avoids shared-material mutation)
+    rimLight.intensity = 2.2 * fadeOut;
+    ambient.intensity  = 0.25 * fadeOut;
 
     renderer.render(scene, camera);
   }
@@ -188,18 +186,22 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     renderer.dispose();
   }
 
-  // Handle resize
-  function onResize() {
+  // Handle resize via ResizeObserver (catches CSS-driven size changes too)
+  function syncSize() {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
+    if (w === 0 || h === 0) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
-  window.addEventListener('resize', onResize);
+  const ro = new ResizeObserver(syncSize);
+  ro.observe(canvas);
+  syncSize(); // force sync on first tick in case layout already settled
+
   const origDispose = dispose;
   const disposeAll = () => {
-    window.removeEventListener('resize', onResize);
+    ro.disconnect();
     origDispose();
   };
 

@@ -1125,7 +1125,8 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   letter-spacing: -0.03em;
   color: var(--ah-text);
   margin: 0 0 14px;
-  animation: ah-fade-up 0.5s ease forwards;
+  /* opacity set to 0 initially; anime.js slides it in */
+  opacity: 0;
 }
 
 .ah-scene-sub {
@@ -1134,7 +1135,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   line-height: 1.6;
   color: var(--ah-muted);
   margin: 0 0 18px;
-  animation: ah-fade-up 0.5s 0.08s ease forwards;
+  opacity: 0;
 }
 
 .ah-scene-link {
@@ -1148,7 +1149,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   border-bottom: 1px solid rgba(255,255,255,0.18);
   padding-bottom: 2px;
   pointer-events: auto;
-  animation: ah-fade-up 0.5s 0.14s ease forwards;
+  opacity: 0;
   transition: color 0.2s, border-color 0.2s;
 }
 .ah-scene-link:hover {
@@ -1176,8 +1177,8 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   flex-direction: column;
   gap: 6px;
   pointer-events: none;
-  animation: ah-fade-up 0.4s 0.1s ease forwards;
-  opacity: 0;
+  /* opacity transitions with scene — driven by parent's anime.js transition */
+  transition: opacity 0.3s ease;
 }
 
 .ah-code-line {
@@ -1410,6 +1411,6 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   .ah-stage { transition: none; }
-  .ah-scene-heading, .ah-scene-sub, .ah-scene-link, .ah-code-card { animation: none; opacity: 1; }
+  .ah-scene-heading, .ah-scene-sub, .ah-scene-link, .ah-code-card { opacity: 1 !important; transform: none !important; }
   .ah-progress-fill { transition: none; }
 }
