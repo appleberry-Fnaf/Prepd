@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { APSubject } from '../lib/supabase';
+import { animate, stagger } from 'animejs';
 import {
   Search,
   BookOpen,
@@ -41,6 +42,7 @@ export default function Subjects() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadSubjects() {
@@ -50,6 +52,20 @@ export default function Subjects() {
     }
     loadSubjects();
   }, []);
+
+  // Stagger cards each time the visible set changes (initial load + filter)
+  useEffect(() => {
+    if (loading || !gridRef.current) return;
+    const cards = gridRef.current.querySelectorAll('.subject-card');
+    if (cards.length === 0) return;
+    animate(cards, {
+      opacity: [0, 1],
+      translateY: [20, 0],
+      delay: stagger(50),
+      duration: 400,
+      ease: 'outQuad',
+    });
+  }, [loading, search, activeCategory]);
 
   const categories = ['All', ...Array.from(new Set(subjects.map(s => s.category)))];
 
@@ -108,14 +124,14 @@ export default function Subjects() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div ref={gridRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {filtered.map((subject) => {
           const Icon = iconMap[subject.icon] || BookOpen;
           return (
             <Link
               key={subject.id}
               to={`/subjects/${subject.slug}`}
-              className="group p-6 card-warm card-warm-hover"
+              className="subject-card group p-6 card-warm card-warm-hover"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-12 h-12 rounded-xl ${subject.color} flex items-center justify-center`}>

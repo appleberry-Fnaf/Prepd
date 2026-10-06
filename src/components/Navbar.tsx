@@ -1,9 +1,9 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { CatMark } from './Logo';
-import { animate } from 'animejs';
+import { animate, scrambleText } from 'animejs';
 import {
   BookOpen,
   PenTool,
@@ -33,7 +33,18 @@ export default function Navbar() {
   const { user, profile, signOut } = useAuth();
   const { theme, toggle } = useTheme();
   const iconRef = useRef<HTMLSpanElement>(null);
+  const brandRef = useRef<HTMLSpanElement>(null);
   const location = useLocation();
+
+  useEffect(() => {
+    if (brandRef.current) {
+      animate(brandRef.current, {
+        textContent: scrambleText({ chars: 'symbols', from: 'left', ease: 'outExpo' }),
+        duration: 900,
+        delay: 300,
+      });
+    }
+  }, []);
 
   function handleThemeToggle() {
     toggle();
@@ -59,7 +70,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2 group">
             <CatMark className="w-9 h-9 group-hover:scale-105 transition-transform" />
-            <span className="text-xl font-bold text-ink tracking-tight">Prepd</span>
+            <span ref={brandRef} className="text-xl font-bold text-ink tracking-tight">Prepd</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">

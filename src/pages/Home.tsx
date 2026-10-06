@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { APSubject } from '../lib/supabase';
+import { animate, scrambleText, stagger } from 'animejs';
 import {
   ArrowRight,
   BookOpen,
@@ -23,6 +24,11 @@ export default function Home() {
   const [subjects, setSubjects] = useState<APSubject[]>([]);
   const [featuredCount, setFeaturedCount] = useState(0);
   const [questionCount, setQuestionCount] = useState(0);
+  const [displayStats, setDisplayStats] = useState({ subjects: 0, questions: 0, featured: 0 });
+
+  const heroTextRef = useRef<HTMLSpanElement>(null);
+  const categoriesGridRef = useRef<HTMLDivElement>(null);
+  const featuresGridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -36,10 +42,70 @@ export default function Home() {
     loadData();
   }, []);
 
+  // Scramble "Get Prepd." on mount
+  useEffect(() => {
+    if (heroTextRef.current) {
+      animate(heroTextRef.current, {
+        textContent: scrambleText({ chars: 'symbols', from: 'left', ease: 'outExpo' }),
+        duration: 1200,
+        delay: 600,
+      });
+    }
+  }, []);
+
+  // Counter animation when data arrives
+  useEffect(() => {
+    if (subjects.length === 0 && questionCount === 0 && featuredCount === 0) return;
+    const targets = { subjects: subjects.length, questions: questionCount, featured: featuredCount };
+    const duration = 1400;
+    const start = performance.now();
+    function tick(now: number) {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      setDisplayStats({
+        subjects: Math.round(eased * targets.subjects),
+        questions: Math.round(eased * targets.questions),
+        featured: Math.round(eased * targets.featured),
+      });
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, [subjects.length, questionCount, featuredCount]);
+
+  // Stagger category cards when data loads
+  useEffect(() => {
+    if (subjects.length === 0) return;
+    const grid = categoriesGridRef.current;
+    if (!grid) return;
+    const cards = grid.querySelectorAll('.category-card');
+    if (cards.length === 0) return;
+    animate(cards, {
+      opacity: [0, 1],
+      translateY: [24, 0],
+      delay: stagger(80),
+      duration: 500,
+      ease: 'outQuad',
+    });
+  }, [subjects.length]);
+
+  // Stagger feature cards on mount
+  useEffect(() => {
+    const grid = featuresGridRef.current;
+    if (!grid) return;
+    const cards = grid.querySelectorAll('.feature-card');
+    animate(cards, {
+      opacity: [0, 1],
+      translateY: [24, 0],
+      delay: stagger(100, { start: 200 }),
+      duration: 500,
+      ease: 'outQuad',
+    });
+  }, []);
+
   const stats = [
-    { label: 'AP Subjects', value: subjects.length, icon: BookOpen },
-    { label: 'Practice Questions', value: questionCount, icon: PenTool },
-    { label: 'Featured Resources', value: featuredCount, icon: GraduationCap },
+    { label: 'AP Subjects', value: displayStats.subjects, icon: BookOpen },
+    { label: 'Practice Questions', value: displayStats.questions, icon: PenTool },
+    { label: 'Featured Resources', value: displayStats.featured, icon: GraduationCap },
   ];
 
   const features = [
@@ -88,7 +154,7 @@ export default function Home() {
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-ink leading-[1.1] tracking-tight">
                 Get Ready.
                 <br />
-                <span className="text-wood">Get Prepd.</span>
+                <span ref={heroTextRef} className="text-wood">Get Prepd.</span>
               </h1>
               <p className="text-lg text-taupe-600 leading-relaxed max-w-lg">
                 Making AP preparation more accessible, organized, and effective for students. Find resources, practice questions, and a community that helps you succeed.
@@ -161,12 +227,12 @@ export default function Home() {
               Explore AP subjects organized by category. Find the right resources for your exams.
             </p>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div ref={categoriesGridRef} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map((cat) => (
               <Link
                 key={cat.name}
                 to={`/subjects`}
-                className="group p-6 card-warm card-warm-hover text-center"
+                className="category-card group p-6 card-warm card-warm-hover text-center"
               >
                 <div className="w-12 h-12 rounded-xl bg-ink/8 flex items-center justify-center mx-auto mb-4 group-hover:bg-ink/12 transition-colors">
                   <cat.icon className="w-6 h-6 text-ink" />
@@ -189,11 +255,11 @@ export default function Home() {
               Prepd brings together all the tools AP students need in one modern, easy-to-use platform.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div ref={featuresGridRef} className="grid md:grid-cols-2 gap-6">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="group p-6 card-warm card-warm-hover"
+                className="feature-card group p-6 card-warm card-warm-hover"
               >
                 <div className="w-12 h-12 rounded-xl bg-ink/8 flex items-center justify-center mb-4">
                   <feature.icon className="w-6 h-6 text-ink" />
