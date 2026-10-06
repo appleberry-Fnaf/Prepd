@@ -19,8 +19,11 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
+          {/* Home: bare page — no Navbar/Footer */}
+          <Route path="/" element={<Home />} />
+
+          {/* All other routes: wrapped in Layout (Navbar + Footer) */}
+          <Route element={<Layout />}>
             <Route path="subjects" element={<Subjects />} />
             <Route path="subjects/:slug" element={<SubjectDetail />} />
             <Route path="practice" element={<Practice />} />
