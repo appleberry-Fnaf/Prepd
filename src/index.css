@@ -616,3 +616,101 @@
     -webkit-backface-visibility: visible !important;
   }
 }
+
+/* ===== Subject Cube ===== */
+
+.cube-container {
+  perspective: 1000px;
+  perspective-origin: 50% 46%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 440px;
+  user-select: none;
+}
+
+.cube-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cube-bloom {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(58, 101, 192, 0.20) 0%, transparent 68%);
+  filter: blur(55px);
+  pointer-events: none;
+  animation: cube-bloom-pulse 4s ease-in-out infinite;
+}
+
+@keyframes cube-bloom-pulse {
+  0%, 100% { opacity: 0.65; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.14); }
+}
+
+.cube-body {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.cube-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 22px;
+  box-shadow:
+    0 0 52px -8px var(--face-glow, #334EAC),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 0 60px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(0, 0, 0, 0.40);
+  overflow: hidden;
+}
+
+.cube-face::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 48%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.045), transparent);
+  border-radius: 18px 18px 0 0;
+  pointer-events: none;
+}
+
+.cube-face-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.90);
+  letter-spacing: -0.02em;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.cube-face-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.28);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cube-bloom { animation: none; }
+  .cube-body { transform: rotateX(-14deg) rotateY(30deg) !important; }
+}

@@ -6,6 +6,7 @@ import { animate, scrambleText } from 'animejs';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CatMark } from '../components/Logo';
+import SubjectCube from '../components/SubjectCube';
 import {
   ArrowRight,
   BookOpen,
@@ -18,8 +19,6 @@ import {
   Layers,
   Target,
   Award,
-  CheckCircle2,
-  HeartHandshake,
   Trophy,
 } from 'lucide-react';
 
@@ -265,37 +264,8 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            <div className="hidden lg:block">
-              <div className="relative">
-                <div className="absolute -top-4 -right-4 w-72 h-72 bg-stone/30 rounded-full blur-3xl" />
-                <div className="absolute -bottom-4 -left-4 w-72 h-72 bg-wood/20 rounded-full blur-3xl" />
-                <div className="relative card-warm p-6 space-y-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-ink/8 flex items-center justify-center">
-                      <BookOpen className="w-5 h-5 text-ink" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-ink">Everything in one place</div>
-                      <div className="text-xs text-taupe-500">Made for AP students</div>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {[
-                      { icon: Layers, text: 'Notes & study guides for every AP subject' },
-                      { icon: CheckCircle2, text: 'Community resources, checked by moderators' },
-                      { icon: HeartHandshake, text: 'Earn verified volunteer hours' },
-                      { icon: Award, text: 'Points, tiers & a leaderboard' },
-                    ].map((item) => (
-                      <div key={item.text} className="flex items-center gap-3 p-3 rounded-xl bg-parchment/60 border border-taupe-300/20">
-                        <div className="w-8 h-8 rounded-lg bg-ink/8 flex items-center justify-center shrink-0">
-                          <item.icon className="w-4 h-4 text-ink" />
-                        </div>
-                        <span className="text-sm text-ink font-medium">{item.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            <div className="hidden lg:flex items-center justify-center">
+              <SubjectCube />
             </div>
           </div>
         </div>
