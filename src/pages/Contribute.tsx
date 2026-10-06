@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import type { APSubject, Submission } from '../lib/supabase';
 import {
-  Upload, FileText, BookOpen, PenTool, ChevronRight, ArrowLeft,
+  Upload, FileText, BookOpen, PenTool, ArrowLeft,
   CheckCircle, Clock, AlertCircle, XCircle, Send, Star, Inbox, Loader2,
+  Paperclip, X as XIcon,
 } from 'lucide-react';
 
 const typeOptions = [
@@ -34,6 +35,9 @@ export default function Contribute() {
   const [form, setForm] = useState({ subjectId: '', type: 'notes', title: '', description: '', fileUrl: '', externalUrl: '' });
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [fileError, setFileError] = useState('');
 
   useEffect(() => {
     async function loadData() {
@@ -48,6 +52,39 @@ export default function Contribute() {
     loadData();
   }, [user]);
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setFileError('');
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      setFileError('Only PDF files are supported.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setFileError('File must be under 10 MB.');
+      return;
+    }
+    setUploadingFile(true);
+    const path = `${user.id}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await supabase.storage
+      .from('submissions')
+      .upload(path, file, { cacheControl: '3600' });
+    if (upErr) {
+      setFileError('Upload failed — make sure the "submissions" storage bucket exists in Supabase.');
+    } else {
+      const { data } = supabase.storage.from('submissions').getPublicUrl(path);
+      setForm(prev => ({ ...prev, fileUrl: data.publicUrl }));
+      setUploadedFileName(file.name);
+    }
+    setUploadingFile(false);
+  }
+
+  function clearUploadedFile() {
+    setUploadedFileName('');
+    setForm(prev => ({ ...prev, fileUrl: '' }));
+    setFileError('');
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) { setError('Please sign in to submit resources.'); return; }
@@ -61,6 +98,8 @@ export default function Contribute() {
     else {
       setSuccess(true);
       setForm({ subjectId: '', type: 'notes', title: '', description: '', fileUrl: '', externalUrl: '' });
+      setUploadedFileName('');
+      setFileError('');
       const { data: subData } = await supabase.from('submissions').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
       setMySubmissions(subData || []);
       setTimeout(() => setSuccess(false), 4000);
@@ -158,11 +197,40 @@ export default function Contribute() {
                   className="w-full px-4 py-3 rounded-xl border border-taupe-300/50 bg-white text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400 resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">Link (optional)</label>
-                <input type="url" value={form.fileUrl} onChange={(e) => setForm(prev => ({ ...prev, fileUrl: e.target.value }))}
-                  placeholder="https://..."
-                  className="w-full px-4 py-3 rounded-xl border border-taupe-300/50 bg-white text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400" />
-                <p className="text-xs text-taupe-500 mt-1">Link to your Google Drive, Dropbox, or any file sharing service.</p>
+                <label className="block text-sm font-medium text-ink mb-2">
+                  <Paperclip className="w-4 h-4 inline mr-1" />Upload PDF (optional)
+                </label>
+                {uploadedFileName ? (
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-taupe-300/50 bg-parchment/60">
+                    <FileText className="w-5 h-5 text-ink shrink-0" />
+                    <span className="text-sm text-ink flex-1 truncate">{uploadedFileName}</span>
+                    <button type="button" onClick={clearUploadedFile} className="p-1 rounded text-taupe-400 hover:text-ink transition-colors">
+                      <XIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl border-2 border-dashed border-taupe-300/50 bg-parchment/40 hover:bg-parchment/70 hover:border-taupe-400 transition-all cursor-pointer">
+                    {uploadingFile ? (
+                      <Loader2 className="w-6 h-6 animate-spin text-taupe-400" />
+                    ) : (
+                      <Upload className="w-6 h-6 text-taupe-400" />
+                    )}
+                    <span className="text-sm font-medium text-taupe-600">
+                      {uploadingFile ? 'Uploading…' : 'Click to upload PDF'}
+                    </span>
+                    <span className="text-xs text-taupe-400">PDF only · max 10 MB</span>
+                    <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFileUpload} disabled={uploadingFile} />
+                  </label>
+                )}
+                {fileError && <p className="text-xs text-red-600 mt-1">{fileError}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-ink mb-2">Or paste a link (optional)</label>
+                <input type="url" value={uploadedFileName ? '' : form.fileUrl} onChange={(e) => setForm(prev => ({ ...prev, fileUrl: e.target.value }))}
+                  placeholder="https://drive.google.com/…"
+                  disabled={!!uploadedFileName}
+                  className="w-full px-4 py-3 rounded-xl border border-taupe-300/50 bg-white text-ink placeholder-taupe-400 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-taupe-400 disabled:opacity-40 disabled:cursor-not-allowed" />
+                <p className="text-xs text-taupe-500 mt-1">Google Drive, Dropbox, or any file sharing link.</p>
               </div>
               <button type="submit" disabled={submitting}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ink text-parchment font-semibold text-sm hover:bg-ink/90 transition-all disabled:opacity-50 shadow-md shadow-ink/15">

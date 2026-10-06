@@ -36,15 +36,15 @@ export default function Navbar() {
   const location = useLocation();
 
   function handleThemeToggle() {
+    toggle();
     if (iconRef.current) {
       animate(iconRef.current, {
-        rotate: ['0deg', '360deg'],
-        scale: [1, 1.35, 1],
-        duration: 480,
-        ease: 'easeOutBack',
+        rotate: '1turn',
+        scale: [{ to: 1.35 }, { to: 1 }],
+        duration: 500,
+        ease: 'outBack',
       });
     }
-    toggle();
   }
 
   const isActive = (path: string) => location.pathname === path;
