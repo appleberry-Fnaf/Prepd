@@ -974,3 +974,442 @@ body.cube-hero-bg::-webkit-scrollbar { display: none; }
   .cube-land-pulse { animation: none; }
   .cube-hero-body  { will-change: auto; }
 }
+
+/* ===================================================================
+   AnimeHome — scroll-story homepage
+   =================================================================== */
+
+/* Google Font: JetBrains Mono (monospace for code cards / nav) */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --ah-bg-dark:  #1e1c1a;
+  --ah-bg-light: #d9d2cb;
+  --ah-text:     rgba(255,255,255,0.88);
+  --ah-muted:    rgba(255,255,255,0.44);
+  --ah-mono:     'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
+  --ah-sans:     'Inter', system-ui, sans-serif;
+}
+
+body.ah-page-body {
+  background: var(--ah-bg-dark) !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-y: scroll;
+}
+body.ah-page-body::-webkit-scrollbar { display: none; }
+
+.ah-page {
+  background: var(--ah-bg-dark);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ── Navbar ── */
+.ah-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 18px 40px;
+  background: linear-gradient(to bottom, rgba(30,28,26,0.92) 0%, transparent 100%);
+}
+
+.ah-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(255,255,255,0.92);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.ah-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex: 1;
+  margin-left: 12px;
+}
+
+.ah-nav-links a {
+  font-family: var(--ah-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.52);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.ah-nav-links a:hover { color: rgba(255,255,255,0.86); }
+
+.ah-nav-cta {
+  margin-left: auto;
+  font-family: var(--ah-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 7px 16px;
+  border-radius: 20px;
+  background: rgba(255, 100, 80, 0.18);
+  border: 1px solid rgba(255, 100, 80, 0.35);
+  color: #ff8870;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.ah-nav-cta:hover {
+  background: rgba(255, 100, 80, 0.28);
+  border-color: rgba(255, 100, 80, 0.55);
+}
+
+/* ── Scroll wrapper ── */
+.ah-scroll-wrapper {
+  position: relative;
+}
+
+/* ── Sticky stage (sits inside the scroll wrapper) ── */
+.ah-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  transition: background 0.7s ease;
+}
+
+/* ── Canvas ── */
+.ah-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Ring ── */
+.ah-ring-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ah-ring {
+  display: block;
+}
+
+/* ── Scene text (bottom-left, like anime.js) ── */
+.ah-scene-text {
+  position: absolute;
+  bottom: clamp(48px, 8vh, 100px);
+  left: clamp(28px, 6vw, 88px);
+  max-width: min(520px, calc(100vw - 56px));
+  pointer-events: none;
+}
+
+.ah-scene-text--light .ah-scene-heading,
+.ah-scene-text--light .ah-scene-sub { color: #1a1814; }
+.ah-scene-text--light .ah-scene-link { color: #2a2420; }
+
+.ah-scene-heading {
+  font-family: var(--ah-sans);
+  font-size: clamp(28px, 3.8vw, 56px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--ah-text);
+  margin: 0 0 14px;
+  animation: ah-fade-up 0.5s ease forwards;
+}
+
+.ah-scene-sub {
+  font-family: var(--ah-sans);
+  font-size: clamp(13px, 1.4vw, 17px);
+  line-height: 1.6;
+  color: var(--ah-muted);
+  margin: 0 0 18px;
+  animation: ah-fade-up 0.5s 0.08s ease forwards;
+}
+
+.ah-scene-link {
+  display: inline-block;
+  font-family: var(--ah-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ah-muted);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  padding-bottom: 2px;
+  pointer-events: auto;
+  animation: ah-fade-up 0.5s 0.14s ease forwards;
+  transition: color 0.2s, border-color 0.2s;
+}
+.ah-scene-link:hover {
+  color: rgba(255,255,255,0.88);
+  border-color: rgba(255,255,255,0.5);
+}
+
+@keyframes ah-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Code card (top-right) ── */
+.ah-code-card {
+  position: absolute;
+  top: 50%;
+  right: clamp(28px, 5vw, 72px);
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.48);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 16px 20px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  animation: ah-fade-up 0.4s 0.1s ease forwards;
+  opacity: 0;
+}
+
+.ah-code-line {
+  font-family: var(--ah-mono);
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
+}
+
+/* ── Progress ticker (bottom-right) ── */
+.ah-progress {
+  position: absolute;
+  bottom: clamp(40px, 7vh, 88px);
+  right: clamp(24px, 3.5vw, 52px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.ah-progress-track {
+  width: 2px;
+  height: 56px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ah-progress-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ef4444;
+  border-radius: 2px;
+  transition: height 0.1s linear;
+  min-height: 3px;
+}
+
+.ah-progress-label {
+  font-family: var(--ah-mono);
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  min-width: 24px;
+}
+
+/* ── Ending section ── */
+.ah-ending {
+  position: relative;
+  z-index: 2;
+  background: var(--ah-bg-dark);
+  padding: clamp(80px, 12vh, 140px) 0 0;
+}
+
+.ah-ending-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 clamp(28px, 6vw, 88px);
+}
+
+.ah-ending-heading {
+  font-family: var(--ah-sans);
+  font-size: clamp(40px, 6vw, 88px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ah-text);
+  margin: 0 0 14px;
+}
+
+.ah-ending-sub {
+  font-size: clamp(14px, 1.4vw, 17px);
+  color: var(--ah-muted);
+  margin: 0 0 52px;
+  line-height: 1.6;
+}
+
+.ah-subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 48px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.ah-subject-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-decoration: none;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+.ah-subject-row:hover { opacity: 0.7; }
+
+.ah-subject-name {
+  font-family: var(--ah-mono);
+  font-size: 12px;
+  color: var(--ah-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ah-subject-cat {
+  font-family: var(--ah-mono);
+  font-size: 10px;
+  color: var(--ah-muted);
+  white-space: nowrap;
+}
+
+.ah-cta-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 80px;
+}
+
+.ah-cta-btn {
+  display: inline-block;
+  font-family: var(--ah-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 13px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.ah-cta-btn--primary {
+  background: rgba(255,255,255,0.92);
+  color: #1e1c1a;
+}
+.ah-cta-btn--primary:hover { background: #ffffff; }
+
+.ah-cta-btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.22);
+  color: var(--ah-muted);
+}
+.ah-cta-btn--ghost:hover {
+  border-color: rgba(255,255,255,0.45);
+  color: var(--ah-text);
+}
+
+/* ── Footer ── */
+.ah-footer {
+  background: #161412;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 48px 0 40px;
+}
+
+.ah-footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 clamp(28px, 6vw, 88px);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px 48px;
+}
+
+.ah-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ah-footer-brand span:first-of-type {
+  font-weight: 700;
+  font-size: 15px;
+  color: rgba(255,255,255,0.88);
+}
+
+.ah-footer-tagline {
+  font-size: 12px !important;
+  color: var(--ah-muted) !important;
+  font-weight: 400 !important;
+}
+
+.ah-footer-links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.ah-footer-links a {
+  font-family: var(--ah-mono);
+  font-size: 11.5px;
+  color: var(--ah-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.ah-footer-links a:hover { color: var(--ah-text); }
+
+.ah-footer-copy {
+  width: 100%;
+  font-family: var(--ah-mono);
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.2);
+  margin: 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .ah-nav { padding: 14px 20px; gap: 16px; }
+  .ah-nav-links { gap: 16px; }
+  .ah-nav-links a { font-size: 11px; }
+
+  .ah-scene-text { bottom: 32px; left: 20px; right: 20px; max-width: none; }
+  .ah-code-card { display: none; }
+  .ah-progress { right: 16px; bottom: 28px; }
+
+  .ah-ring-wrap { transform: translate(-50%, -50%) scale(0.7); }
+
+  .ah-subjects-grid { grid-template-columns: 1fr 1fr; }
+  .ah-ending-inner { padding: 0 20px; }
+  .ah-footer-inner { padding: 0 20px; }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .ah-stage { transition: none; }
+  .ah-scene-heading, .ah-scene-sub, .ah-scene-link, .ah-code-card { animation: none; opacity: 1; }
+  .ah-progress-fill { transition: none; }
+}
