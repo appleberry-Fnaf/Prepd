@@ -252,6 +252,17 @@
 
 /* ===== Cinematic Book Section ===== */
 
+/*
+ * Fixed book palette — always warm aged paper regardless of colour scheme.
+ * Using hardcoded vars so dark-mode CSS-var flips don't touch page colours.
+ */
+:root {
+  --bk-page:      #f7f0e3;   /* warm aged paper   */
+  --bk-page-alt:  #ede4ce;   /* slightly darker   (right bg, back faces, stacks) */
+  --bk-text:      #2a1a0a;   /* warm dark ink     */
+  --bk-muted:     #8a7058;   /* muted body copy   */
+}
+
 .book-scene {
   perspective: 1800px;
   perspective-origin: 50% 40%;
@@ -263,17 +274,15 @@
   padding: 0 16px;
 }
 
-/* Book block — fills most of the viewport */
 .book {
   position: relative;
   transform-style: preserve-3d;
   width: min(96vw, 1000px);
   height: min(78vh, 640px);
   will-change: transform, opacity;
-  /* Multi-layer shadow: ground shadow + ambient glow */
   filter:
-    drop-shadow(0 48px 80px rgba(var(--color-ink-rgb), 0.32))
-    drop-shadow(0 12px 24px rgba(var(--color-ink-rgb), 0.18));
+    drop-shadow(0 52px 90px rgba(0,0,0,0.55))
+    drop-shadow(0 14px 32px rgba(0,0,0,0.3));
 }
 
 /* ── Interior: left page ─────────────────────────────── */
@@ -281,13 +290,11 @@
   position: absolute;
   top: 0; left: 0; bottom: 0;
   right: calc(50% + 10px);
-  background: rgb(var(--color-parchment-rgb));
+  background: var(--bk-page);
   border-radius: 4px 0 0 4px;
   overflow: hidden;
-  /* Inner shadow toward spine */
-  box-shadow: inset -10px 0 24px rgba(0, 0, 0, 0.09);
+  box-shadow: inset -14px 0 28px rgba(0,0,0,0.10);
 }
-/* Page-stack edge visible on left side */
 .book-left-page::before {
   content: '';
   position: absolute;
@@ -296,8 +303,8 @@
   border-radius: 2px 0 0 2px;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(var(--color-stone-rgb), 0.35) 0, rgba(var(--color-stone-rgb), 0.35) 1px,
-    rgb(var(--color-parchment-rgb)) 1px, rgb(var(--color-parchment-rgb)) 3px
+    rgba(0,0,0,0.14) 0, rgba(0,0,0,0.14) 1px,
+    var(--bk-page-alt) 1px, var(--bk-page-alt) 3px
   );
 }
 
@@ -306,12 +313,11 @@
   position: absolute;
   top: 0; right: 0; bottom: 0;
   left: calc(50% + 10px);
-  background: rgb(var(--color-parchment-rgb));
+  background: var(--bk-page-alt);
   border-radius: 0 4px 4px 0;
   overflow: visible;
-  box-shadow: inset 4px 0 12px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 4px 0 12px rgba(0,0,0,0.06);
 }
-/* Page-stack edge visible on right side */
 .book-right-bg::after {
   content: '';
   position: absolute;
@@ -320,8 +326,8 @@
   border-radius: 0 2px 2px 0;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(var(--color-stone-rgb), 0.4) 0, rgba(var(--color-stone-rgb), 0.4) 1px,
-    rgb(var(--color-parchment-rgb)) 1px, rgb(var(--color-parchment-rgb)) 3px
+    rgba(0,0,0,0.18) 0, rgba(0,0,0,0.18) 1px,
+    var(--bk-page-alt) 1px, var(--bk-page-alt) 3px
   );
 }
 
@@ -334,27 +340,26 @@
   z-index: 10;
   background: linear-gradient(
     to right,
-    rgb(var(--color-ink-rgb)) 0%,
-    rgba(var(--color-ink-rgb), 0.82) 40%,
-    rgba(var(--color-ink-rgb), 0.68) 100%
+    #0e0600 0%,
+    #2e1408 45%,
+    #1a0804 100%
   );
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow:
-    -4px 0 14px rgba(0, 0, 0, 0.18),
-     4px 0 14px rgba(0, 0, 0, 0.12);
+    -5px 0 20px rgba(0,0,0,0.50),
+     4px 0 14px rgba(0,0,0,0.28);
 }
 .book-spine-text {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
-  color: rgb(var(--color-parchment-rgb));
+  color: rgba(247,240,227,0.42);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  opacity: 0.55;
   user-select: none;
 }
 
@@ -366,7 +371,7 @@
   transform-origin: left center;
   will-change: transform;
   z-index: 5;
-  border-radius: 4px 8px 8px 4px;
+  border-radius: 4px 10px 10px 4px;
 }
 .book-cover-face {
   position: absolute;
@@ -376,29 +381,28 @@
   border-radius: inherit;
   overflow: hidden;
 }
-/* Front: the cover design */
+/* Front: dark leather cover — hardcoded so it never changes */
 .book-cover-face--front {
-  background: rgb(var(--color-ink-rgb));
-  /* Diamond crosshatch texture */
-  background-image:
-    repeating-linear-gradient(45deg,  transparent, transparent 38px, rgba(255,255,255,0.025) 38px, rgba(255,255,255,0.025) 39px),
-    repeating-linear-gradient(-45deg, transparent, transparent 38px, rgba(255,255,255,0.025) 38px, rgba(255,255,255,0.025) 39px);
+  background:
+    repeating-linear-gradient(45deg,  transparent, transparent 38px, rgba(255,255,255,0.018) 38px, rgba(255,255,255,0.018) 39px),
+    repeating-linear-gradient(-45deg, transparent, transparent 38px, rgba(255,255,255,0.018) 38px, rgba(255,255,255,0.018) 39px),
+    linear-gradient(160deg, #3d1d0d 0%, #1e0d06 58%, #2e1208 100%);
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.28);
 }
-/* Back: inside front cover (plain, maybe slightly tinted) */
+/* Back of cover: inside-front-cover endpaper, always warm cream */
 .book-cover-face--back {
   transform: rotateY(180deg);
-  background: rgb(var(--color-parchment-rgb));
-  box-shadow: inset -10px 0 30px rgba(0, 0, 0, 0.1);
+  background: #f0e4cb;
+  box-shadow: inset -16px 0 36px rgba(0,0,0,0.14);
 }
-/* Spine binding crease on the cover's left edge */
 .book-cover-crease {
   position: absolute;
   left: 0; top: 0; bottom: 0;
-  width: 24px;
+  width: 28px;
   background: linear-gradient(
     to right,
-    rgba(0,0,0,0.22) 0%,
-    rgba(0,0,0,0.08) 60%,
+    rgba(0,0,0,0.38) 0%,
+    rgba(0,0,0,0.12) 55%,
     transparent 100%
   );
   pointer-events: none;
@@ -416,17 +420,30 @@
   will-change: transform;
 }
 
-/* Page faces */
 .book-page-face {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  background: rgb(var(--color-parchment-rgb));
   overflow: hidden;
 }
+/* Front face: warm cream paper */
+.book-page-face--front {
+  background: var(--bk-page);
+}
+/* Back face: slightly darker — makes the turn visually distinct */
 .book-page-face--back {
   transform: rotateY(180deg);
+  background: var(--bk-page-alt);
+}
+/* Leading-edge shadow — simulates the curl */
+.book-page-face--front::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 32px;
+  background: linear-gradient(to left, rgba(0,0,0,0.10) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 /* Static right page (Feature 4 — never turns) */
@@ -436,25 +453,20 @@
   left: calc(50% + 10px);
   width: calc(50% - 10px);
   height: 100%;
-  background: rgb(var(--color-parchment-rgb));
+  background: var(--bk-page);
   overflow: hidden;
 }
 
-/* ── Page content layouts ────────────────────────────── */
-.book-page-inner {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 2.25rem 2rem;
-}
-
+/* ── Page content ────────────────────────────────────── */
+.book-page-inner,
 .book-left-page-inner {
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 2.25rem 2rem;
+  /* Force dark text on warm paper — always */
+  color: var(--bk-text);
 }
 
 /* ── Ruled-line texture ──────────────────────────────── */
@@ -464,10 +476,10 @@
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0px, transparent 27px,
-    rgba(var(--color-stone-rgb), 0.2) 27px, rgba(var(--color-stone-rgb), 0.2) 28px
+    rgba(0,0,0,0.065) 27px, rgba(0,0,0,0.065) 28px
   );
   background-position-y: 40px;
-  opacity: 0.8;
+  pointer-events: none;
 }
 
 /* ── Page-turn back label ────────────────────────────── */
@@ -479,19 +491,19 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(var(--color-ink-rgb), 0.2);
+  color: rgba(42,26,10,0.20);
 }
 
-/* ── Right-edge shadow on front face ─────────────────── */
+/* ── Right-edge accent on front face ─────────────────── */
 .book-page-edge {
   position: absolute;
   right: 0; top: 0; bottom: 0;
   width: 3px;
   background: linear-gradient(
     to bottom,
-    rgba(var(--color-stone-rgb), 0.4),
-    rgba(var(--color-stone-rgb), 0.15) 50%,
-    rgba(var(--color-stone-rgb), 0.35)
+    rgba(0,0,0,0.14),
+    rgba(0,0,0,0.05) 50%,
+    rgba(0,0,0,0.11)
   );
 }
 
@@ -522,34 +534,41 @@
   .book-right-bg { left: calc(50% + 6px); }
 }
 
-/* ── Dark mode ───────────────────────────────────────── */
+/* ── Dark mode — book pages stay warm cream, text stays dark ── */
+/*
+ * The book is always physically warm paper. In dark mode the surrounding
+ * UI dims, but we keep the pages cream and override Tailwind text utilities
+ * so they don't invert to the light ink / muted-blue values.
+ */
 .dark .book-left-page,
 .dark .book-right-bg,
-.dark .book-page-face,
-.dark .book-right-page-static,
-.dark .book-cover-face--back {
-  background: #122040;
+.dark .book-page-face--front,
+.dark .book-right-page-static {
+  /* keep warm backgrounds — already set via --bk-* vars, just ensure no override */
 }
-.dark .book-cover-face--front {
-  background: #0b1729;
-  background-image:
-    repeating-linear-gradient(45deg,  transparent, transparent 38px, rgba(255,255,255,0.015) 38px, rgba(255,255,255,0.015) 39px),
-    repeating-linear-gradient(-45deg, transparent, transparent 38px, rgba(255,255,255,0.015) 38px, rgba(255,255,255,0.015) 39px);
+
+/* Tailwind text classes resolve via --color-ink-rgb etc. which flip in dark mode.
+   Re-override them for content that sits on warm book pages. */
+.dark .book-left-page .text-ink,
+.dark .book-page-face--front .text-ink,
+.dark .book-right-page-static .text-ink {
+  color: var(--bk-text) !important;
 }
-.dark .book-page-lines {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0px, transparent 27px,
-    rgba(var(--color-stone-rgb), 0.1) 27px, rgba(var(--color-stone-rgb), 0.1) 28px
-  );
+.dark .book-left-page .text-taupe-600,
+.dark .book-page-face--front .text-taupe-600,
+.dark .book-right-page-static .text-taupe-600 {
+  color: #8a7058 !important;
 }
-.dark .book-left-page::before,
-.dark .book-right-bg::after {
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(var(--color-stone-rgb), 0.15) 0, rgba(var(--color-stone-rgb), 0.15) 1px,
-    #122040 1px, #122040 3px
-  );
+.dark .book-left-page .text-taupe-400,
+.dark .book-page-face--front .text-taupe-400,
+.dark .book-right-page-static .text-taupe-400 {
+  color: #a08868 !important;
+}
+/* accent-strip background uses --color-ink-rgb — force dark on warm page */
+.dark .book-left-page .accent-strip,
+.dark .book-page-face--front .accent-strip,
+.dark .book-right-page-static .accent-strip {
+  background: var(--bk-text) !important;
 }
 
 /* ── Reduced motion ──────────────────────────────────── */
