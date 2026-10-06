@@ -1089,6 +1089,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   width: 100%;
   height: 100%;
   display: block;
+  will-change: transform;
 }
 
 /* ── Ring ── */
@@ -1147,8 +1148,8 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   letter-spacing: -0.03em;
   color: var(--ah-text);
   margin: 0 0 14px;
-  /* opacity starts at 0; anime.js controls it */
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 .ah-scene-sub {
@@ -1158,6 +1159,7 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   color: var(--ah-muted);
   margin: 0 0 18px;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 /* Step list — defined further below with blueprint scene styles */
@@ -1620,29 +1622,68 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   color: rgba(42,40,36,0.7);
 }
 
-/* ── Mobile ── */
+/* ── Mobile (≤640px) ── */
 @media (max-width: 640px) {
-  .ah-nav { padding: 14px 20px; gap: 16px; }
-  .ah-nav-links { gap: 16px; }
-  .ah-nav-links a { font-size: 11px; }
+  /* Nav: hide text links, keep brand + CTA pill */
+  .ah-nav { padding: 14px 20px; gap: 0; }
+  .ah-nav-links { display: none; }
+  .ah-nav-cta { margin-left: auto; }
 
-  .ah-scene-text { bottom: 32px; left: 20px; right: 20px; max-width: none; }
+  /* Stage */
+  .ah-ring-wrap { transform: translate(-50%, -50%) scale(0.68); }
+  .ah-scene-text { bottom: 28px; left: 20px; right: 20px; max-width: none; }
   .ah-code-card { display: none; }
-  .ah-progress { right: 16px; bottom: 28px; }
+  .ah-progress { right: 14px; bottom: 24px; }
   .ah-bp-overlay { display: none; }
 
-  .ah-ring-wrap { transform: translate(-50%, -50%) scale(0.7); }
+  /* Stats strip — tighter gap on mobile */
+  .ah-stats-strip { gap: 28px; }
 
+  /* Ending — 2-col grid */
   .ah-subjects-grid { grid-template-columns: 1fr 1fr; }
-  .ah-ending-inner { padding: 0 20px; }
-  .ah-footer-inner { padding: 0 20px; }
+  .ah-ending-inner { padding-inline: 20px; }
+
+  /* Footer — stack vertically */
+  .ah-footer-inner {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    gap: 0;
+  }
+  .ah-footer-brand   { grid-column: 1; grid-row: 1; margin-bottom: 16px; }
+  .ah-footer-mission { grid-column: 1; grid-row: 2; max-width: none; margin-bottom: 20px; }
+  .ah-footer-links   { grid-column: 1; grid-row: 3; flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 10px 20px; margin-bottom: 0; }
+  .ah-footer-copy    { grid-column: 1; grid-row: 4; }
+  .ah-footer-inner { padding-inline: 20px; }
+}
+
+/* ── Very small (≤390px) — 1-col subject grid ── */
+@media (max-width: 390px) {
+  .ah-subjects-grid { grid-template-columns: 1fr; }
+  .ah-stats-strip { flex-wrap: wrap; justify-content: center; gap: 20px 32px; }
 }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .ah-stage, .ah-accent-bar { transition: none; }
-  .ah-scene-heading, .ah-scene-sub, .ah-scene-link,
-  .ah-code-card, .ah-scene-tag, .ah-bp-label { opacity: 1 !important; transform: none !important; }
-  .ah-progress-fill { transition: none; }
-  .ah-ring path, .ah-ring line { transition: none; }
+  /* Kill CSS transitions on stage elements */
+  .ah-stage,
+  .ah-accent-bar,
+  .ah-ring path,
+  .ah-ring line,
+  .ah-progress-fill,
+  .ah-subject-row,
+  .ah-cta-btn,
+  .ah-footer-links a { transition: none; }
+
+  /* Show all anime.js-driven elements immediately */
+  .ah-scene-heading,
+  .ah-scene-sub,
+  .ah-scene-link,
+  .ah-code-card,
+  .ah-scene-tag,
+  .ah-bp-label,
+  .ah-ending-heading,
+  .ah-ending-sub,
+  .ah-stat,
+  .ah-subject-row,
+  .ah-cta-btn { opacity: 1 !important; transform: none !important; }
 }

@@ -110,9 +110,13 @@ export default function HeroStage() {
     window.addEventListener('mousemove', onMouseMove, { passive: true });
 
     // ── rAF loop ──
+    let paused = false;
     function tick() {
+      rafRef.current = requestAnimationFrame(tick);
+      if (paused) return;
+
       const wrapper = wrapperRef.current;
-      if (!wrapper) { rafRef.current = requestAnimationFrame(tick); return; }
+      if (!wrapper) return;
 
       const p   = getScrollProg(wrapper);
       const idx = sceneAtProgress(p);
@@ -127,14 +131,16 @@ export default function HeroStage() {
         sceneIdxRef.current = idx;
         transitionTo(idx);
       }
-
-      rafRef.current = requestAnimationFrame(tick);
     }
     rafRef.current = requestAnimationFrame(tick);
+
+    const onVisibility = () => { paused = document.hidden; };
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('visibilitychange', onVisibility);
       three.dispose();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
