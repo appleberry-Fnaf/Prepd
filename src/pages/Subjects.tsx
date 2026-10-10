@@ -17,9 +17,11 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
-  'Math & CS': '#3b82f6', 'Sciences': '#60a5fa',
-  'English': '#f5c842', 'History & Social Sciences': '#f5c842',
-  'Languages': '#60a5fa',
+  'Math & CS': '#3b82f6', 'Math & Computer Science': '#3b82f6',   // blue
+  'Sciences': '#f97316',                                          // orange
+  'English': '#f5c842',                                           // yellow
+  'History': '#22c55e', 'History & Social Sciences': '#22c55e',   // green
+  'Languages': '#a855f7',                                         // purple
 };
 
 export default function Subjects() {
@@ -99,7 +101,7 @@ export default function Subjects() {
         <div ref={gridRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
           {filtered.map(subject => {
             const Icon = iconMap[subject.icon] || BookOpen;
-            const accent = CATEGORY_COLOR[subject.category] ?? '#888';
+            const accent = CATEGORY_COLOR[subject.category] ?? '#06b6d4';
             return (
               <Link
                 key={subject.id}

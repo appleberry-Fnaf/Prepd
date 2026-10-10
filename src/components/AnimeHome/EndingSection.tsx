@@ -5,11 +5,13 @@ import { CatMark } from '../Logo';
 import { AP_SUBJECTS } from './constants';
 
 const CATEGORY_COLOR: Record<string, string> = {
-  'Math & CS':  '#3b82f6',
-  'Sciences':   '#60a5fa',
-  'English':    '#f5c842',
-  'History':    '#f5c842',
-  'Languages':  '#60a5fa',
+  'Math & CS':                 '#3b82f6', // blue
+  'Math & Computer Science':   '#3b82f6',
+  'Sciences':                  '#f97316', // orange
+  'English':                   '#f5c842', // yellow
+  'History':                   '#22c55e', // green
+  'History & Social Sciences': '#22c55e',
+  'Languages':                 '#a855f7', // purple
 };
 
 const STATS = [
@@ -88,7 +90,7 @@ export default function EndingSection() {
                 <span className="ah-subject-row-left">
                   <span
                     className="ah-subject-dot"
-                    style={{ background: CATEGORY_COLOR[category] ?? '#888' }}
+                    style={{ background: CATEGORY_COLOR[category] ?? '#06b6d4' }}
                     aria-hidden="true"
                   />
                   <span className="ah-subject-name">{name}</span>
