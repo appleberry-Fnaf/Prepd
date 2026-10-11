@@ -22,23 +22,24 @@ function makeCoverTexture(): THREE.CanvasTexture {
   c.width = W; c.height = H;
   const g = c.getContext('2d')!;
 
-  // Background — deep teal/blue, like an elegant cloth binding
+  // Background — light blue, like an elegant cloth binding
   const bg = g.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#1d6f7e');
-  bg.addColorStop(0.5, '#0f4f5e');
-  bg.addColorStop(1, '#083039');
+  bg.addColorStop(0, '#d6eefb');
+  bg.addColorStop(0.5, '#a9d8ef');
+  bg.addColorStop(1, '#7cc0e2');
   g.fillStyle = bg;
   g.fillRect(0, 0, W, H);
 
   // Subtle vignette
-  const vg = g.createRadialGradient(W / 2, H / 2, H * 0.2, W / 2, H / 2, H * 0.75);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,0.35)');
+  const vg = g.createRadialGradient(W / 2, H / 2, H * 0.2, W / 2, H / 2, H * 0.78);
+  vg.addColorStop(0, 'rgba(255,255,255,0.25)');
+  vg.addColorStop(1, 'rgba(10,60,90,0.28)');
   g.fillStyle = vg;
   g.fillRect(0, 0, W, H);
 
-  const GOLD = '#e8c874';
-  const GOLD_DIM = '#b8954a';
+  const GOLD = '#c99a3a';     // deep gold frame
+  const GOLD_DIM = '#a57c2c';
+  const TITLE = '#0c3a5c';    // deep navy — reads clearly on light blue
 
   // Double gold frame
   g.strokeStyle = GOLD;
@@ -69,10 +70,10 @@ function makeCoverTexture(): THREE.CanvasTexture {
 
   // Title
   g.textAlign = 'center';
-  g.fillStyle = GOLD;
+  g.fillStyle = TITLE;
   g.font = '700 92px Georgia, "Times New Roman", serif';
-  g.shadowColor = 'rgba(0,0,0,0.4)';
-  g.shadowBlur = 8;
+  g.shadowColor = 'rgba(255,255,255,0.45)';
+  g.shadowBlur = 6;
   g.fillText('PREPD', W / 2, H / 2 - 20);
 
   // Thin rule between the two words
@@ -88,6 +89,7 @@ function makeCoverTexture(): THREE.CanvasTexture {
   g.strokeRect(-7, -7, 14, 14);
   g.restore();
 
+  g.fillStyle = TITLE;
   g.font = '700 80px Georgia, "Times New Roman", serif';
   g.fillText('STUDY', W / 2, H / 2 + 108);
 
@@ -188,10 +190,10 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     map: coverTex, roughness: 0.55, metalness: 0.2,
   });
   const coverSideMat = new THREE.MeshStandardMaterial({
-    color: 0x0d4654, roughness: 0.7, metalness: 0.15,
+    color: 0x7cc0e2, roughness: 0.6, metalness: 0.12,
   });
   const coverBackMat = new THREE.MeshStandardMaterial({
-    color: 0x0c3f4c, roughness: 0.75, metalness: 0.1,
+    color: 0x9ad0ec, roughness: 0.65, metalness: 0.08,
   });
   const pagesMat = new THREE.MeshStandardMaterial({
     color: 0xf2e9d2, roughness: 0.92, metalness: 0,
@@ -200,7 +202,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     map: pageTex, color: 0xffffff, roughness: 0.95, metalness: 0,
     side: THREE.DoubleSide,
   });
-  const goldEdgeMat = new THREE.LineBasicMaterial({ color: 0xe8c874 });
+  const goldEdgeMat = new THREE.LineBasicMaterial({ color: 0xc99a3a });
 
   // Front cover: decorative art only on the outward (+z) face
   const frontFaceMats = [
@@ -306,7 +308,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     isBlueprintMode = on;
     allMeshes.forEach(m => { m.visible = !on; });
     allEdges.forEach(e => {
-      (e.material as THREE.LineBasicMaterial).color.setHex(on ? 0x1a2040 : 0xe8c874);
+      (e.material as THREE.LineBasicMaterial).color.setHex(on ? 0x1a2040 : 0xc99a3a);
     });
     ambient.intensity   = on ? 0 : baseLight.ambient;
     keyLight.intensity  = on ? 0 : baseLight.key;

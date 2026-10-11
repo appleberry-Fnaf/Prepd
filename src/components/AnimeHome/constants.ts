@@ -10,7 +10,7 @@ export const ACCENT = {
 
 // Arc segment colors for the ring (6 segments: red → orange → yellow → green → cyan → blue)
 export const RING_ARC_COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6',
+  '#bae6fd', '#7dd3fc', '#38bdf8', '#0ea5e9', '#3b82f6', '#2563eb',
 ] as const;
 
 export const SCROLL_VH       = 900;
