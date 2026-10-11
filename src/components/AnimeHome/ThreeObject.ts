@@ -247,13 +247,14 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   group.add(spineMesh);
 
   // ── Turning leaves (individual pages hinged at the spine) ─────────────────
-  const NLEAVES = 7;
+  const NLEAVES = 9;
   const leafPivots: THREE.Group[] = [];
-  const leafW = PAGES_W;
-  const leafH = PAGES_H - 0.02;
+  // leaves are a touch smaller than the covers so they tuck neatly inside
+  const leafW = PAGES_W - 0.14;   // 1.28
+  const leafH = PAGES_H - 0.14;   // 1.86
   // leaves live in the thin gap between the top of the page block and the front cover
-  const leafZ0 = PAGES_TOP_Z + 0.006;
-  const leafGap = 0.0085;
+  const leafZ0 = PAGES_TOP_Z + 0.002;
+  const leafGap = 0.004;
 
   for (let i = 0; i < NLEAVES; i++) {
     const pivot = new THREE.Group();
@@ -262,7 +263,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     const leafGeo = new THREE.PlaneGeometry(leafW, leafH);
     const leaf = new THREE.Mesh(leafGeo, leafMat);
     // hinge at the spine: the plane's centre sits half a width to the +x of the pivot
-    leaf.position.set((leafW / 2) + 0.02, 0, 0);
+    leaf.position.set((leafW / 2) + 0.05, 0, 0);
     pivot.add(leaf);
     group.add(pivot);
     leafPivots.push(pivot);
@@ -347,15 +348,18 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     const coverOpen = openT - closeT;
     frontPivot.rotation.y = coverOpen * -2.75;
 
-    // Fluid page riffle while the book is open: triangle 0→1→0 over p 0.40–0.66
+    // Gentle page riffle while the book is open — a travelling lift that
+    // sweeps across the stack and back, so pages flutter without any single
+    // sheet swinging out toward the camera. Triangle 0→1→0 over p 0.40–0.66.
     const riffM = clamp01((p - 0.40) / 0.26);
     const riffle = riffM < 0.5 ? riffM * 2 : (1 - riffM) * 2; // 0 → 1 → 0
-    const turnF = riffle * NLEAVES;
     for (let i = 0; i < NLEAVES; i++) {
-      const t = easeInOut(clamp01(turnF - i));
-      // small per-leaf lag/fan so the turn looks hand-riffled, not rigid
-      const fan = (1 - t) * 0.04 + t * 0.02;
-      leafPivots[i].rotation.y = -t * Math.PI * 0.97 - fan * (i % 2 === 0 ? 1 : 0.6);
+      // wave position for this leaf; each lifts in turn as the wave passes
+      const phase = riffle * (NLEAVES + 2) - i;
+      const bump  = Math.sin(clamp01(phase / 2) * Math.PI); // 0 → 1 → 0 hump
+      // slight resting fan when the book is open so the stack looks layered
+      const rest  = coverOpen * 0.05 * ((i + 1) / NLEAVES);
+      leafPivots[i].rotation.y = -(rest + bump * 0.30); // max ~20°, stays tucked
     }
 
     // Fade out: p 0.92–1.0
