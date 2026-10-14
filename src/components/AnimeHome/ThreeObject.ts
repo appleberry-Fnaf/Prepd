@@ -11,135 +11,15 @@ export interface ThreeScene {
   setBlueprintMode: (on: boolean) => void;
 }
 
-// ── Easing ────────────────────────────────────────────────────────────────
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
-const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
-// ── Decorative Art-Deco cover texture (drawn on a 2D canvas) ────────────────
-function makeCoverTexture(): THREE.CanvasTexture {
-  const W = 620, H = 840;
-  const c = document.createElement('canvas');
-  c.width = W; c.height = H;
-  const g = c.getContext('2d')!;
-
-  // Background — light blue, like an elegant cloth binding
-  const bg = g.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#d6eefb');
-  bg.addColorStop(0.5, '#a9d8ef');
-  bg.addColorStop(1, '#7cc0e2');
-  g.fillStyle = bg;
-  g.fillRect(0, 0, W, H);
-
-  // Subtle vignette
-  const vg = g.createRadialGradient(W / 2, H / 2, H * 0.2, W / 2, H / 2, H * 0.78);
-  vg.addColorStop(0, 'rgba(255,255,255,0.25)');
-  vg.addColorStop(1, 'rgba(10,60,90,0.28)');
-  g.fillStyle = vg;
-  g.fillRect(0, 0, W, H);
-
-  const GOLD = '#c99a3a';     // deep gold frame
-  const GOLD_DIM = '#a57c2c';
-  const TITLE = '#0c3a5c';    // deep navy — reads clearly on light blue
-
-  // Double gold frame
-  g.strokeStyle = GOLD;
-  g.lineWidth = 6;
-  g.strokeRect(34, 34, W - 68, H - 68);
-  g.lineWidth = 2.5;
-  g.strokeStyle = GOLD_DIM;
-  g.strokeRect(48, 48, W - 96, H - 96);
-
-  // Art-Deco sunburst fan at top
-  g.save();
-  g.translate(W / 2, 150);
-  g.strokeStyle = GOLD;
-  g.lineWidth = 2;
-  for (let i = -6; i <= 6; i++) {
-    const a = (Math.PI / 2) + (i / 6) * (Math.PI * 0.42);
-    g.beginPath();
-    g.moveTo(0, 0);
-    g.lineTo(Math.cos(a) * 118, -Math.sin(a) * 118);
-    g.stroke();
-  }
-  // crowning arcs
-  g.lineWidth = 3;
-  g.beginPath(); g.arc(0, 0, 122, Math.PI * 1.08, Math.PI * 1.92); g.stroke();
-  g.lineWidth = 1.5;
-  g.beginPath(); g.arc(0, 0, 134, Math.PI * 1.12, Math.PI * 1.88); g.stroke();
-  g.restore();
-
-  // Title
-  g.textAlign = 'center';
-  g.fillStyle = TITLE;
-  g.font = '700 92px Georgia, "Times New Roman", serif';
-  g.shadowColor = 'rgba(255,255,255,0.45)';
-  g.shadowBlur = 6;
-  g.fillText('PREPD', W / 2, H / 2 - 20);
-
-  // Thin rule between the two words
-  g.shadowBlur = 0;
-  g.strokeStyle = GOLD;
-  g.lineWidth = 2;
-  g.beginPath(); g.moveTo(W / 2 - 150, H / 2 + 16); g.lineTo(W / 2 - 40, H / 2 + 16); g.stroke();
-  g.beginPath(); g.moveTo(W / 2 + 40, H / 2 + 16); g.lineTo(W / 2 + 150, H / 2 + 16); g.stroke();
-  // center diamond
-  g.save();
-  g.translate(W / 2, H / 2 + 16);
-  g.rotate(Math.PI / 4);
-  g.strokeRect(-7, -7, 14, 14);
-  g.restore();
-
-  g.fillStyle = TITLE;
-  g.font = '700 80px Georgia, "Times New Roman", serif';
-  g.fillText('STUDY', W / 2, H / 2 + 108);
-
-  // Lower flourish + tagline
-  g.save();
-  g.translate(W / 2, H - 170);
-  g.strokeStyle = GOLD;
-  g.lineWidth = 2;
-  for (let i = -5; i <= 5; i++) {
-    const a = (Math.PI / 2) - (i / 5) * (Math.PI * 0.38);
-    g.beginPath();
-    g.moveTo(0, 0);
-    g.lineTo(Math.cos(a) * 70, Math.sin(a) * 70);
-    g.stroke();
-  }
-  g.restore();
-
-  g.fillStyle = GOLD_DIM;
-  g.font = '600 30px Georgia, serif';
-  g.fillText('· A P   E X A M   P R E P ·', W / 2, H - 70);
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
-  return tex;
-}
-
-// ── Ruled page texture ──────────────────────────────────────────────────────
-function makePageTexture(): THREE.CanvasTexture {
-  const W = 360, H = 480;
-  const c = document.createElement('canvas');
-  c.width = W; c.height = H;
-  const g = c.getContext('2d')!;
-
-  g.fillStyle = '#f6efdc';
-  g.fillRect(0, 0, W, H);
-
-  // faint ruled lines
-  g.strokeStyle = 'rgba(120,140,160,0.28)';
-  g.lineWidth = 1;
-  for (let y = 70; y < H - 40; y += 30) {
-    g.beginPath(); g.moveTo(44, y); g.lineTo(W - 34, y); g.stroke();
-  }
-  // margin line
-  g.strokeStyle = 'rgba(210,120,120,0.35)';
-  g.beginPath(); g.moveTo(44, 40); g.lineTo(44, H - 34); g.stroke();
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+type Season = 'spring' | 'summer' | 'fall' | 'winter';
+function currentSeason(): Season {
+  const m = new Date().getMonth(); // 0 = Jan
+  if (m >= 2 && m <= 4) return 'spring';
+  if (m >= 5 && m <= 7) return 'summer';
+  if (m >= 8 && m <= 10) return 'fall';
+  return 'winter';
 }
 
 export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
@@ -154,145 +34,218 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
   camera.position.set(0, 0, 6);
 
-  // ── Lights — brighter than before so the cover art reads ──────────────────
-  const ambient = new THREE.AmbientLight(0xffffff, 0.45);
+  // ── Lights — bright, with a cool rim so the white cat pops off dark bg ─────
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambient);
 
-  const keyLight = new THREE.DirectionalLight(0xfff4d8, 2.4);
-  keyLight.position.set(2, 3.5, 3);
+  const keyLight = new THREE.DirectionalLight(0xfff6e8, 2.1);
+  keyLight.position.set(2.5, 3.5, 3);
   scene.add(keyLight);
 
-  const fillLight = new THREE.DirectionalLight(0x8fd4e0, 0.8);
-  fillLight.position.set(-2.5, -1, 3);
+  const fillLight = new THREE.DirectionalLight(0x9fd0f0, 0.6);
+  fillLight.position.set(-3, -0.5, 2.5);
   scene.add(fillLight);
 
-  const backLight = new THREE.DirectionalLight(0x14324a, 0.5);
-  backLight.position.set(0, -3, -2);
-  scene.add(backLight);
+  const rimLight = new THREE.DirectionalLight(0xbfe4ff, 1.8);
+  rimLight.position.set(-1.5, 2.5, -3);
+  scene.add(rimLight);
 
-  // Warm halo near the cover
-  const glowLight = new THREE.PointLight(0xf5c842, 1.6, 7, 2);
-  glowLight.position.set(0.3, 0.4, 2.2);
-  scene.add(glowLight);
+  const baseLight = { ambient: 0.6, key: 2.1, fill: 0.6, rim: 1.8 };
 
-  const baseLight = {
-    ambient: ambient.intensity,
-    key: keyLight.intensity,
-    fill: fillLight.intensity,
-    glow: glowLight.intensity,
-  };
-
-  // ── Textures + materials ──────────────────────────────────────────────────
-  const coverTex = makeCoverTexture();
-  const pageTex  = makePageTexture();
-
-  const coverFaceMat = new THREE.MeshStandardMaterial({
-    map: coverTex, roughness: 0.55, metalness: 0.2,
-  });
-  const coverSideMat = new THREE.MeshStandardMaterial({
-    color: 0x7cc0e2, roughness: 0.6, metalness: 0.12,
-  });
-  const coverBackMat = new THREE.MeshStandardMaterial({
-    color: 0x9ad0ec, roughness: 0.65, metalness: 0.08,
-  });
-  const pagesMat = new THREE.MeshStandardMaterial({
-    color: 0xf2e9d2, roughness: 0.92, metalness: 0,
-  });
-  const leafMat = new THREE.MeshStandardMaterial({
-    map: pageTex, color: 0xffffff, roughness: 0.95, metalness: 0,
-    side: THREE.DoubleSide,
-  });
-  const goldEdgeMat = new THREE.LineBasicMaterial({ color: 0xc99a3a });
-
-  // Front cover: decorative art only on the outward (+z) face
-  const frontFaceMats = [
-    coverSideMat, coverSideMat,       // +x, -x
-    coverSideMat, coverSideMat,       // +y, -y
-    coverFaceMat, coverBackMat,       // +z (art), -z
-  ];
-
-  // ── Geometry ──────────────────────────────────────────────────────────────
-  const SPINE_X  = -0.775;
-  const COVER_W  = 1.55;
-  const COVER_H  = 2.10;
-  const COVER_D  = 0.07;
-  const PAGES_W  = 1.42;
-  const PAGES_H  = 2.00;
-  const PAGES_D  = 0.40;
-  const PAGES_TOP_Z = PAGES_D / 2;              // +0.20
-
-  const group = new THREE.Group();
-
-  // Back cover (static)
-  const backGeo  = new THREE.BoxGeometry(COVER_W, COVER_H, COVER_D);
-  const backMesh = new THREE.Mesh(backGeo, coverSideMat);
-  backMesh.position.set(0.02, 0, -(PAGES_D / 2 + COVER_D / 2));
-  group.add(backMesh);
-
-  // Pages block (static fore-edge / gilt)
-  const pagesGeo  = new THREE.BoxGeometry(PAGES_W, PAGES_H, PAGES_D);
-  const pagesMesh = new THREE.Mesh(pagesGeo, pagesMat);
-  pagesMesh.position.set(0.04, 0, 0);
-  group.add(pagesMesh);
-
-  const pagesEdgeGeo = new THREE.EdgesGeometry(pagesGeo, 20);
-  const pagesEdges   = new THREE.LineSegments(pagesEdgeGeo, goldEdgeMat);
-  pagesEdges.position.copy(pagesMesh.position);
-  group.add(pagesEdges);
-
-  // Spine (static)
-  const spineGeo  = new THREE.BoxGeometry(COVER_D, COVER_H, PAGES_D + COVER_D * 2);
-  const spineMesh = new THREE.Mesh(spineGeo, coverSideMat);
-  spineMesh.position.set(SPINE_X, 0, 0);
-  group.add(spineMesh);
-
-  // ── Turning leaves (individual pages hinged at the spine) ─────────────────
-  const NLEAVES = 9;
-  const leafPivots: THREE.Group[] = [];
-  // leaves are a touch smaller than the covers so they tuck neatly inside
-  const leafW = PAGES_W - 0.14;   // 1.28
-  const leafH = PAGES_H - 0.14;   // 1.86
-  // leaves live in the thin gap between the top of the page block and the front cover
-  const leafZ0 = PAGES_TOP_Z + 0.002;
-  const leafGap = 0.004;
-
-  for (let i = 0; i < NLEAVES; i++) {
-    const pivot = new THREE.Group();
-    pivot.position.set(SPINE_X, 0, leafZ0 + i * leafGap);
-
-    const leafGeo = new THREE.PlaneGeometry(leafW, leafH);
-    const leaf = new THREE.Mesh(leafGeo, leafMat);
-    // hinge at the spine: the plane's centre sits half a width to the +x of the pivot
-    leaf.position.set((leafW / 2) + 0.05, 0, 0);
-    pivot.add(leaf);
-    group.add(pivot);
-    leafPivots.push(pivot);
+  // ── Material registry (for the blueprint wireframe toggle) ────────────────
+  const mats: THREE.MeshStandardMaterial[] = [];
+  const origHex: number[] = [];
+  function reg(m: THREE.MeshStandardMaterial): THREE.MeshStandardMaterial {
+    mats.push(m);
+    origHex.push(m.color.getHex());
+    return m;
   }
 
-  // Front cover pivot — rotates around spine for the "open book" effect
-  const frontPivot = new THREE.Group();
-  frontPivot.position.set(SPINE_X, 0, PAGES_D / 2 + COVER_D / 2);
-  group.add(frontPivot);
+  // Palette
+  const FUR    = reg(new THREE.MeshStandardMaterial({ color: 0xf4f2ee, roughness: 0.95, metalness: 0 }));
+  const FUR2   = reg(new THREE.MeshStandardMaterial({ color: 0xe9e7e2, roughness: 0.95, metalness: 0 }));
+  const PINK   = reg(new THREE.MeshStandardMaterial({ color: 0xf1a8bb, roughness: 0.8,  metalness: 0 }));
+  const EYE    = reg(new THREE.MeshStandardMaterial({ color: 0x2b6aa0, roughness: 0.25, metalness: 0.1, emissive: 0x0b2b4a, emissiveIntensity: 0.3 }));
+  const PUPIL  = reg(new THREE.MeshStandardMaterial({ color: 0x0a1018, roughness: 0.3,  metalness: 0 }));
+  const SHINE  = reg(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2,  metalness: 0, emissive: 0xffffff, emissiveIntensity: 0.4 }));
 
-  const frontGeo  = new THREE.BoxGeometry(COVER_W, COVER_H, COVER_D);
-  const frontMesh = new THREE.Mesh(frontGeo, frontFaceMats);
-  frontMesh.position.set(-SPINE_X, 0, 0); // offset so it hinges at the spine
-  frontPivot.add(frontMesh);
+  const whiskerMat = new THREE.LineBasicMaterial({ color: 0xcfd6dd });
 
-  const frontEdgeGeo = new THREE.EdgesGeometry(frontGeo, 20);
-  const frontEdges   = new THREE.LineSegments(frontEdgeGeo, goldEdgeMat);
-  frontEdges.position.copy(frontMesh.position);
-  frontPivot.add(frontEdges);
+  // ── Cat group hierarchy ───────────────────────────────────────────────────
+  const group    = new THREE.Group();   // whole cat
+  const headGroup = new THREE.Group();  // pivots at the neck so the head can look around
+  const tailGroup = new THREE.Group();  // pivots at the tail base so it can wag
+  const eyeMeshes: THREE.Mesh[] = [];
+
+  function add(geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D): THREE.Mesh {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    parent.add(m);
+    return m;
+  }
+
+  // Body — sitting ovoid
+  const body = add(new THREE.SphereGeometry(0.72, 32, 24), FUR, 0, -0.25, 0, group);
+  body.scale.set(1.02, 1.18, 0.92);
+  // chest fluff
+  const chest = add(new THREE.SphereGeometry(0.5, 24, 18), FUR, 0, -0.35, 0.34, group);
+  chest.scale.set(0.9, 1.0, 0.7);
+
+  // Front legs + paws
+  for (const sx of [-1, 1]) {
+    const leg = add(new THREE.CylinderGeometry(0.15, 0.17, 0.5, 18), FUR, sx * 0.26, -0.78, 0.42, group);
+    leg.rotation.x = 0.06;
+    const paw = add(new THREE.SphereGeometry(0.19, 18, 14), FUR, sx * 0.27, -1.0, 0.52, group);
+    paw.scale.set(1, 0.7, 1.15);
+    // toe lines (tiny indentations via small spheres)
+    add(new THREE.SphereGeometry(0.03, 8, 8), FUR2, sx * 0.21, -1.02, 0.66, group);
+    add(new THREE.SphereGeometry(0.03, 8, 8), FUR2, sx * 0.33, -1.02, 0.66, group);
+  }
+
+  // Tail (tube along a curve, in its own pivot group)
+  tailGroup.position.set(0.12, -0.5, -0.32);
+  const tailCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0.22, -0.05, -0.22),
+    new THREE.Vector3(0.55, 0.18, -0.15),
+    new THREE.Vector3(0.72, 0.6, 0.12),
+    new THREE.Vector3(0.52, 0.92, 0.4),
+  ]);
+  const tailGeo = new THREE.TubeGeometry(tailCurve, 40, 0.12, 12, false);
+  tailGroup.add(new THREE.Mesh(tailGeo, FUR));
+  add(new THREE.SphereGeometry(0.12, 14, 12), FUR2, 0.52, 0.92, 0.4, tailGroup); // soft tip
+  group.add(tailGroup);
+
+  // ── Head ──────────────────────────────────────────────────────────────────
+  headGroup.position.set(0, 0.45, 0);
+  group.add(headGroup);
+
+  const head = add(new THREE.SphereGeometry(0.56, 32, 26), FUR, 0, 0.34, 0.16, headGroup);
+  head.scale.set(1.08, 1.0, 1.0);
+  // cheeks
+  add(new THREE.SphereGeometry(0.22, 18, 14), FUR, -0.33, 0.18, 0.4, headGroup).scale.set(1, 0.9, 0.9);
+  add(new THREE.SphereGeometry(0.22, 18, 14), FUR,  0.33, 0.18, 0.4, headGroup).scale.set(1, 0.9, 0.9);
+  // muzzle
+  add(new THREE.SphereGeometry(0.2, 18, 14), FUR, 0, 0.14, 0.52, headGroup).scale.set(1.2, 0.85, 0.8);
+
+  // Ears (outer + pink inner)
+  for (const sx of [-1, 1]) {
+    const ear = add(new THREE.ConeGeometry(0.22, 0.4, 20), FUR, sx * 0.32, 0.78, 0.08, headGroup);
+    ear.rotation.z = sx * -0.18;
+    ear.rotation.x = -0.12;
+    const inner = add(new THREE.ConeGeometry(0.12, 0.26, 16), PINK, sx * 0.32, 0.76, 0.17, headGroup);
+    inner.rotation.z = sx * -0.18;
+    inner.rotation.x = -0.12;
+  }
+
+  // Eyes (blue ball + pupil + highlight)
+  for (const sx of [-1, 1]) {
+    const e = add(new THREE.SphereGeometry(0.135, 20, 16), EYE, sx * 0.21, 0.4, 0.56, headGroup);
+    e.scale.set(0.95, 1.1, 0.7);
+    eyeMeshes.push(e);
+    const pupil = add(new THREE.SphereGeometry(0.075, 16, 12), PUPIL, sx * 0.21, 0.4, 0.66, headGroup);
+    pupil.scale.set(0.8, 1.2, 0.6);
+    add(new THREE.SphereGeometry(0.03, 10, 8), SHINE, sx * 0.24, 0.45, 0.70, headGroup);
+  }
+
+  // Nose + mouth hint
+  const nose = add(new THREE.SphereGeometry(0.058, 14, 12), PINK, 0, 0.21, 0.70, headGroup);
+  nose.scale.set(1.3, 0.9, 0.9);
+
+  // Whiskers
+  const whiskerPts: number[] = [];
+  const wy = 0.17;
+  for (const sx of [-1, 1]) {
+    for (const dy of [0.05, 0, -0.05]) {
+      whiskerPts.push(sx * 0.14, wy + dy, 0.62,  sx * 0.62, wy + dy * 2 + 0.02, 0.46);
+    }
+  }
+  const whiskerGeo = new THREE.BufferGeometry();
+  whiskerGeo.setAttribute('position', new THREE.Float32BufferAttribute(whiskerPts, 3));
+  const whiskers = new THREE.LineSegments(whiskerGeo, whiskerMat);
+  headGroup.add(whiskers);
+
+  // ── Seasonal accessories ──────────────────────────────────────────────────
+  const accessories: Record<Season, THREE.Group> = {
+    spring: new THREE.Group(),
+    summer: new THREE.Group(),
+    fall:   new THREE.Group(),
+    winter: new THREE.Group(),
+  };
+
+  // Spring — flower tucked by the ear
+  {
+    const g = accessories.spring;
+    const center = reg(new THREE.MeshStandardMaterial({ color: 0xf7d14e, roughness: 0.6 }));
+    const petal  = reg(new THREE.MeshStandardMaterial({ color: 0xf06fa6, roughness: 0.7 }));
+    add(new THREE.SphereGeometry(0.06, 14, 12), center, 0, 0, 0, g);
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      add(new THREE.SphereGeometry(0.07, 14, 12), petal, Math.cos(a) * 0.11, Math.sin(a) * 0.11, -0.02, g)
+        .scale.set(1, 1, 0.5);
+    }
+    g.position.set(0.34, 0.74, 0.28);
+    headGroup.add(g);
+  }
+
+  // Summer — sunglasses over the eyes
+  {
+    const g = accessories.summer;
+    const lensMat  = reg(new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.2, metalness: 0.4 }));
+    const frameMat = reg(new THREE.MeshStandardMaterial({ color: 0x0b0c10, roughness: 0.3, metalness: 0.5 }));
+    for (const sx of [-1, 1]) {
+      const lens = add(new THREE.SphereGeometry(0.16, 20, 16), lensMat, sx * 0.21, 0.41, 0.64, g);
+      lens.scale.set(1, 0.92, 0.32);
+    }
+    // bridge
+    add(new THREE.BoxGeometry(0.14, 0.035, 0.04), frameMat, 0, 0.44, 0.69, g);
+    // arms
+    for (const sx of [-1, 1]) {
+      const arm = add(new THREE.BoxGeometry(0.42, 0.03, 0.03), frameMat, sx * 0.4, 0.44, 0.4, g);
+      arm.rotation.y = sx * 0.5;
+    }
+    g.position.set(0, 0, 0);
+    headGroup.add(g);
+  }
+
+  // Fall — cozy knit scarf around the neck
+  {
+    const g = accessories.fall;
+    const knit = reg(new THREE.MeshStandardMaterial({ color: 0xb5432f, roughness: 0.98 }));
+    const loop = add(new THREE.TorusGeometry(0.44, 0.13, 14, 32), knit, 0, 0.42, 0.12, g);
+    loop.rotation.x = Math.PI / 2 - 0.25;
+    loop.scale.set(1, 1, 0.8);
+    // hanging tail of the scarf
+    const hang = add(new THREE.BoxGeometry(0.2, 0.44, 0.1), knit, 0.2, 0.06, 0.5, g);
+    hang.rotation.z = 0.12;
+    add(new THREE.BoxGeometry(0.2, 0.08, 0.1), knit, 0.22, -0.18, 0.5, g).rotation.z = 0.12; // fringe hint
+    headGroup.add(g); // sits at neck, which is headGroup's origin area
+  }
+
+  // Winter — Santa hat
+  {
+    const g = accessories.winter;
+    const red   = reg(new THREE.MeshStandardMaterial({ color: 0xcc2d2d, roughness: 0.85 }));
+    const white = reg(new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.95 }));
+    const coneM = add(new THREE.ConeGeometry(0.34, 0.6, 24), red, 0, 1.08, 0.02, g);
+    coneM.rotation.x = -0.18;
+    coneM.position.z = 0.1;
+    const brim = add(new THREE.TorusGeometry(0.33, 0.08, 14, 28), white, 0, 0.82, 0.06, g);
+    brim.rotation.x = Math.PI / 2;
+    brim.scale.set(1, 1, 0.9);
+    add(new THREE.SphereGeometry(0.1, 16, 14), white, 0.12, 1.34, 0.18, g); // pom-pom
+    headGroup.add(g);
+  }
+
+  // Show only the current season's accessory
+  const season = currentSeason();
+  (Object.keys(accessories) as Season[]).forEach(k => { accessories[k].visible = k === season; });
 
   scene.add(group);
 
-  // Collect meshes + edges for blueprint toggle
-  const allMeshes: THREE.Mesh[]        = [];
-  const allEdges: THREE.LineSegments[] = [];
-  group.traverse(obj => {
-    if (obj instanceof THREE.Mesh)              allMeshes.push(obj);
-    else if (obj instanceof THREE.LineSegments) allEdges.push(obj);
-  });
+  // Collect meshes for blueprint toggle
+  const allMeshes: THREE.Mesh[] = [];
+  group.traverse(o => { if (o instanceof THREE.Mesh) allMeshes.push(o); });
 
   // ── State ─────────────────────────────────────────────────────────────────
   let targetP = 0, currentP = 0;
@@ -300,6 +253,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   let isBlueprintMode = false;
   let animId: number;
   const clock = new THREE.Clock();
+  let nextBlink = 1.5 + Math.random() * 3;
 
   function setScrollProgress(p: number) { targetP = p; }
   function setMouseTilt(x: number, y: number) { mx = x; my = y; }
@@ -307,69 +261,63 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   function setBlueprintMode(on: boolean) {
     if (on === isBlueprintMode) return;
     isBlueprintMode = on;
-    allMeshes.forEach(m => { m.visible = !on; });
-    allEdges.forEach(e => {
-      (e.material as THREE.LineBasicMaterial).color.setHex(on ? 0x1a2040 : 0xc99a3a);
+    mats.forEach((m, i) => {
+      m.wireframe = on;
+      m.color.setHex(on ? 0x2a4a74 : origHex[i]);
+      m.emissiveIntensity = on ? 0 : (m === EYE ? 0.3 : (m === SHINE ? 0.4 : m.emissiveIntensity));
     });
-    ambient.intensity   = on ? 0 : baseLight.ambient;
-    keyLight.intensity  = on ? 0 : baseLight.key;
-    fillLight.intensity = on ? 0 : baseLight.fill;
-    glowLight.intensity = on ? 0 : baseLight.glow;
+    whiskerMat.color.setHex(on ? 0x2a4a74 : 0xcfd6dd);
+    ambient.intensity  = on ? 0.2 : baseLight.ambient;
+    keyLight.intensity = on ? 0.4 : baseLight.key;
+    fillLight.intensity = on ? 0.2 : baseLight.fill;
+    rimLight.intensity = on ? 0 : baseLight.rim;
   }
 
   function loop() {
     animId = requestAnimationFrame(loop);
-    const elapsed = clock.getElapsedTime();
+    const t = clock.getElapsedTime();
 
     currentP += (targetP - currentP) * 0.085;
-    lmx += (mx - lmx) * 0.055;
-    lmy += (my - lmy) * 0.055;
-
+    lmx += (mx - lmx) * 0.06;
+    lmy += (my - lmy) * 0.06;
     const p = currentP;
 
-    // Scale in over first 10%
     const scaleIn = p < 0.1 ? p / 0.1 : 1;
 
-    // Floating Y oscillation + gentle breathing
-    group.position.y = Math.sin(elapsed * 0.6) * 0.09;
+    // Gentle float + idle sway (cat stays facing the camera, not spinning)
+    group.position.y = Math.sin(t * 0.8) * 0.07;
+    group.rotation.y = Math.sin(t * 0.35) * 0.18 + lmx * 0.25 + (p - 0.5) * 0.3;
+    group.rotation.x = lmy * 0.08 + Math.sin(t * 0.6) * 0.015;
 
-    // Slow Y rotation + mouse parallax
-    group.rotation.y += 0.0022;
-    group.rotation.x  = lmy * -0.12;
-    group.rotation.z  = lmx * -0.05;
+    // Head looks toward the mouse + a soft bob
+    headGroup.rotation.y = lmx * 0.22;
+    headGroup.rotation.x = -lmy * 0.14 + Math.sin(t * 0.9) * 0.03;
+    headGroup.rotation.z = Math.sin(t * 0.5) * 0.02;
 
-    // Camera fly-in: p 0.10–0.28 → z 6→4
-    const flyT = easeInOut(clamp01((p - 0.1) / 0.18));
-    camera.position.z = 6 - flyT * 2;
+    // Tail wag
+    tailGroup.rotation.z = Math.sin(t * 1.6) * 0.18;
+    tailGroup.rotation.y = Math.sin(t * 1.2) * 0.12;
 
-    // Cover open: p 0.30–0.42, close back: p 0.66–0.80 (both eased)
-    const openT  = easeInOut(clamp01((p - 0.30) / 0.12));
-    const closeT = easeInOut(clamp01((p - 0.66) / 0.14));
-    const coverOpen = openT - closeT;
-    frontPivot.rotation.y = coverOpen * -2.75;
-
-    // Gentle page riffle while the book is open — a travelling lift that
-    // sweeps across the stack and back, so pages flutter without any single
-    // sheet swinging out toward the camera. Triangle 0→1→0 over p 0.40–0.66.
-    const riffM = clamp01((p - 0.40) / 0.26);
-    const riffle = riffM < 0.5 ? riffM * 2 : (1 - riffM) * 2; // 0 → 1 → 0
-    for (let i = 0; i < NLEAVES; i++) {
-      // wave position for this leaf; each lifts in turn as the wave passes
-      const phase = riffle * (NLEAVES + 2) - i;
-      const bump  = Math.sin(clamp01(phase / 2) * Math.PI); // 0 → 1 → 0 hump
-      // slight resting fan when the book is open so the stack looks layered
-      const rest  = coverOpen * 0.05 * ((i + 1) / NLEAVES);
-      leafPivots[i].rotation.y = -(rest + bump * 0.30); // max ~20°, stays tucked
+    // Blink
+    if (t > nextBlink) {
+      const since = t - nextBlink;
+      const blink = since < 0.14 ? 1 - since / 0.14 : since < 0.28 ? (since - 0.14) / 0.14 : 1;
+      const sy = 0.1 + 0.9 * blink;
+      eyeMeshes.forEach(e => { e.scale.y = 1.1 * sy; });
+      if (since > 0.28) { nextBlink = t + 2 + Math.random() * 4; eyeMeshes.forEach(e => { e.scale.y = 1.1; }); }
     }
 
-    // Fade out: p 0.92–1.0
-    const fadeOut = 1 - easeInOut(clamp01((p - 0.92) / 0.08));
-    group.scale.setScalar(scaleIn * fadeOut);
+    // Camera fly-in: p 0.10–0.28 → z 6→4.4
+    const flyT = clamp01((p - 0.1) / 0.18);
+    camera.position.z = 6 - flyT * 1.6;
+
+    // Fade out at the very end
+    const fadeOut = 1 - clamp01((p - 0.92) / 0.08);
+    group.scale.setScalar(scaleIn * fadeOut * 1.05);
     if (!isBlueprintMode) {
-      keyLight.intensity  = baseLight.key   * fadeOut;
-      ambient.intensity   = baseLight.ambient * fadeOut;
-      fillLight.intensity = baseLight.fill  * fadeOut;
-      glowLight.intensity = baseLight.glow  * fadeOut;
+      keyLight.intensity  = baseLight.key  * fadeOut;
+      ambient.intensity   = baseLight.ambient * Math.max(0.3, fadeOut);
+      rimLight.intensity  = baseLight.rim  * fadeOut;
     }
 
     renderer.render(scene, camera);
@@ -379,15 +327,9 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   function dispose() {
     cancelAnimationFrame(animId);
     allMeshes.forEach(m => m.geometry.dispose());
-    allEdges.forEach(e  => e.geometry.dispose());
-    coverFaceMat.dispose();
-    coverSideMat.dispose();
-    coverBackMat.dispose();
-    pagesMat.dispose();
-    leafMat.dispose();
-    goldEdgeMat.dispose();
-    coverTex.dispose();
-    pageTex.dispose();
+    whiskerGeo.dispose();
+    mats.forEach(m => m.dispose());
+    whiskerMat.dispose();
     renderer.dispose();
   }
 
