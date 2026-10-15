@@ -62,10 +62,10 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   }
 
   // Palette
-  const FUR    = reg(new THREE.MeshStandardMaterial({ color: 0xf4f2ee, roughness: 0.95, metalness: 0 }));
-  const FUR2   = reg(new THREE.MeshStandardMaterial({ color: 0xe9e7e2, roughness: 0.95, metalness: 0 }));
-  const PINK   = reg(new THREE.MeshStandardMaterial({ color: 0xf1a8bb, roughness: 0.8,  metalness: 0 }));
-  const EYE    = reg(new THREE.MeshStandardMaterial({ color: 0x2b6aa0, roughness: 0.25, metalness: 0.1, emissive: 0x0b2b4a, emissiveIntensity: 0.3 }));
+  const FUR    = reg(new THREE.MeshStandardMaterial({ color: 0x1f2b47, roughness: 0.9,  metalness: 0.05 })); // dark navy-blue
+  const FUR2   = reg(new THREE.MeshStandardMaterial({ color: 0x3a5283, roughness: 0.9,  metalness: 0.05 })); // lighter steel-blue belly/muzzle
+  const PINK   = reg(new THREE.MeshStandardMaterial({ color: 0xef9bb3, roughness: 0.8,  metalness: 0 }));
+  const EYE    = reg(new THREE.MeshStandardMaterial({ color: 0x8fd6f7, roughness: 0.2,  metalness: 0.1, emissive: 0x2a86c0, emissiveIntensity: 0.45 }));
   const PUPIL  = reg(new THREE.MeshStandardMaterial({ color: 0x0a1018, roughness: 0.3,  metalness: 0 }));
   const SHINE  = reg(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2,  metalness: 0, emissive: 0xffffff, emissiveIntensity: 0.4 }));
 
@@ -87,19 +87,19 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   // Body — sitting ovoid
   const body = add(new THREE.SphereGeometry(0.72, 32, 24), FUR, 0, -0.25, 0, group);
   body.scale.set(1.02, 1.18, 0.92);
-  // chest fluff
-  const chest = add(new THREE.SphereGeometry(0.5, 24, 18), FUR, 0, -0.35, 0.34, group);
+  // chest fluff (lighter belly marking)
+  const chest = add(new THREE.SphereGeometry(0.5, 24, 18), FUR2, 0, -0.35, 0.34, group);
   chest.scale.set(0.9, 1.0, 0.7);
 
   // Front legs + paws
   for (const sx of [-1, 1]) {
     const leg = add(new THREE.CylinderGeometry(0.15, 0.17, 0.5, 18), FUR, sx * 0.26, -0.78, 0.42, group);
     leg.rotation.x = 0.06;
-    const paw = add(new THREE.SphereGeometry(0.19, 18, 14), FUR, sx * 0.27, -1.0, 0.52, group);
+    const paw = add(new THREE.SphereGeometry(0.19, 18, 14), FUR2, sx * 0.27, -1.0, 0.52, group);
     paw.scale.set(1, 0.7, 1.15);
     // toe lines (tiny indentations via small spheres)
-    add(new THREE.SphereGeometry(0.03, 8, 8), FUR2, sx * 0.21, -1.02, 0.66, group);
-    add(new THREE.SphereGeometry(0.03, 8, 8), FUR2, sx * 0.33, -1.02, 0.66, group);
+    add(new THREE.SphereGeometry(0.03, 8, 8), FUR, sx * 0.21, -1.02, 0.66, group);
+    add(new THREE.SphereGeometry(0.03, 8, 8), FUR, sx * 0.33, -1.02, 0.66, group);
   }
 
   // Tail (tube along a curve, in its own pivot group)
@@ -125,8 +125,8 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   // cheeks
   add(new THREE.SphereGeometry(0.22, 18, 14), FUR, -0.33, 0.18, 0.4, headGroup).scale.set(1, 0.9, 0.9);
   add(new THREE.SphereGeometry(0.22, 18, 14), FUR,  0.33, 0.18, 0.4, headGroup).scale.set(1, 0.9, 0.9);
-  // muzzle
-  add(new THREE.SphereGeometry(0.2, 18, 14), FUR, 0, 0.14, 0.52, headGroup).scale.set(1.2, 0.85, 0.8);
+  // muzzle (lighter)
+  add(new THREE.SphereGeometry(0.2, 18, 14), FUR2, 0, 0.14, 0.52, headGroup).scale.set(1.2, 0.85, 0.8);
 
   // Ears (outer + pink inner)
   for (const sx of [-1, 1]) {
@@ -208,18 +208,35 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     headGroup.add(g);
   }
 
-  // Fall — cozy knit scarf around the neck
+  // Fall — chunky wrapped scarf that covers the neck (stays with the body)
   {
     const g = accessories.fall;
-    const knit = reg(new THREE.MeshStandardMaterial({ color: 0xb5432f, roughness: 0.98 }));
-    const loop = add(new THREE.TorusGeometry(0.44, 0.13, 14, 32), knit, 0, 0.42, 0.12, g);
-    loop.rotation.x = Math.PI / 2 - 0.25;
-    loop.scale.set(1, 1, 0.8);
-    // hanging tail of the scarf
-    const hang = add(new THREE.BoxGeometry(0.2, 0.44, 0.1), knit, 0.2, 0.06, 0.5, g);
-    hang.rotation.z = 0.12;
-    add(new THREE.BoxGeometry(0.2, 0.08, 0.1), knit, 0.22, -0.18, 0.5, g).rotation.z = 0.12; // fringe hint
-    headGroup.add(g); // sits at neck, which is headGroup's origin area
+    const knit  = reg(new THREE.MeshStandardMaterial({ color: 0xd98a5b, roughness: 1.0 }));  // warm cozy knit
+    const knit2 = reg(new THREE.MeshStandardMaterial({ color: 0xc5713f, roughness: 1.0 }));  // darker fold
+
+    // Main thick wrap around the neck
+    const wrap1 = add(new THREE.TorusGeometry(0.48, 0.19, 16, 36), knit, 0, 0, 0, g);
+    wrap1.rotation.x = Math.PI / 2;
+    wrap1.scale.set(1, 1, 0.82);
+    // Second fold, overlapping and tilted — the "wrapped twice" look
+    const wrap2 = add(new THREE.TorusGeometry(0.44, 0.16, 16, 32), knit2, 0, 0.12, 0.06, g);
+    wrap2.rotation.x = Math.PI / 2 - 0.28;
+    wrap2.scale.set(1, 1, 0.82);
+    // Knot where the scarf crosses at the front
+    add(new THREE.SphereGeometry(0.2, 18, 14), knit, 0, -0.04, 0.44, g).scale.set(1.1, 1, 0.9);
+
+    // Hanging end down the chest
+    const hang = add(new THREE.BoxGeometry(0.3, 0.62, 0.14), knit, 0.1, -0.52, 0.44, g);
+    hang.rotation.z = 0.1;
+    hang.rotation.x = -0.12;
+    // Fringe strands at the bottom
+    for (let i = 0; i < 5; i++) {
+      add(new THREE.BoxGeometry(0.045, 0.14, 0.12), knit2, -0.02 + i * 0.055, -0.9, 0.46, g)
+        .rotation.z = 0.1;
+    }
+
+    g.position.set(0, 0.2, 0.08);
+    group.add(g); // on the body, so the head turns freely above it
   }
 
   // Winter — Santa hat
@@ -264,7 +281,7 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     mats.forEach((m, i) => {
       m.wireframe = on;
       m.color.setHex(on ? 0x2a4a74 : origHex[i]);
-      m.emissiveIntensity = on ? 0 : (m === EYE ? 0.3 : (m === SHINE ? 0.4 : m.emissiveIntensity));
+      m.emissiveIntensity = on ? 0 : (m === EYE ? 0.45 : (m === SHINE ? 0.4 : m.emissiveIntensity));
     });
     whiskerMat.color.setHex(on ? 0x2a4a74 : 0xcfd6dd);
     ambient.intensity  = on ? 0.2 : baseLight.ambient;
