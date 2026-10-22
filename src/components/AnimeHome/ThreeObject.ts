@@ -87,10 +87,6 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   // Body — sitting ovoid
   const body = add(new THREE.SphereGeometry(0.72, 32, 24), FUR, 0, -0.25, 0, group);
   body.scale.set(1.02, 1.18, 0.92);
-  // chest fluff (lighter belly marking)
-  const chest = add(new THREE.SphereGeometry(0.5, 24, 18), FUR2, 0, -0.35, 0.34, group);
-  chest.scale.set(0.9, 1.0, 0.7);
-
   // Front legs + paws
   for (const sx of [-1, 1]) {
     const leg = add(new THREE.CylinderGeometry(0.15, 0.17, 0.5, 18), FUR, sx * 0.26, -0.78, 0.42, group);
