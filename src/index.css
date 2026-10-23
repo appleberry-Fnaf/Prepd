@@ -1102,6 +1102,49 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   will-change: transform;
 }
 
+/* ── Glow burst on cat click ── */
+.ah-glow-burst {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 80vmin; height: 80vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(96,165,250,0.55) 0%, rgba(59,130,246,0.18) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 5;
+  animation: ah-glow-burst 0.9s ease-out forwards;
+}
+
+@keyframes ah-glow-burst {
+  0%   { transform: translate(-50%,-50%) scale(0.3); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(2.8); opacity: 0; }
+}
+
+/* ── Scroll hint (fades in after reveal, disappears once scrolled) ── */
+.ah-scroll-hint {
+  position: absolute;
+  bottom: clamp(32px, 5vh, 56px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--ah-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.35);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  animation: ah-hint-fade 0.6s ease forwards, ah-hint-bob 2s ease-in-out infinite 0.6s;
+}
+
+@keyframes ah-hint-fade {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes ah-hint-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(-4px); }
+}
+
 /* ── Ring ── */
 .ah-ring-wrap {
   position: absolute;

@@ -10,6 +10,7 @@ export interface ThreeScene {
   setMouseTilt: (mx: number, my: number) => void;
   setBlueprintMode: (on: boolean) => void;
   triggerPoke: () => void;
+  triggerGlow: () => void;
 }
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
@@ -269,13 +270,15 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   const clock = new THREE.Clock();
   let nextBlink = 1.5 + Math.random() * 3;
 
-  // Poke animation state
   let pokeStart = -1;
-  const POKE_DUR = 0.55; // seconds
+  const POKE_DUR = 0.55;
+  let glowStart = -1;
+  const GLOW_DUR = 0.9;
 
   function setScrollProgress(p: number) { targetP = p; }
   function setMouseTilt(x: number, y: number) { mx = x; my = y; }
   function triggerPoke() { pokeStart = clock.getElapsedTime(); }
+  function triggerGlow() { glowStart = clock.getElapsedTime(); }
 
   function setBlueprintMode(on: boolean) {
     if (on === isBlueprintMode) return;
@@ -300,8 +303,6 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     lmx += (mx - lmx) * 0.06;
     lmy += (my - lmy) * 0.06;
     const p = currentP;
-
-    const scaleIn = p < 0.1 ? p / 0.1 : 1;
 
     // Gentle float + idle sway (cat stays facing the camera, not spinning)
     group.position.y = Math.sin(t * 0.8) * 0.07;
@@ -333,6 +334,21 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     // Fade out at the very end
     const fadeOut = 1 - clamp01((p - 0.92) / 0.08);
 
+    // Glow burst when cat is clicked
+    if (!isBlueprintMode && glowStart >= 0) {
+      const gt = Math.min((clock.getElapsedTime() - glowStart) / GLOW_DUR, 1);
+      const pulse = Math.sin(gt * Math.PI);
+      EYE.emissiveIntensity   = 0.45 + pulse * 4;
+      SHINE.emissiveIntensity = 0.4  + pulse * 2.5;
+      rimLight.intensity      = baseLight.rim     + pulse * 12;
+      ambient.intensity       = baseLight.ambient + pulse * 2;
+      if (gt >= 1) {
+        glowStart = -1;
+        EYE.emissiveIntensity   = 0.45;
+        SHINE.emissiveIntensity = 0.4;
+      }
+    }
+
     // Poke: quick jump up + squash on landing
     let pokeY = 0, pokeScaleX = 1, pokeScaleY = 1;
     if (pokeStart >= 0) {
@@ -350,9 +366,9 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
 
     group.position.y += pokeY;
     group.scale.set(
-      scaleIn * fadeOut * 1.05 * pokeScaleX,
-      scaleIn * fadeOut * 1.05 * pokeScaleY,
-      scaleIn * fadeOut * 1.05,
+      fadeOut * 1.05 * pokeScaleX,
+      fadeOut * 1.05 * pokeScaleY,
+      fadeOut * 1.05,
     );
     if (!isBlueprintMode) {
       keyLight.intensity  = baseLight.key  * fadeOut;
@@ -387,6 +403,6 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   return {
     renderer, camera, scene,
     dispose: () => { ro.disconnect(); dispose(); },
-    setScrollProgress, setMouseTilt, setBlueprintMode, triggerPoke,
+    setScrollProgress, setMouseTilt, setBlueprintMode, triggerPoke, triggerGlow,
   };
 }
