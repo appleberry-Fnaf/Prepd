@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import HomeNavbar from './HomeNavbar';
 import HeroStage from './HeroStage';
 import EndingSection from './EndingSection';
 
 export default function AnimeHomePage() {
+  const [revealed, setRevealed] = useState(false);
+
   useEffect(() => {
     document.body.classList.add('ah-page-body');
     return () => document.body.classList.remove('ah-page-body');
@@ -11,9 +13,9 @@ export default function AnimeHomePage() {
 
   return (
     <div className="ah-page">
-      <HomeNavbar />
+      <HomeNavbar revealed={revealed} />
       <main>
-        <HeroStage />
+        <HeroStage onReveal={() => setRevealed(true)} />
         <EndingSection />
       </main>
     </div>
