@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { animate } from 'animejs';
 import { createThreeScene, ThreeScene } from './ThreeObject';
-import Ring from './Ring';
 import BlueprintOverlay from './BlueprintOverlay';
 import ProgressTicker from './ProgressTicker';
 import { SCENES, SCROLL_VH, BG_LIGHT } from './constants';
@@ -34,7 +33,6 @@ export default function HeroStage() {
   const [scrollP,  setScrollP]  = useState(0);
   const [bg,       setBg]       = useState('#0a0f1e');
   const [blueprint, setBlueprint] = useState(false);
-  const [ringData, setRingData] = useState({ active: [0,1,2,3,4,5] as number[], accent: null as string | null });
   const [sceneIdx, setSceneIdx] = useState(0);
 
   // ── Transition: exit current text+card → swap → enter new ────────────────
@@ -53,7 +51,6 @@ export default function HeroStage() {
     setTimeout(() => {
       const s = SCENES[newIdx];
       setSceneIdx(newIdx);
-      setRingData({ active: [...s.ringActive], accent: s.accent });
       setBg(s.bg);
       setBlueprint(s.bg === BG_LIGHT);
 
@@ -157,15 +154,6 @@ export default function HeroStage() {
 
         {/* Warm glow halo behind the book */}
         <div className="ah-book-glow" aria-hidden="true" />
-
-        {/* Ring — blueprint prop flips segment colors for light bg */}
-        <div className="ah-ring-wrap" aria-hidden="true">
-          <Ring
-            activeSegments={ringData.active}
-            accent={ringData.accent}
-            blueprint={blueprint}
-          />
-        </div>
 
         {/* Blueprint annotation labels (only during beige scenes) */}
         {scene.annotations && (
