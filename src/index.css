@@ -1102,31 +1102,6 @@ body.ah-page-body::-webkit-scrollbar { display: none; }
   will-change: transform;
 }
 
-/* ── Click hint — shown before reveal ── */
-.ah-click-hint {
-  position: absolute;
-  bottom: clamp(40px, 7vh, 72px);
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--ah-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 10;
-  opacity: 0;
-  animation: ah-hint-pulse 2.2s ease-in-out infinite;
-  animation-delay: 1.4s;
-  animation-fill-mode: backwards;
-}
-
-@keyframes ah-hint-pulse {
-  0%, 100% { opacity: 0.25; transform: translateX(-50%) translateY(0); }
-  50%       { opacity: 0.65; transform: translateX(-50%) translateY(-4px); }
-}
-
 /* ── Ring ── */
 .ah-ring-wrap {
   position: absolute;

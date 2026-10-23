@@ -1,25 +1,9 @@
-import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { animate } from 'animejs';
 import { CatMark } from '../Logo';
 
-interface Props { revealed: boolean }
-
-export default function HomeNavbar({ revealed }: Props) {
-  const navRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (!revealed || !navRef.current) return;
-    animate(navRef.current, {
-      opacity: [0, 1],
-      translateY: [-14, 0],
-      duration: 560,
-      ease: 'outExpo',
-    });
-  }, [revealed]);
-
+export default function HomeNavbar() {
   return (
-    <nav ref={navRef} className="ah-nav" style={{ opacity: 0 }} aria-label="Site navigation">
+    <nav className="ah-nav" aria-label="Site navigation">
       <Link to="/" className="ah-nav-brand" aria-label="Prepd home">
         <CatMark className="w-7 h-7" />
         <span>Prepd</span>

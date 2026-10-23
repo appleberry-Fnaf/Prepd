@@ -9,6 +9,7 @@ export interface ThreeScene {
   setScrollProgress: (p: number) => void;
   setMouseTilt: (mx: number, my: number) => void;
   setBlueprintMode: (on: boolean) => void;
+  triggerPoke: () => void;
 }
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
@@ -268,8 +269,13 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   const clock = new THREE.Clock();
   let nextBlink = 1.5 + Math.random() * 3;
 
+  // Poke animation state
+  let pokeStart = -1;
+  const POKE_DUR = 0.55; // seconds
+
   function setScrollProgress(p: number) { targetP = p; }
   function setMouseTilt(x: number, y: number) { mx = x; my = y; }
+  function triggerPoke() { pokeStart = clock.getElapsedTime(); }
 
   function setBlueprintMode(on: boolean) {
     if (on === isBlueprintMode) return;
@@ -326,7 +332,28 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
 
     // Fade out at the very end
     const fadeOut = 1 - clamp01((p - 0.92) / 0.08);
-    group.scale.setScalar(scaleIn * fadeOut * 1.05);
+
+    // Poke: quick jump up + squash on landing
+    let pokeY = 0, pokeScaleX = 1, pokeScaleY = 1;
+    if (pokeStart >= 0) {
+      const pt = Math.min((clock.getElapsedTime() - pokeStart) / POKE_DUR, 1);
+      // arc: up then down (sine arch)
+      pokeY = Math.sin(pt * Math.PI) * 0.55;
+      // squash at peak (flatten slightly), squash again on landing
+      const squash = pt < 0.5
+        ? 1 + Math.sin(pt * Math.PI * 2) * 0.08   // stretch going up
+        : 1 - Math.sin((pt - 0.5) * Math.PI) * 0.12; // squash coming down
+      pokeScaleX = 1 / squash;
+      pokeScaleY = squash;
+      if (pt >= 1) pokeStart = -1;
+    }
+
+    group.position.y += pokeY;
+    group.scale.set(
+      scaleIn * fadeOut * 1.05 * pokeScaleX,
+      scaleIn * fadeOut * 1.05 * pokeScaleY,
+      scaleIn * fadeOut * 1.05,
+    );
     if (!isBlueprintMode) {
       keyLight.intensity  = baseLight.key  * fadeOut;
       ambient.intensity   = baseLight.ambient * Math.max(0.3, fadeOut);
@@ -360,6 +387,6 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
   return {
     renderer, camera, scene,
     dispose: () => { ro.disconnect(); dispose(); },
-    setScrollProgress, setMouseTilt, setBlueprintMode,
+    setScrollProgress, setMouseTilt, setBlueprintMode, triggerPoke,
   };
 }
