@@ -6,6 +6,11 @@ import BlueprintOverlay from './BlueprintOverlay';
 import ProgressTicker from './ProgressTicker';
 import { SCENES, SCROLL_VH, BG_LIGHT } from './constants';
 
+interface Props {
+  revealed: boolean;
+  onReveal: () => void;
+}
+
 function getScrollProg(el: HTMLElement): number {
   const rect  = el.getBoundingClientRect();
   const total = el.offsetHeight - window.innerHeight;
@@ -16,7 +21,7 @@ function sceneAtProgress(p: number): number {
   return Math.min(SCENES.length - 1, Math.floor(p * SCENES.length));
 }
 
-export default function HeroStage() {
+export default function HeroStage({ revealed, onReveal }: Props) {
   const wrapperRef  = useRef<HTMLDivElement>(null);
   const canvasRef   = useRef<HTMLCanvasElement>(null);
   const threeRef    = useRef<ThreeScene | null>(null);
@@ -24,16 +29,16 @@ export default function HeroStage() {
   const sceneIdxRef = useRef<number>(-1);
   const transitRef  = useRef<boolean>(false);
   const pendingRef  = useRef<number | null>(null);
+  const revealedRef = useRef(false);
 
-  // DOM refs for animated regions
   const textRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const barRef  = useRef<HTMLDivElement>(null);
 
-  const [scrollP,  setScrollP]  = useState(0);
-  const [bg,       setBg]       = useState('#0a0f1e');
+  const [scrollP,   setScrollP]  = useState(0);
+  const [bg,        setBg]       = useState('#0a0f1e');
   const [blueprint, setBlueprint] = useState(false);
-  const [sceneIdx, setSceneIdx] = useState(0);
+  const [sceneIdx,  setSceneIdx] = useState(0);
 
   // ── Transition: exit current text+card → swap → enter new ────────────────
   function transitionTo(newIdx: number) {
@@ -75,23 +80,37 @@ export default function HeroStage() {
     }, 165);
   }
 
+  // ── Click on the cat ──────────────────────────────────────────────────────
+  function handleClick() {
+    // After reveal, clicks just poke the cat
+    if (revealedRef.current) {
+      threeRef.current?.triggerPoke();
+      return;
+    }
+
+    revealedRef.current = true;
+    onReveal();
+
+    // Poke the cat as part of the reveal
+    threeRef.current?.triggerPoke();
+
+    // Animate text in
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced && textRef.current) {
+      const h = textRef.current.querySelector('.ah-scene-heading');
+      const s = textRef.current.querySelector('.ah-scene-sub');
+      if (h) animate(h, { translateX: [-60, 0], opacity: [0, 1], duration: 900, delay: 200, ease: 'outExpo' });
+      if (s) animate(s, { translateX: [-40, 0], opacity: [0, 1], duration: 900, delay: 360, ease: 'outExpo' });
+    }
+  }
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // ── Hero entrance (text slides from left) ──
-    if (!reduced && textRef.current) {
-      const h = textRef.current.querySelector('.ah-scene-heading');
-      const s = textRef.current.querySelector('.ah-scene-sub');
-      if (h) animate(h, { translateX: [-60, 0], opacity: [0, 1], duration: 900, delay: 380, ease: 'outExpo' });
-      if (s) animate(s, { translateX: [-40, 0], opacity: [0, 1], duration: 900, delay: 540, ease: 'outExpo' });
-    }
-
     if (reduced) return;
 
-    // ── Three.js ──
     const three = createThreeScene(canvas);
     threeRef.current = three;
 
@@ -102,7 +121,6 @@ export default function HeroStage() {
     };
     window.addEventListener('mousemove', onMouseMove, { passive: true });
 
-    // ── rAF loop ──
     let paused = false;
     function tick() {
       rafRef.current = requestAnimationFrame(tick);
@@ -111,13 +129,16 @@ export default function HeroStage() {
       const wrapper = wrapperRef.current;
       if (!wrapper) return;
 
+      three.setMouseTilt(mx, my);
+
+      // Scroll-driven scenes only after reveal
+      if (!revealedRef.current) return;
+
       const p   = getScrollProg(wrapper);
       const idx = sceneAtProgress(p);
 
       three.setScrollProgress(p);
-      three.setMouseTilt(mx, my);
       three.setBlueprintMode(SCENES[idx].bg === BG_LIGHT);
-
       setScrollP(p);
 
       if (idx !== sceneIdxRef.current) {
@@ -142,33 +163,32 @@ export default function HeroStage() {
   const scene = SCENES[sceneIdx];
 
   return (
-    <div ref={wrapperRef} className="ah-scroll-wrapper" style={{ height: `${SCROLL_VH}vh` }}>
+    <div
+      ref={wrapperRef}
+      className="ah-scroll-wrapper"
+      style={{ height: revealed ? `${SCROLL_VH}vh` : '100vh' }}
+    >
       <div className="ah-stage" style={{ background: bg }} data-bp={blueprint ? '' : undefined}>
 
-        {/* Three.js canvas — clicking it pokes the cat */}
         <canvas
           ref={canvasRef}
           className="ah-canvas"
-          aria-label="Interactive cat"
           style={{ cursor: 'pointer' }}
-          onClick={() => threeRef.current?.triggerPoke()}
+          onClick={handleClick}
+          aria-label="Click the cat"
         />
 
-        {/* Warm glow halo behind the cat */}
         <div className="ah-book-glow" aria-hidden="true" />
 
-        {/* Blueprint annotation labels (only during beige scenes) */}
-        {scene.annotations && (
-          <BlueprintOverlay
-            annotations={scene.annotations}
-            visible={blueprint}
-          />
+        {revealed && scene.annotations && (
+          <BlueprintOverlay annotations={scene.annotations} visible={blueprint} />
         )}
 
-        {/* Scene text block */}
+        {/* Scene text — hidden until revealed */}
         <div
           ref={textRef}
           className={`ah-scene-text ${blueprint ? 'ah-scene-text--light' : ''}`}
+          style={{ visibility: revealed ? 'visible' : 'hidden' }}
           aria-live="polite"
           aria-atomic="true"
         >
@@ -180,10 +200,7 @@ export default function HeroStage() {
           />
 
           {scene.tag && (
-            <span
-              className="ah-scene-tag"
-              style={{ color: scene.accent ?? 'inherit' }}
-            >
+            <span className="ah-scene-tag" style={{ color: scene.accent ?? 'inherit' }}>
               {scene.tag}
             </span>
           )}
@@ -208,28 +225,22 @@ export default function HeroStage() {
           )}
 
           {scene.link && scene.linkLabel && (
-            <Link to={scene.link} className="ah-scene-link">
-              {scene.linkLabel}
-            </Link>
+            <Link to={scene.link} className="ah-scene-link">{scene.linkLabel}</Link>
           )}
         </div>
 
-        {/* Code card — always in DOM, hidden when no card */}
         <div
           ref={cardRef}
           className="ah-code-card"
           aria-label="Feature detail"
-          style={{ opacity: scene.card ? 1 : 0, pointerEvents: 'none' }}
+          style={{ opacity: revealed && scene.card ? 1 : 0, pointerEvents: 'none' }}
         >
-          {scene.card
-            ? scene.card.split('\n').map((line, i) => (
-                <span key={i} className="ah-code-line">{line}</span>
-              ))
-            : null}
+          {scene.card?.split('\n').map((line, i) => (
+            <span key={i} className="ah-code-line">{line}</span>
+          ))}
         </div>
 
-        {/* Progress ticker */}
-        <ProgressTicker progress={scrollP} />
+        {revealed && <ProgressTicker progress={scrollP} />}
       </div>
     </div>
   );
