@@ -206,7 +206,16 @@ export default function Moderate() {
                 <tbody>
                   {reviewed.map(sub => (
                     <tr key={sub.id}>
-                      <td style={{ fontWeight: 600 }}>{sub.title}</td>
+                      <td style={{ fontWeight: 600 }}>
+                        {sub.status === 'approved' && sub.file_url ? (
+                          <a href={sub.file_url} target="_blank" rel="noopener noreferrer"
+                            title="Open resource"
+                            style={{ color: 'var(--ah-text)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                            {sub.title}
+                            <ExternalLink className="w-3 h-3" style={{ color: '#60a5fa', flexShrink: 0 }} />
+                          </a>
+                        ) : sub.title}
+                      </td>
                       <td style={{ color: '#60a5fa', fontSize: 12 }}>{submitters[sub.user_id] || 'Anonymous'}</td>
                       <td style={{ color: 'var(--ah-muted)', fontSize: 12 }}>{subjectName(sub.subject_id)}</td>
                       <td>
