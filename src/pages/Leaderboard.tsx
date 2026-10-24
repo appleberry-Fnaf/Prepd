@@ -3,21 +3,23 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Contribution } from '../lib/supabase';
 import { Trophy, Crown, Star, Upload, BookOpen, PenTool, CheckCircle, Zap } from 'lucide-react';
+import './leaderboard-y2k.css';
 
 interface LeaderboardProfile {
   id: string; display_name: string; avatar_url: string | null;
   total_points: number; volunteer_hours: number;
 }
 
-const MEDAL = ['#f5c842', '#a0a8b8', '#60a5fa'];
+const MEDAL = ['#b8860b', '#808080', '#a0522d'];
+const MEDAL_LABEL = ['1st', '2nd', '3rd'];
 const RANK_LABEL = ['Top Contributor', 'Rising Star', 'Active Scholar', 'Contributor'];
 
 const POINT_ITEMS = [
-  { icon: Upload,       label: 'Submit a resource',  points: 10, color: '#60a5fa' },
-  { icon: BookOpen,     label: 'Resource approved',  points: 25, color: '#f5c842' },
-  { icon: Star,         label: 'Get an upvote',      points: 5,  color: '#f5c842' },
-  { icon: PenTool,      label: 'Answer a question',  points: 2,  color: '#60a5fa' },
-  { icon: CheckCircle,  label: 'Correct answer',     points: 5,  color: '#4ade80' },
+  { icon: Upload,       label: 'Submit a resource',  points: 10 },
+  { icon: BookOpen,     label: 'Resource approved',  points: 25 },
+  { icon: Star,         label: 'Get an upvote',      points: 5  },
+  { icon: PenTool,      label: 'Answer a question',  points: 2  },
+  { icon: CheckCircle,  label: 'Correct answer',     points: 5  },
 ];
 
 export default function Leaderboard() {
@@ -47,99 +49,101 @@ export default function Leaderboard() {
   if (loading) return <div className="dk-empty" style={{ minHeight: '60vh' }}><div className="dk-spin" /></div>;
 
   return (
-    <div>
-      <div className="dk-header">
-        <span className="dk-page-tag">Leaderboard</span>
-        <h1 className="dk-heading-xl">Rise through<br />the ranks.</h1>
-        <p className="dk-sub" style={{ maxWidth: 460 }}>
-          Every contribution earns points. See where you stand.
-        </p>
-      </div>
+    <div className="y2k-desktop">
 
-      <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
+      {/* ── Main window: rankings ────────────────────────────────────────── */}
+      <div className="y2k-window y2k-window--main">
+        <div className="y2k-titlebar">
+          <span className="y2k-title"><Trophy className="w-3.5 h-3.5" /> Prepd_Leaderboard.exe</span>
+          <span className="y2k-caption-group">
+            <span className="y2k-caption">_</span>
+            <span className="y2k-caption">▢</span>
+            <span className="y2k-caption">×</span>
+          </span>
+        </div>
+        <div className="y2k-menubar">
+          <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span>
+        </div>
 
-        {/* Top 3 podium */}
-        {topProfiles.length >= 2 && (
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16, marginBottom: 48, flexWrap: 'wrap' }}>
-            {[1, 0, 2].map(idx => {
-              const p = topProfiles[idx];
-              if (!p) return null;
-              const isFirst = idx === 0;
-              const size = isFirst ? 72 : 56;
-              const medalColor = MEDAL[idx];
-              return (
-                <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, order: idx === 1 ? 0 : idx === 0 ? 1 : 2 }}>
-                  {p.avatar_url ? (
-                    <img src={p.avatar_url} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${medalColor}44` }} />
-                  ) : (
-                    <div style={{ width: size, height: size, borderRadius: '50%', background: `${medalColor}18`, border: `1px solid ${medalColor}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--ah-sans)', fontSize: isFirst ? 20 : 16, fontWeight: 700, color: medalColor }}>
-                      {getInitials(p.display_name)}
-                    </div>
-                  )}
-                  <div style={{ width: isFirst ? 44 : 36, height: isFirst ? 44 : 36, borderRadius: '50%', background: `${medalColor}22`, border: `1px solid ${medalColor}55`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {isFirst ? <Crown className="w-5 h-5" style={{ color: medalColor }} /> : <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 13, fontWeight: 700, color: medalColor }}>{idx + 1}</span>}
-                  </div>
-                  <span style={{ fontFamily: 'var(--ah-sans)', fontSize: 13, fontWeight: 600, color: 'var(--ah-text)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.display_name || 'Student'}</span>
-                  <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11, color: medalColor }}>{val(p)} {unit}</span>
-                </div>
-              );
-            })}
+        <div className="y2k-body">
+          {/* Toolbar: sort toggle */}
+          <div className="y2k-toolbar">
+            <span style={{ fontSize: 17 }}>Sort by:</span>
+            {(['points', 'hours'] as const).map(s => (
+              <button key={s} className="y2k-btn" aria-pressed={sortBy === s} onClick={() => setSortBy(s)}>
+                {s === 'points' ? 'POINTS' : 'VOL.HRS'}
+              </button>
+            ))}
           </div>
-        )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, alignItems: 'start' }}>
-          {/* Rankings table */}
-          <div className="dk-card" style={{ overflow: 'hidden', gridColumn: 'span 2', minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 700, color: 'var(--ah-text)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Trophy className="w-4 h-4" style={{ color: '#f5c842' }} /> Top Contributors
-              </h2>
-              <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: 3 }}>
-                {(['points', 'hours'] as const).map(s => (
-                  <button key={s} onClick={() => setSortBy(s)}
-                    className={`dk-tab ${sortBy === s ? 'dk-tab-active' : 'dk-tab-inactive'}`}
-                    style={{ padding: '5px 12px', fontSize: 11 }}>
-                    {s === 'points' ? 'Points' : 'Vol. hrs'}
-                  </button>
-                ))}
+          {/* Podium — top 3 */}
+          {topProfiles.length >= 2 && (
+            <div className="y2k-sunken" style={{ marginBottom: 14 }}>
+              <div className="y2k-podium">
+                {[1, 0, 2].map(idx => {
+                  const p = topProfiles[idx];
+                  if (!p) return null;
+                  const isFirst = idx === 0;
+                  const size = isFirst ? 68 : 52;
+                  return (
+                    <div key={p.id} className="y2k-pod" style={{ order: idx === 1 ? 0 : idx === 0 ? 1 : 2 }}>
+                      <div className="y2k-pin" style={{ background: MEDAL[idx], color: '#fff' }}>
+                        {isFirst ? '★ 1st ★' : MEDAL_LABEL[idx]}
+                      </div>
+                      <div className="y2k-pod-av">
+                        {p.avatar_url ? (
+                          <img src={p.avatar_url} alt="" style={{ width: size, height: size, objectFit: 'cover', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Press Start 2P', monospace", fontSize: isFirst ? 16 : 12, background: '#e8e8e8', color: '#000' }}>
+                            {getInitials(p.display_name)}
+                          </div>
+                        )}
+                      </div>
+                      {isFirst && <Crown className="w-5 h-5" style={{ color: '#b8860b' }} />}
+                      <span className="y2k-pod-name">{p.display_name || 'Student'}</span>
+                      <span className="y2k-pod-score" style={{ color: MEDAL[idx] }}>{val(p)} {unit}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
+          )}
 
+          {/* Rankings listview */}
+          <div className="y2k-sunken">
             {topProfiles.length === 0 ? (
-              <div className="dk-empty"><Trophy className="w-8 h-8" /><p>No contributors yet. <Link to="/contribute" style={{ color: '#60a5fa' }}>Start contributing</Link></p></div>
+              <div style={{ padding: 24, textAlign: 'center', fontSize: 18 }}>
+                No contributors yet. <Link to="/contribute">Start contributing »</Link>
+              </div>
             ) : (
-              <table className="dk-table">
+              <table className="y2k-table">
                 <thead>
                   <tr>
-                    <th style={{ width: 48 }}>#</th>
-                    <th>Contributor</th>
-                    <th style={{ textAlign: 'right' }}>{sortBy === 'hours' ? 'Hours' : 'Points'}</th>
+                    <th style={{ width: 40 }}>#</th>
+                    <th>CONTRIBUTOR</th>
+                    <th style={{ textAlign: 'right' }}>{sortBy === 'hours' ? 'HOURS' : 'POINTS'}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {topProfiles.map((p, i) => (
                     <tr key={p.id}>
-                      <td>
-                        <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 12, color: i < 3 ? MEDAL[i] : 'var(--ah-muted)', fontWeight: 700 }}>{i + 1}</span>
-                      </td>
+                      <td><span className="y2k-rank" style={{ color: i < 3 ? MEDAL[i] : '#000' }}>{i + 1}</span></td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           {p.avatar_url ? (
-                            <img src={p.avatar_url} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                            <img src={p.avatar_url} alt="" className="y2k-av-sm" />
                           ) : (
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--ah-mono)', fontSize: 11, fontWeight: 700, color: 'var(--ah-muted)', flexShrink: 0 }}>
-                              {getInitials(p.display_name)}
-                            </div>
+                            <span className="y2k-av-ph">{getInitials(p.display_name)}</span>
                           )}
                           <div>
-                            <div style={{ fontFamily: 'var(--ah-sans)', fontSize: 13.5, fontWeight: 600 }}>{p.display_name || 'Anonymous'}</div>
-                            <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{RANK_LABEL[Math.min(i, 3)]}</div>
+                            <div>{p.display_name || 'Anonymous'}</div>
+                            <div className="y2k-sub">{RANK_LABEL[Math.min(i, 3)]}</div>
                           </div>
                         </div>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <span style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 800, color: i < 3 ? MEDAL[i] : 'var(--ah-text)', letterSpacing: '-0.02em' }}>{val(p)}</span>
-                        <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', marginLeft: 4 }}>{unit}</span>
+                        <span className="y2k-score" style={{ color: i < 3 ? MEDAL[i] : '#000' }}>{val(p)}</span>
+                        <span className="y2k-sub" style={{ marginLeft: 4 }}>{unit}</span>
                       </td>
                     </tr>
                   ))}
@@ -148,42 +152,48 @@ export default function Leaderboard() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {/* Points guide */}
-            <div className="dk-card" style={{ padding: '22px' }}>
-              <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Zap className="w-4 h-4" style={{ color: '#f5c842' }} /> How to earn
-              </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {POINT_ITEMS.map(item => (
-                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.03)' }}>
-                    <item.icon className="w-4 h-4 shrink-0" style={{ color: item.color }} />
-                    <span style={{ fontSize: 12.5, color: 'var(--ah-muted)', flex: 1 }}>{item.label}</span>
-                    <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, fontWeight: 700, color: item.color }}>+{item.points}</span>
+          {/* Status bar */}
+          <div className="y2k-statusbar">
+            <span className="y2k-status-cell">{topProfiles.length} contributor(s)</span>
+            <span className="y2k-status-cell">Sorted: {sortBy === 'hours' ? 'Vol. hours' : 'Points'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Side window: how to earn + recent ────────────────────────────── */}
+      <div className="y2k-window y2k-window--side">
+        <div className="y2k-titlebar">
+          <span className="y2k-title"><Zap className="w-3.5 h-3.5" /> HowToEarn.txt</span>
+          <span className="y2k-caption-group">
+            <span className="y2k-caption">_</span>
+            <span className="y2k-caption">×</span>
+          </span>
+        </div>
+        <div className="y2k-body">
+          <div className="y2k-h"><Zap className="w-3.5 h-3.5" /> How to earn points</div>
+          <div className="y2k-sunken" style={{ padding: '6px 10px', background: '#fff' }}>
+            {POINT_ITEMS.map(item => (
+              <div key={item.label} className="y2k-earn-row">
+                <item.icon className="w-4 h-4" />
+                <span>{item.label}</span>
+                <span className="y2k-earn-pts" style={{ color: '#008000' }}>+{item.points}</span>
+              </div>
+            ))}
+          </div>
+
+          {recentContributions.length > 0 && (
+            <>
+              <div className="y2k-h" style={{ marginTop: 16 }}>Recent activity</div>
+              <div className="y2k-sunken" style={{ padding: '6px 10px', background: '#fff' }}>
+                {recentContributions.slice(0, 6).map(c => (
+                  <div key={c.id} className="y2k-earn-row">
+                    <span style={{ textTransform: 'capitalize' }}>{c.action_type.replace(/_/g, ' ')}</span>
+                    <span className="y2k-earn-pts" style={{ color: '#008000' }}>+{c.points}</span>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Recent activity */}
-            {recentContributions.length > 0 && (
-              <div className="dk-card" style={{ padding: '22px' }}>
-                <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 14, fontWeight: 700, color: 'var(--ah-text)', marginBottom: 16 }}>Recent activity</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {recentContributions.slice(0, 6).map(c => (
-                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0' }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12.5, color: 'var(--ah-muted)', textTransform: 'capitalize' }}>{c.action_type.replace(/_/g, ' ')}</div>
-                        <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{new Date(c.created_at).toLocaleDateString()}</div>
-                      </div>
-                      <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 11.5, color: '#4ade80', fontWeight: 700 }}>+{c.points}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
