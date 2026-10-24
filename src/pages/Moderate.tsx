@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import type { APSubject, Submission } from '../lib/supabase';
-import { ShieldCheck, CheckCircle, XCircle, Clock, ExternalLink, Loader2, Inbox } from 'lucide-react';
+import { ShieldCheck, CheckCircle, XCircle, Clock, ExternalLink, Loader2, Inbox, User } from 'lucide-react';
 
 export default function Moderate() {
   const { user, profile, loading: authLoading } = useAuth();
   const [subjects, setSubjects] = useState<APSubject[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submitters, setSubmitters] = useState<Record<string, string>>({});
   const [hours, setHours] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
@@ -19,8 +20,26 @@ export default function Moderate() {
   async function loadData() {
     const { data: subjectsData } = await supabase.from('ap_subjects').select('*');
     setSubjects(subjectsData || []);
-    const { data: subData } = await supabase.from('submissions').select('*').order('created_at', { ascending: false });
-    setSubmissions(subData || []);
+
+    const { data: subData } = await supabase
+      .from('submissions')
+      .select('*')
+      .order('created_at', { ascending: false });
+    const subs = subData || [];
+    setSubmissions(subs);
+
+    // Fetch display names for all unique submitters
+    const uids = [...new Set(subs.map(s => s.user_id))];
+    if (uids.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .in('id', uids);
+      const map: Record<string, string> = {};
+      (profiles || []).forEach(p => { map[p.id] = p.display_name || 'Anonymous'; });
+      setSubmitters(map);
+    }
+
     setLoading(false);
   }
 
@@ -34,12 +53,29 @@ export default function Moderate() {
   async function decide(sub: Submission, status: 'approved' | 'rejected') {
     setBusy(sub.id);
     const vh = status === 'approved' ? parseFloat(hours[sub.id] || '0') || 0 : 0;
+
     await supabase.from('submissions').update({
       status, volunteer_hours: vh,
       moderator_notes: notes[sub.id] || null,
       reviewed_by: user?.id || null,
       reviewed_at: new Date().toISOString(),
     }).eq('id', sub.id);
+
+    // Award 25 pts to the submitter on approval
+    if (status === 'approved') {
+      await supabase.from('contributions').insert({
+        user_id: sub.user_id,
+        action_type: 'resource_approved',
+        points: 25,
+        subject_id: sub.subject_id,
+      });
+      const { data: prof } = await supabase
+        .from('profiles').select('total_points').eq('id', sub.user_id).single();
+      await supabase.from('profiles')
+        .update({ total_points: (prof?.total_points ?? 0) + 25 })
+        .eq('id', sub.user_id);
+    }
+
     await loadData();
     setBusy(null);
   }
@@ -102,6 +138,15 @@ export default function Moderate() {
                     <div style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       {subjectName(sub.subject_id)} · {sub.type}
                     </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5 }}>
+                      <User className="w-3 h-3" style={{ color: 'var(--ah-muted)' }} />
+                      <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: '#60a5fa' }}>
+                        {submitters[sub.user_id] || 'Anonymous'}
+                      </span>
+                      <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)' }}>
+                        · {new Date(sub.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
                   {sub.file_url && (
                     <a href={sub.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--ah-mono)', fontSize: 10.5, color: '#60a5fa', textDecoration: 'none', flexShrink: 0 }}>
@@ -152,6 +197,7 @@ export default function Moderate() {
                 <thead>
                   <tr>
                     <th>Title</th>
+                    <th>Submitted by</th>
                     <th>Subject</th>
                     <th>Status</th>
                     <th>Hrs</th>
@@ -161,6 +207,7 @@ export default function Moderate() {
                   {reviewed.map(sub => (
                     <tr key={sub.id}>
                       <td style={{ fontWeight: 600 }}>{sub.title}</td>
+                      <td style={{ color: '#60a5fa', fontSize: 12 }}>{submitters[sub.user_id] || 'Anonymous'}</td>
                       <td style={{ color: 'var(--ah-muted)', fontSize: 12 }}>{subjectName(sub.subject_id)}</td>
                       <td>
                         <span className={`dk-badge ${sub.status === 'approved' ? 'dk-badge-green' : 'dk-badge-red'}`}>

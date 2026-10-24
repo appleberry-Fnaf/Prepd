@@ -1,10 +1,42 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import type { APSubject, PracticeQuestion } from '../lib/supabase';
 import { CheckCircle, XCircle, ChevronRight, ArrowRight, BookOpen, Zap } from 'lucide-react';
 
+async function saveProgress(userId: string, subjectId: string, answered: number, correct: number) {
+  const { data: existing } = await supabase
+    .from('user_progress')
+    .select('questions_answered, questions_correct, resources_viewed, study_time_minutes')
+    .eq('user_id', userId)
+    .eq('subject_id', subjectId)
+    .maybeSingle();
+
+  await supabase.from('user_progress').upsert({
+    user_id: userId,
+    subject_id: subjectId,
+    questions_answered: (existing?.questions_answered ?? 0) + answered,
+    questions_correct:  (existing?.questions_correct  ?? 0) + correct,
+    resources_viewed:   existing?.resources_viewed   ?? 0,
+    study_time_minutes: existing?.study_time_minutes ?? 0,
+    last_accessed: new Date().toISOString(),
+  }, { onConflict: 'user_id,subject_id' });
+
+  const points = answered * 2 + correct * 5;
+  if (points > 0) {
+    await supabase.from('contributions').insert({
+      user_id: userId, action_type: 'practice_session', points, subject_id: subjectId,
+    });
+    const { data: prof } = await supabase.from('profiles').select('total_points').eq('id', userId).single();
+    await supabase.from('profiles')
+      .update({ total_points: (prof?.total_points ?? 0) + points })
+      .eq('id', userId);
+  }
+}
+
 export default function Practice() {
+  const { user } = useAuth();
   const [subjects, setSubjects] = useState<APSubject[]>([]);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -26,6 +58,13 @@ export default function Practice() {
     }
     loadData();
   }, []);
+
+  // Save progress when quiz finishes
+  useEffect(() => {
+    if (mode !== 'done' || !user || !selectedSubject) return;
+    saveProgress(user.id, selectedSubject, score.total, score.correct);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   const subjectQuestionCount = (id: string) => questions.filter(q => q.subject_id === id).length;
 
