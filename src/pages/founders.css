@@ -106,34 +106,21 @@
     brightness(0) invert(1)
     drop-shadow(0 3px 5px rgba(0, 0, 0, 0.6));
 }
-/* Headphones + a cord curling down out of the circle into the Spotify player */
-.music-bridge {
+/* Over-ear headphones wrapping the circle, with a cord into the Spotify player.
+   viewBox is 100x150 and the element is 100% x 150% of the square photo,
+   so it maps 1:1 with no distortion; the bottom third reaches the player. */
+.music-rig {
   position: absolute;
-  left: calc(50% - 46px);
-  top: 66%;
-  width: 92px;
-  height: 210px;
-  z-index: 5;
-  pointer-events: none;
-  animation: fav-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s both;
-  transform-origin: top center;
-}
-.music-bridge-hp {
-  display: block;
-  width: 62px;
-  height: 62px;
-  margin: 0 auto;
-  object-fit: contain;
-  filter: brightness(0) invert(1) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.6));
-  animation: fav-float 3.6s ease-in-out infinite 1s;
-}
-.music-bridge-cord {
-  position: absolute;
-  top: 48px;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 160px;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+  height: 150%;
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.55));
+  animation: fav-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+  transform-origin: center top;
 }
 
 @keyframes fav-pop {

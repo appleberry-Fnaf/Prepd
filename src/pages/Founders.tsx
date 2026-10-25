@@ -149,17 +149,18 @@ export default function Founders() {
                       </div>
                     ))}
 
-                    {/* Headphones + cord curling down into the Spotify player */}
-                    {isFlipped && f.musicSticker && (
-                      <div className="music-bridge" aria-hidden="true">
-                        <img className="music-bridge-hp" src={f.musicSticker} alt="" />
-                        <svg className="music-bridge-cord" viewBox="0 0 92 160" fill="none" preserveAspectRatio="none">
-                          <path
-                            d="M46 2 C 18 34, 80 60, 44 90 C 22 108, 70 126, 50 160"
-                            stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round"
-                          />
-                        </svg>
-                      </div>
+                    {/* Over-ear headphones wrapping the circle, cord into the player */}
+                    {isFlipped && f.song && (
+                      <svg className="music-rig" viewBox="0 0 100 150" fill="none" aria-hidden="true">
+                        {/* headband over the top */}
+                        <path d="M6 50 C 6 7, 94 7, 94 50" stroke="#fff" strokeWidth="6.5" strokeLinecap="round" />
+                        {/* ear cups at the middle of the photo */}
+                        <rect x="-3" y="35" width="20" height="33" rx="10" fill="#fff" transform="rotate(-11 7 51)" />
+                        <rect x="83" y="35" width="20" height="33" rx="10" fill="#fff" transform="rotate(11 93 51)" />
+                        {/* cord curling down into the player */}
+                        <path d="M8 66 C 1 90, 34 99, 21 117 C 11 131, 35 141, 47 150"
+                          stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
+                      </svg>
                     )}
                   </div>
 
