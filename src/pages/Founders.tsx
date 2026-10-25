@@ -19,7 +19,8 @@ interface Founder {
   song?: string;       // Spotify track URI — plays on flip to baby pic
   songStopMs?: number; // stop playback at this position (ms)
   linkedin?: string;   // LinkedIn profile URL
-  favs?: { label: string; src: string; pos: React.CSSProperties; rot: string }[];
+  favs?: { label: string; src: string; pos: React.CSSProperties; rot: string; tint?: boolean; glow?: boolean }[];
+  musicSticker?: string; // sticker that bridges the circle to the Spotify player
 }
 
 const FOUNDERS: Founder[] = [
@@ -38,11 +39,11 @@ const FOUNDERS: Founder[] = [
     songStopMs: 12000,
     linkedin: 'https://www.linkedin.com/in/sai-sahaana-aswanth-7aab47419/',
     favs: [
-      { label: 'Chess',      src: '/founders/favs/chess.png',       pos: { top: '-7%',    left: '-11%'  }, rot: '-8deg' },
-      { label: 'Piano',      src: '/founders/favs/piano.png',       pos: { top: '-3%',    right: '-12%' }, rot: '7deg'  },
-      { label: 'Spider-Man', src: '/founders/favs/spiderman.webp',  pos: { bottom: '22%', left: '-13%'  }, rot: '6deg'  },
-      { label: 'Music',      src: '/founders/favs/headphones.png',  pos: { bottom: '10%', right: '-12%' }, rot: '-7deg' },
+      { label: 'Chess',      src: '/founders/favs/chess.png',      pos: { top: '-8%',    left: '-12%' }, rot: '-8deg', glow: true },
+      { label: 'Piano',      src: '/founders/favs/piano.png',      pos: { top: '-5%',    right: '-13%' }, rot: '7deg', tint: true },
+      { label: 'Spider-Man', src: '/founders/favs/spiderman.png',  pos: { bottom: '26%', left: '-14%' }, rot: '6deg', tint: true },
     ],
+    musicSticker: '/founders/favs/headphones.png',
     bio: [
       'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was little, I’ve wanted to help the people around me, which led me to pursue biomedical engineering. Since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
       'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it. As a student, I know that preparing for exams and finding reliable study resources can be challenging, which inspired me to create Prepd, a student-led initiative that makes academic resources more accessible and helps students feel more confident in their learning.',
@@ -136,7 +137,7 @@ export default function Founders() {
                     {isFlipped && f.favs?.map((fav, k) => (
                       <div
                         key={fav.label}
-                        className="fav"
+                        className={`fav ${fav.tint ? 'fav-tint' : ''} ${fav.glow ? 'fav-glow' : ''}`}
                         title={fav.label}
                         style={{
                           ...fav.pos,
@@ -147,6 +148,13 @@ export default function Founders() {
                         <img src={fav.src} alt={fav.label} />
                       </div>
                     ))}
+
+                    {/* Headphones drop down out of the circle toward the Spotify player */}
+                    {isFlipped && f.musicSticker && (
+                      <div className="fav fav-tint fav-headphones" title="Now playing" aria-hidden="true">
+                        <img src={f.musicSticker} alt="" />
+                      </div>
+                    )}
                   </div>
 
                   {/* Spotify player — reveals + plays when flipped to the baby pic */}
