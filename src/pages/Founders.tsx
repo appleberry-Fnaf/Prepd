@@ -122,7 +122,7 @@ export default function Founders() {
                     {f.name}
                   </h2>
                   <p style={{ fontFamily: 'var(--ah-mono)', fontSize: 12, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>
-                    Goes by {f.short}
+                    {f.role}
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {f.bio.map((para, j) => (
