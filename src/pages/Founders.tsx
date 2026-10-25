@@ -65,8 +65,7 @@ export default function Founders() {
         <span className="dk-page-tag">About</span>
         <h1 className="dk-heading-xl">Meet the<br />founders.</h1>
         <p className="dk-sub" style={{ maxWidth: 520 }}>
-          Prepd is run and built by students! Here are our founders —
-          tap a photo to see us back then.
+          Prepd is run and built by students! Here are the students who made this happen.
         </p>
       </div>
 
@@ -118,12 +117,9 @@ export default function Founders() {
                     {f.role === 'Founder' ? <Sparkles className="w-3 h-3" /> : <Heart className="w-3 h-3" />}
                     {f.role}
                   </span>
-                  <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em', marginBottom: 2 }}>
+                  <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em', marginBottom: 16 }}>
                     {f.name}
                   </h2>
-                  <p style={{ fontFamily: 'var(--ah-mono)', fontSize: 12, color: 'var(--ah-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>
-                    {f.role}
-                  </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {f.bio.map((para, j) => (
                       <p key={j} style={{ fontSize: 14.5, lineHeight: 1.7, color: 'var(--ah-muted)' }}>
