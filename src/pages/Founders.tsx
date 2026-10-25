@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Heart, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import './founders.css';
 
 interface Founder {
@@ -110,13 +110,6 @@ export default function Founders() {
 
                 {/* Text */}
                 <div style={{ direction: 'ltr', minWidth: 0 }}>
-                  <span
-                    className="dk-badge"
-                    style={{ background: `${f.accent}1f`, color: f.accent, border: `1px solid ${f.accent}44`, marginBottom: 12 }}
-                  >
-                    {f.role === 'Founder' ? <Sparkles className="w-3 h-3" /> : <Heart className="w-3 h-3" />}
-                    {f.role}
-                  </span>
                   <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em', marginBottom: 16 }}>
                     {f.name}
                   </h2>
