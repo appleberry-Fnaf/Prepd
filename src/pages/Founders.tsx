@@ -19,6 +19,7 @@ interface Founder {
   song?: string;       // Spotify track URI — plays on flip to baby pic
   songStopMs?: number; // stop playback at this position (ms)
   linkedin?: string;   // LinkedIn profile URL
+  favs?: { label: string; src: string; pos: React.CSSProperties; rot: string }[];
 }
 
 const FOUNDERS: Founder[] = [
@@ -36,6 +37,12 @@ const FOUNDERS: Founder[] = [
     song: 'spotify:track:2WdAV1VqmllcEznKlVOFxG', // Paris in the Rain — Lauv
     songStopMs: 12000,
     linkedin: 'https://www.linkedin.com/in/sai-sahaana-aswanth-7aab47419/',
+    favs: [
+      { label: 'Chess',      src: '/founders/favs/chess.png',       pos: { top: '-7%',    left: '-11%'  }, rot: '-8deg' },
+      { label: 'Piano',      src: '/founders/favs/piano.png',       pos: { top: '-3%',    right: '-12%' }, rot: '7deg'  },
+      { label: 'Spider-Man', src: '/founders/favs/spiderman.webp',  pos: { bottom: '22%', left: '-13%'  }, rot: '6deg'  },
+      { label: 'Music',      src: '/founders/favs/headphones.png',  pos: { bottom: '10%', right: '-12%' }, rot: '-7deg' },
+    ],
     bio: [
       'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was little, I’ve wanted to help the people around me, which led me to pursue biomedical engineering. Since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
       'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it. As a student, I know that preparing for exams and finding reliable study resources can be challenging, which inspired me to create Prepd, a student-led initiative that makes academic resources more accessible and helps students feel more confident in their learning.',
@@ -104,24 +111,42 @@ export default function Founders() {
               >
                 {/* Photo — circular flip card */}
                 <div className="founder-photo" style={{ direction: 'ltr', ['--accent' as string]: f.accent }}>
-                  <div
-                    className={`flip ${isFlipped ? 'is-flipped' : ''}`}
-                    onClick={() => toggle(f)}
-                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(f); } }}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`${f.name} — tap to flip between now and baby photo`}
-                  >
-                    <div className="flip-inner">
-                      <div className="flip-face flip-front">
-                        <img src={f.photo} alt={f.name}
-                          style={{ objectPosition: f.photoPos ?? 'center', transform: `scale(${f.photoZoom ?? 1})` }} />
-                      </div>
-                      <div className="flip-face flip-back">
-                        <img src={f.baby} alt={`${f.short} as a baby`}
-                          style={{ objectPosition: f.babyPos ?? 'center', transform: `scale(${f.babyZoom ?? 1})` }} />
+                  <div className="flip-wrap">
+                    <div
+                      className={`flip ${isFlipped ? 'is-flipped' : ''}`}
+                      onClick={() => toggle(f)}
+                      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(f); } }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${f.name} — tap to flip between now and baby photo`}
+                    >
+                      <div className="flip-inner">
+                        <div className="flip-face flip-front">
+                          <img src={f.photo} alt={f.name}
+                            style={{ objectPosition: f.photoPos ?? 'center', transform: `scale(${f.photoZoom ?? 1})` }} />
+                        </div>
+                        <div className="flip-face flip-back">
+                          <img src={f.baby} alt={`${f.short} as a baby`}
+                            style={{ objectPosition: f.babyPos ?? 'center', transform: `scale(${f.babyZoom ?? 1})` }} />
+                        </div>
                       </div>
                     </div>
+
+                    {/* Favorite-things stickers — pop out when flipped to the baby pic */}
+                    {isFlipped && f.favs?.map((fav, k) => (
+                      <div
+                        key={fav.label}
+                        className="fav"
+                        title={fav.label}
+                        style={{
+                          ...fav.pos,
+                          ['--rot' as string]: fav.rot,
+                          animationDelay: `${0.12 + k * 0.09}s, ${0.6 + k * 0.3}s`,
+                        }}
+                      >
+                        <img src={fav.src} alt={fav.label} />
+                      </div>
+                    ))}
                   </div>
 
                   {/* Spotify player — reveals + plays when flipped to the baby pic */}
