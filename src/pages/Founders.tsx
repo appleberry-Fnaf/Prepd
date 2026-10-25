@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Linkedin } from 'lucide-react';
 import SpotifyMiniPlayer, { SpotifyMiniPlayerHandle } from '../components/SpotifyMiniPlayer';
 import './founders.css';
 
@@ -18,6 +18,7 @@ interface Founder {
   babyZoom?: number;
   song?: string;       // Spotify track URI — plays on flip to baby pic
   songStopMs?: number; // stop playback at this position (ms)
+  linkedin?: string;   // LinkedIn profile URL
 }
 
 const FOUNDERS: Founder[] = [
@@ -34,6 +35,7 @@ const FOUNDERS: Founder[] = [
     babyZoom: 1,
     song: 'spotify:track:2WdAV1VqmllcEznKlVOFxG', // Paris in the Rain — Lauv
     songStopMs: 12000,
+    linkedin: 'https://www.linkedin.com/in/sai-sahaana-aswanth-7aab47419/',
     bio: [
       'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was little, I’ve wanted to help the people around me, which led me to pursue biomedical engineering. Since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
       'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it. As a student, I know that preparing for exams and finding reliable study resources can be challenging, which inspired me to create Prepd, a student-led initiative that makes academic resources more accessible and helps students feel more confident in their learning.',
@@ -152,9 +154,24 @@ export default function Founders() {
                   <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em', marginBottom: 4 }}>
                     {f.name}
                   </h2>
-                  <p style={{ fontFamily: 'var(--ah-mono)', fontSize: 12.5, fontWeight: 700, color: f.accent, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
+                  <p style={{ fontFamily: 'var(--ah-mono)', fontSize: 12.5, fontWeight: 700, color: f.accent, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: f.linkedin ? 10 : 16 }}>
                     {f.role}
                   </p>
+                  {f.linkedin && (
+                    <a
+                      href={f.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 7,
+                        marginBottom: 16, padding: '6px 12px', borderRadius: 999,
+                        background: `${f.accent}14`, border: `1px solid ${f.accent}3a`,
+                        color: f.accent, fontSize: 13, fontWeight: 600, textDecoration: 'none',
+                      }}
+                    >
+                      <Linkedin className="w-4 h-4" /> Connect on LinkedIn
+                    </a>
+                  )}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {f.bio.map((para, j) => (
                       <p key={j} style={{ fontSize: 14.5, lineHeight: 1.7, color: 'var(--ah-muted)' }}>
