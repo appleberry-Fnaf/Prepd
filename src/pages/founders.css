@@ -28,6 +28,11 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   border: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: none;
+  transition: box-shadow 0.4s ease;
+}
+/* glow only appears after the card is flipped */
+.flip.is-flipped .flip-face {
   box-shadow: 0 12px 44px -12px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 .flip-face img {
