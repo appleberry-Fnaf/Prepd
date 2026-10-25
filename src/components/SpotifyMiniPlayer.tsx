@@ -30,20 +30,32 @@ const SpotifyMiniPlayer = forwardRef<SpotifyMiniPlayerHandle, Props>(
     const hostRef = useRef<HTMLDivElement>(null);
     const controllerRef = useRef<any>(null);
     const watchingRef = useRef(false);
+    const needSeekRef = useRef(false);
+    const timerRef = useRef<number | undefined>(undefined);
+
+    const clearTimer = () => {
+      if (timerRef.current) { window.clearTimeout(timerRef.current); timerRef.current = undefined; }
+    };
+
+    const doStop = () => {
+      const c = controllerRef.current;
+      watchingRef.current = false;
+      clearTimer();
+      try { c?.pause(); c?.seek(0); } catch { /* noop */ }
+    };
 
     useImperativeHandle(ref, () => ({
       play() {
         const c = controllerRef.current;
         if (!c) return;
         watchingRef.current = true;
+        needSeekRef.current = true;   // force back to 0 once playback reports in
+        clearTimer();
         try { c.seek(0); c.play(); } catch { /* noop */ }
+        // wall-clock backstop in case position events stop arriving
+        timerRef.current = window.setTimeout(doStop, stopAtMs + 500);
       },
-      stop() {
-        const c = controllerRef.current;
-        if (!c) return;
-        watchingRef.current = false;
-        try { c.pause(); c.seek(0); } catch { /* noop */ }
-      },
+      stop() { doStop(); },
     }));
 
     useEffect(() => {
@@ -57,11 +69,16 @@ const SpotifyMiniPlayer = forwardRef<SpotifyMiniPlayerHandle, Props>(
           (controller: any) => {
             controllerRef.current = controller;
             controller.addListener('playback_update', (e: any) => {
+              if (!watchingRef.current) return;
               const pos = e?.data?.position ?? 0;
-              if (watchingRef.current && pos >= stopAtMs) {
-                watchingRef.current = false;
-                try { controller.pause(); controller.seek(0); } catch { /* noop */ }
+              // If playback resumed from somewhere other than the start, snap to 0 once
+              if (needSeekRef.current && pos > 1500) {
+                needSeekRef.current = false;
+                try { controller.seek(0); } catch { /* noop */ }
+                return;
               }
+              needSeekRef.current = false;
+              if (pos >= stopAtMs) doStop();
             });
           }
         );
@@ -87,6 +104,7 @@ const SpotifyMiniPlayer = forwardRef<SpotifyMiniPlayerHandle, Props>(
 
       return () => {
         cancelled = true;
+        clearTimer();
         try { controllerRef.current?.destroy(); } catch { /* noop */ }
       };
     }, [uri, stopAtMs]);
