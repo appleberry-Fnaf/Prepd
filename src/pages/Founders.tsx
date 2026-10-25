@@ -65,7 +65,7 @@ const FOUNDERS: Founder[] = [
 
 const VISION: string[] = [
   'Our vision is to build a global community of students and educators, united by the belief that learning should be accessible to everyone. We want to connect students with free, high-quality resources and meaningful ways to contribute, allowing them to explore their interests, build new skills, and find their place in a supportive community.',
-  'We believe studying should be more than a race to stand out — it should help students discover what matters to them, learn from one another, and recognize their potential to make a difference. Through Prepd, we hope to build a community where students support one another, share what they know, and work toward their goals with greater confidence. No matter who you are, where you come from, or what you’re working toward, there’s a place for you here.',
+  'We believe studying should be more than a race to stand out; it should help students discover what matters to them, learn from one another, and recognize their potential to make a difference. Through Prepd, we hope to build a community where students support one another, share what they know, and work toward their goals with greater confidence. No matter who you are, where you come from, or what you’re working toward, there’s a place for you here.',
   'Ultimately, we envision Prepd becoming a place where knowledge is shared freely, passions become purpose, and small acts of help add up to lasting, meaningful change.',
 ];
 
