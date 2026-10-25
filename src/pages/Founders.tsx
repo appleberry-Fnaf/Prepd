@@ -35,10 +35,9 @@ const FOUNDERS: Founder[] = [
     song: 'spotify:track:2WdAV1VqmllcEznKlVOFxG', // Paris in the Rain — Lauv
     songStopMs: 12000,
     bio: [
-      'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was a little kid, I’ve wanted to help the people around me. This led me to become passionate about pursuing a career in biomedical engineering, and since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
-      'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it.',
-      'As a student, I understand that preparing for exams and finding reliable study resources can be challenging. This inspired me to create Prepd, a student-led initiative dedicated to making academic resources more accessible and helping students feel more confident in their learning.',
-      'Through this initiative, I hope to build a community where students can support one another, share knowledge, and work toward their goals together. To me, Prepd is one step toward turning a simple question into meaningful action.',
+      'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was little, I’ve wanted to help the people around me, which led me to pursue biomedical engineering. Since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
+      'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it. As a student, I know that preparing for exams and finding reliable study resources can be challenging, which inspired me to create Prepd, a student-led initiative that makes academic resources more accessible and helps students feel more confident in their learning.',
+      'Through Prepd, I hope to build a community where students support one another, share knowledge, and work toward their goals together. To me, it’s one step toward turning a simple question into meaningful action.',
     ],
   },
   {
