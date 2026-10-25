@@ -38,12 +38,6 @@ const FOUNDERS: Founder[] = [
     song: 'spotify:track:2WdAV1VqmllcEznKlVOFxG', // Paris in the Rain — Lauv
     songStopMs: 12000,
     linkedin: 'https://www.linkedin.com/in/sai-sahaana-aswanth-7aab47419/',
-    favs: [
-      { label: 'Chess',      src: '/founders/favs/chess.png',      pos: { top: '-8%',    left: '-12%' }, rot: '-8deg', tint: true },
-      { label: 'Piano',      src: '/founders/favs/piano.png',      pos: { top: '-5%',    right: '-13%' }, rot: '7deg', tint: true },
-      { label: 'Spider-Man', src: '/founders/favs/spiderman.png',  pos: { bottom: '26%', left: '-14%' }, rot: '6deg', tint: true },
-    ],
-    musicSticker: '/founders/favs/headphones.png',
     bio: [
       'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was little, I’ve wanted to help the people around me, which led me to pursue biomedical engineering. Since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
       'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it. As a student, I know that preparing for exams and finding reliable study resources can be challenging, which inspired me to create Prepd, a student-led initiative that makes academic resources more accessible and helps students feel more confident in their learning.',
@@ -132,36 +126,6 @@ export default function Founders() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Favorite-things stickers — pop out when flipped to the baby pic */}
-                    {isFlipped && f.favs?.map((fav, k) => (
-                      <div
-                        key={fav.label}
-                        className={`fav ${fav.tint ? 'fav-tint' : ''} ${fav.glow ? 'fav-glow' : ''}`}
-                        title={fav.label}
-                        style={{
-                          ...fav.pos,
-                          ['--rot' as string]: fav.rot,
-                          animationDelay: `${0.12 + k * 0.09}s, ${0.6 + k * 0.3}s`,
-                        }}
-                      >
-                        <img src={fav.src} alt={fav.label} />
-                      </div>
-                    ))}
-
-                    {/* Over-ear headphones wrapping the circle, cord into the player */}
-                    {isFlipped && f.song && (
-                      <svg className="music-rig" viewBox="0 0 100 150" fill="none" aria-hidden="true">
-                        {/* headband over the top */}
-                        <path d="M6 50 C 6 7, 94 7, 94 50" stroke="#fff" strokeWidth="6.5" strokeLinecap="round" />
-                        {/* ear cups at the middle of the photo */}
-                        <rect x="-3" y="35" width="20" height="33" rx="10" fill="#fff" transform="rotate(-11 7 51)" />
-                        <rect x="83" y="35" width="20" height="33" rx="10" fill="#fff" transform="rotate(11 93 51)" />
-                        {/* cord curling down into the player */}
-                        <path d="M8 66 C 1 90, 34 99, 21 117 C 11 131, 35 141, 47 150"
-                          stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
-                      </svg>
-                    )}
                   </div>
 
                   {/* Spotify player — reveals + plays when flipped to the baby pic */}
