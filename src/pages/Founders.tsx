@@ -39,7 +39,7 @@ const FOUNDERS: Founder[] = [
     songStopMs: 12000,
     linkedin: 'https://www.linkedin.com/in/sai-sahaana-aswanth-7aab47419/',
     favs: [
-      { label: 'Chess',      src: '/founders/favs/chess.png',      pos: { top: '-8%',    left: '-12%' }, rot: '-8deg', glow: true },
+      { label: 'Chess',      src: '/founders/favs/chess.png',      pos: { top: '-8%',    left: '-12%' }, rot: '-8deg', tint: true },
       { label: 'Piano',      src: '/founders/favs/piano.png',      pos: { top: '-5%',    right: '-13%' }, rot: '7deg', tint: true },
       { label: 'Spider-Man', src: '/founders/favs/spiderman.png',  pos: { bottom: '26%', left: '-14%' }, rot: '6deg', tint: true },
     ],
@@ -149,10 +149,16 @@ export default function Founders() {
                       </div>
                     ))}
 
-                    {/* Headphones drop down out of the circle toward the Spotify player */}
+                    {/* Headphones + cord curling down into the Spotify player */}
                     {isFlipped && f.musicSticker && (
-                      <div className="fav fav-tint fav-headphones" title="Now playing" aria-hidden="true">
-                        <img src={f.musicSticker} alt="" />
+                      <div className="music-bridge" aria-hidden="true">
+                        <img className="music-bridge-hp" src={f.musicSticker} alt="" />
+                        <svg className="music-bridge-cord" viewBox="0 0 92 160" fill="none" preserveAspectRatio="none">
+                          <path
+                            d="M46 2 C 18 34, 80 60, 44 90 C 22 108, 70 126, 50 160"
+                            stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round"
+                          />
+                        </svg>
                       </div>
                     )}
                   </div>
