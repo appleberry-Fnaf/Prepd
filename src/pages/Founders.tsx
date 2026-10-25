@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import SpotifyMiniPlayer, { SpotifyMiniPlayerHandle } from '../components/SpotifyMiniPlayer';
 import './founders.css';
 
 interface Founder {
@@ -15,6 +16,8 @@ interface Founder {
   photoZoom?: number;  // scale to fill the circle
   babyPos?: string;
   babyZoom?: number;
+  song?: string;       // Spotify track URI — plays on flip to baby pic
+  songStopMs?: number; // stop playback at this position (ms)
 }
 
 const FOUNDERS: Founder[] = [
@@ -29,6 +32,8 @@ const FOUNDERS: Founder[] = [
     photoZoom: 1.4,
     babyPos: 'center 32%',
     babyZoom: 1,
+    song: 'spotify:track:2WdAV1VqmllcEznKlVOFxG', // Paris in the Rain — Lauv
+    songStopMs: 12000,
     bio: [
       'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was a little kid, I’ve wanted to help the people around me. This led me to become passionate about pursuing a career in biomedical engineering, and since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
       'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it.',
@@ -57,7 +62,18 @@ const FOUNDERS: Founder[] = [
 
 export default function Founders() {
   const [flipped, setFlipped] = useState<Record<string, boolean>>({});
-  const toggle = (name: string) => setFlipped(f => ({ ...f, [name]: !f[name] }));
+  const players = useRef<Record<string, SpotifyMiniPlayerHandle | null>>({});
+
+  const toggle = (f: Founder) => {
+    const next = !flipped[f.name];
+    setFlipped(prev => ({ ...prev, [f.name]: next }));
+    // Play the founder's song when flipping to the baby pic; stop when flipping back
+    if (f.song) {
+      const p = players.current[f.name];
+      if (next) p?.play();
+      else p?.stop();
+    }
+  };
 
   return (
     <div>
@@ -89,8 +105,8 @@ export default function Founders() {
                 <div className="founder-photo" style={{ direction: 'ltr', ['--accent' as string]: f.accent }}>
                   <div
                     className={`flip ${isFlipped ? 'is-flipped' : ''}`}
-                    onClick={() => toggle(f.name)}
-                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(f.name); } }}
+                    onClick={() => toggle(f)}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(f); } }}
                     role="button"
                     tabIndex={0}
                     aria-label={`${f.name} — tap to flip between now and baby photo`}
@@ -106,6 +122,30 @@ export default function Founders() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Spotify player — reveals + plays when flipped to the baby pic */}
+                  {f.song && (
+                    <div
+                      className="founder-song"
+                      style={{
+                        maxWidth: 320,
+                        width: '100%',
+                        marginTop: isFlipped ? 16 : 0,
+                        maxHeight: isFlipped ? 120 : 0,
+                        opacity: isFlipped ? 1 : 0,
+                        overflow: 'hidden',
+                        transform: isFlipped ? 'translateY(0)' : 'translateY(-8px)',
+                        transition: 'opacity 0.45s ease, max-height 0.45s ease, margin-top 0.45s ease, transform 0.45s ease',
+                        pointerEvents: isFlipped ? 'auto' : 'none',
+                      }}
+                    >
+                      <SpotifyMiniPlayer
+                        ref={(el) => { players.current[f.name] = el; }}
+                        uri={f.song}
+                        stopAtMs={f.songStopMs ?? 12000}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Text */}
