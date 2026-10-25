@@ -65,8 +65,8 @@ export default function Founders() {
         <span className="dk-page-tag">About</span>
         <h1 className="dk-heading-xl">Meet the<br />founders.</h1>
         <p className="dk-sub" style={{ maxWidth: 520 }}>
-          Prepd is built and run by students — here are the two who started it.
-          Tap a photo to see us back then!
+          Prepd is run and built by students! Here are our founders —
+          tap a photo to see us back then.
         </p>
       </div>
 
