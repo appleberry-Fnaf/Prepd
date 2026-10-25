@@ -2,14 +2,79 @@
   grid-template-columns: minmax(0, 340px) 1fr;
 }
 
+/* ── Circular flip card ──────────────────────────────────────────────────── */
+.flip {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  perspective: 1200px;
+  cursor: pointer;
+  outline: none;
+}
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0.1, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.flip.is-flipped .flip-inner { transform: rotateY(180deg); }
+
+.flip-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 12px 44px -12px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.flip-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.flip-back { transform: rotateY(180deg); }
+
+/* focus ring for keyboard users */
+.flip:focus-visible .flip-face {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* little "tap to flip" pill under the photo */
+.flip-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 14px auto 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, transparent);
+  color: var(--accent);
+  font-family: var(--ah-mono, monospace);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.flip-hint:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+/* center the photo + hint as a column */
+.founder-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.founder-photo .flip { max-width: 320px; }
+
 @media (max-width: 720px) {
   .founder-card {
     grid-template-columns: 1fr !important;
     direction: ltr !important;
     text-align: left;
   }
-  .founder-photo {
-    max-width: 300px;
-    margin: 0 auto;
-  }
+  .founder-photo .flip { max-width: 280px; }
 }
