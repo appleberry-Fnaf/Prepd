@@ -30,7 +30,7 @@ const FOUNDERS: Founder[] = [
     babyPos: 'center 32%',
     babyZoom: 1,
     bio: [
-      'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was a little kid, I’ve wanted to help the people around me. I’m a high school student passionate about pursuing a career in biomedical engineering and creating opportunities that make a meaningful difference in people’s everyday lives.',
+      'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was a little kid, I’ve wanted to help the people around me. This led me to become passionate about pursuing a career in biomedical engineering, and since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
       'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it.',
       'As a student, I understand that preparing for exams and finding reliable study resources can be challenging. This inspired me to create Prepd, a student-led initiative dedicated to making academic resources more accessible and helping students feel more confident in their learning.',
       'Through this initiative, I hope to build a community where students can support one another, share knowledge, and work toward their goals together. To me, Prepd is one step toward turning a simple question into meaningful action.',
