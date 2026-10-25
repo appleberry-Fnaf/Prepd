@@ -150,9 +150,12 @@ export default function Founders() {
 
                 {/* Text */}
                 <div style={{ direction: 'ltr', minWidth: 0 }}>
-                  <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em', marginBottom: 16 }}>
+                  <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em', marginBottom: 4 }}>
                     {f.name}
                   </h2>
+                  <p style={{ fontFamily: 'var(--ah-mono)', fontSize: 12.5, fontWeight: 700, color: f.accent, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
+                    {f.role}
+                  </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {f.bio.map((para, j) => (
                       <p key={j} style={{ fontSize: 14.5, lineHeight: 1.7, color: 'var(--ah-muted)' }}>
