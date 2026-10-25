@@ -10,6 +10,7 @@ import Contribute from './pages/Contribute';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import Moderate from './pages/Moderate';
+import Founders from './pages/Founders';
 import Auth from './pages/Auth';
 import ResetPassword from './pages/ResetPassword';
 
@@ -31,6 +32,8 @@ function App() {
             <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="moderate" element={<Moderate />} />
+            <Route path="founders" element={<Founders />} />
+            <Route path="about" element={<Founders />} />
             <Route path="auth" element={<Auth />} />
             <Route path="reset-password" element={<ResetPassword />} />
           </Route>

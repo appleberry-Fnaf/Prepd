@@ -129,6 +129,7 @@ export default function EndingSection() {
             <Link to="/practice">Practice</Link>
             <Link to="/contribute">Contribute</Link>
             <Link to="/leaderboard">Leaderboard</Link>
+            <Link to="/founders">Founders</Link>
             <Link to="/profile">Profile</Link>
             <a href="https://linktr.ee/prepdstudy" target="_blank" rel="noopener noreferrer">Linktree ↗</a>
           </nav>

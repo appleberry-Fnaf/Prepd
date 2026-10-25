@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { path: '/practice',   label: 'Practice' },
   { path: '/contribute', label: 'Contribute' },
   { path: '/leaderboard',label: 'Leaderboard' },
+  { path: '/founders',   label: 'Founders' },
   { path: '/profile',    label: 'Profile' },
 ];
 
