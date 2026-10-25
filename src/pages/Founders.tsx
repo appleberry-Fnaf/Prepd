@@ -39,9 +39,9 @@ const FOUNDERS: Founder[] = [
     songStopMs: 12000,
     linkedin: 'https://www.linkedin.com/in/sai-sahaana-aswanth-7aab47419/',
     bio: [
-      'My name is Sai Sahaana Aswanth, but I go by Sai. Ever since I was little, I’ve wanted to help the people around me, which led me to pursue biomedical engineering. Since starting high school, I’ve focused on creating opportunities that make a meaningful difference in people’s everyday lives.',
-      'I’ve always been drawn to the question, “What can we do better?” I believe meaningful change starts with recognizing a problem and finding ways to address it. As a student, I know that preparing for exams and finding reliable study resources can be challenging, which inspired me to create Prepd, a student-led initiative that makes academic resources more accessible and helps students feel more confident in their learning.',
-      'Through Prepd, I hope to build a community where students support one another, share knowledge, and work toward their goals together.',
+      'My name is Sai Sahaana Aswanth, but I go by Sai. Prepd began with a simple belief: every student deserves the chance to learn, grow, and feel confident — no matter where they’re starting from. Ever since I was little, I’ve wanted to help the people around me, which led me to pursue biomedical engineering and, since starting high school, to focus on creating opportunities that make a meaningful difference in people’s everyday lives.',
+      'I’ve always been drawn to the question, “What can we do better?” As a student, I know how overwhelming it can be to prepare for exams and find reliable study resources, and how quickly the race to stand out can turn learning into a competition. Rather than letting studying become another thing to compete over, I created Prepd — a student-led initiative that makes academic resources more accessible and helps students feel supported instead of pressured.',
+      'Through Prepd, I hope to build a community where students support one another, share knowledge, and work toward their goals together. No matter who you are, where you come from, or what you’re working toward, there’s a place for you here.',
     ],
   },
   {
@@ -58,11 +58,17 @@ const FOUNDERS: Founder[] = [
     song: 'spotify:track:2mdEsXPu8ZmkHRRtAdC09e',
     songStopMs: 13000,
     bio: [
-      'My name is Sahana Lakshminarasimhan, and I’m a high school student passionate about education, collaboration, and creating opportunities that help others succeed.',
-      'I believe that every student deserves access to the resources and support they need to reach their full potential. However, finding effective study materials and preparing for exams can sometimes feel overwhelming. This inspired me to support initiatives like Prepd which aim to make learning more accessible for students.',
-      'Through this initiative, I hope to encourage students to learn from one another, share resources, and approach their academic goals with greater confidence.',
+      'My name is Sahana Lakshminarasimhan, and I’ve always believed that every student deserves access to the resources and support they need to reach their full potential. I’m passionate about education, collaboration, and creating opportunities that help others succeed.',
+      'I know firsthand how overwhelming it can feel to find effective study materials and prepare for exams, and how isolating that pressure can be. That’s what drew me to help build Prepd — an initiative focused on making learning more accessible and turning studying into something students do together, not alone.',
+      'Through Prepd, I hope to encourage students to learn from one another, share what they know, and approach their goals with greater confidence. No matter your background or where you’re headed, you belong here.',
     ],
   },
+];
+
+const VISION: string[] = [
+  'Our vision is to build a global community of students, educators, and young changemakers united by a shared belief that learning should be accessible to everyone. We want to connect students with free, high-quality resources and meaningful ways to contribute — letting them explore their interests, build new skills, and find their place in a supportive community.',
+  'We believe studying should be more than a race to stand out; it should help young people discover what matters to them, learn from one another, and recognize their potential to make a difference. By breaking down barriers to academic support and rewarding students for giving back, we hope to create a world where every learner, regardless of background, has the chance to learn, lead, and grow.',
+  'Ultimately, we envision Prepd becoming a place where knowledge is shared freely, passions become purpose, and small acts of help add up to lasting, meaningful change.',
 ];
 
 export default function Founders() {
@@ -189,6 +195,19 @@ export default function Founders() {
               </div>
             );
           })}
+        </div>
+
+        {/* Our Vision */}
+        <div className="dk-card" style={{ padding: 'clamp(26px, 4vw, 44px)', marginTop: 'clamp(32px, 6vh, 64px)' }}>
+          <span className="dk-page-tag" style={{ marginBottom: 10, display: 'inline-block' }}>Our Vision</span>
+          <h2 style={{ fontFamily: 'var(--ah-sans)', fontSize: 'clamp(22px, 3.2vw, 30px)', fontWeight: 800, color: 'var(--ah-text)', letterSpacing: '-0.02em', marginBottom: 16 }}>
+            Where we’re headed.
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 13, maxWidth: 760 }}>
+            {VISION.map((para, i) => (
+              <p key={i} style={{ fontSize: 14.5, lineHeight: 1.75, color: 'var(--ah-muted)' }}>{para}</p>
+            ))}
+          </div>
         </div>
 
         {/* CTA */}
