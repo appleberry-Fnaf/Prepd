@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Heart, ArrowRight, RefreshCw } from 'lucide-react';
+import { Sparkles, Heart, ArrowRight } from 'lucide-react';
 import './founders.css';
 
 interface Founder {
@@ -11,6 +11,10 @@ interface Founder {
   baby: string;
   accent: string;
   bio: string[];
+  photoPos?: string;   // object-position for the pro photo
+  photoZoom?: number;  // scale to fill the circle
+  babyPos?: string;
+  babyZoom?: number;
 }
 
 const FOUNDERS: Founder[] = [
@@ -21,6 +25,10 @@ const FOUNDERS: Founder[] = [
     photo: '/founders/sai.webp',
     baby: '/founders/sai-baby.webp',
     accent: '#60a5fa',
+    photoPos: 'center 40%',
+    photoZoom: 1.4,
+    babyPos: 'center 32%',
+    babyZoom: 1,
     bio: [
       'My name is Sai Sahaana Aswanth, but I go by Sai. I’m a high school student passionate about pursuing a career in biomedical engineering and creating opportunities that make a meaningful difference in people’s everyday lives.',
       'Ever since I was a little kid, I’ve wanted to help the people around me — even the small moments of making someone’s day a little easier always felt important to me. That instinct never really left; it just grew into something bigger.',
@@ -36,6 +44,10 @@ const FOUNDERS: Founder[] = [
     photo: '/founders/sahana.webp',
     baby: '/founders/sahana-baby.jpg',
     accent: '#a855f7',
+    photoPos: 'center 28%',
+    photoZoom: 1.08,
+    babyPos: 'center 30%',
+    babyZoom: 1,
     bio: [
       'My name is Sahana Lakshminarasimhan, and I’m a high school student passionate about education, collaboration, and creating opportunities that help others succeed.',
       'I believe that every student deserves access to the resources and support they need to reach their full potential. However, finding effective study materials and preparing for exams can sometimes feel overwhelming. This inspired me to support initiatives like Prepd which aim to make learning more accessible for students.',
@@ -87,17 +99,15 @@ export default function Founders() {
                   >
                     <div className="flip-inner">
                       <div className="flip-face flip-front">
-                        <img src={f.photo} alt={f.name} />
+                        <img src={f.photo} alt={f.name}
+                          style={{ objectPosition: f.photoPos ?? 'center', transform: `scale(${f.photoZoom ?? 1})` }} />
                       </div>
                       <div className="flip-face flip-back">
-                        <img src={f.baby} alt={`${f.short} as a baby`} />
+                        <img src={f.baby} alt={`${f.short} as a baby`}
+                          style={{ objectPosition: f.babyPos ?? 'center', transform: `scale(${f.babyZoom ?? 1})` }} />
                       </div>
                     </div>
                   </div>
-                  <button className="flip-hint" onClick={() => toggle(f.name)} type="button">
-                    <RefreshCw className="w-3 h-3" />
-                    {isFlipped ? 'Show now' : 'Baby pic!'}
-                  </button>
                 </div>
 
                 {/* Text */}
