@@ -46,8 +46,8 @@ const FOUNDERS: Founder[] = [
     accent: '#a855f7',
     photoPos: 'center 28%',
     photoZoom: 1.08,
-    babyPos: 'center 30%',
-    babyZoom: 1,
+    babyPos: 'center 62%',
+    babyZoom: 1.02,
     bio: [
       'My name is Sahana Lakshminarasimhan, and I’m a high school student passionate about education, collaboration, and creating opportunities that help others succeed.',
       'I believe that every student deserves access to the resources and support they need to reach their full potential. However, finding effective study materials and preparing for exams can sometimes feel overwhelming. This inspired me to support initiatives like Prepd which aim to make learning more accessible for students.',
