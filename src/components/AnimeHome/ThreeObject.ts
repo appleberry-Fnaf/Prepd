@@ -254,12 +254,11 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     headGroup.add(g);
   }
 
-  // Halloween — witch hat (tall cone, wide brim, purple band, gold buckle)
+  // Halloween — witch hat with gold band + broom
   {
     const g = accessories.halloween;
-    const hatBlack  = reg(new THREE.MeshStandardMaterial({ color: 0x0e0c18, roughness: 0.75, metalness: 0.05 }));
-    const hatPurple = reg(new THREE.MeshStandardMaterial({ color: 0x6d28d9, roughness: 0.8 }));
-    const hatGold   = reg(new THREE.MeshStandardMaterial({ color: 0xc89b2a, roughness: 0.5, metalness: 0.35 }));
+    const hatBlack = reg(new THREE.MeshStandardMaterial({ color: 0x0e0c18, roughness: 0.75, metalness: 0.05 }));
+    const hatGold  = reg(new THREE.MeshStandardMaterial({ color: 0xd4a820, roughness: 0.35, metalness: 0.6 }));
 
     // Wide flat brim
     const brim = add(new THREE.CylinderGeometry(0.72, 0.76, 0.06, 32), hatBlack, 0, 0.85, 0.1, g);
@@ -271,27 +270,54 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     cone.rotation.x = -0.18;
     cone.rotation.z = 0.1;
 
-    // Purple hat band
-    const band = add(new THREE.CylinderGeometry(0.285, 0.285, 0.1, 20), hatPurple, 0, 0.93, 0.14, g);
-    band.rotation.x = -0.18;
+    // Gold ring band going all the way around the hat base
+    const band = add(new THREE.TorusGeometry(0.292, 0.042, 12, 32), hatGold, 0, 0.925, 0.14, g);
+    band.rotation.x = Math.PI / 2 - 0.18;
     band.rotation.z = 0.1;
 
-    // Gold square buckle
-    const buckle = add(new THREE.BoxGeometry(0.11, 0.11, 0.035), hatGold, 0, 0.93, 0.3, g);
+    // Gold square buckle plate on front
+    const buckle = add(new THREE.BoxGeometry(0.14, 0.14, 0.045), hatGold, 0, 0.925, 0.33, g);
     buckle.rotation.x = -0.18;
     buckle.rotation.z = 0.1;
-    // Darker inner square (hollow buckle effect)
-    const buckleInner = add(new THREE.BoxGeometry(0.062, 0.062, 0.04), hatBlack, 0, 0.93, 0.316, g);
-    buckleInner.rotation.x = -0.18;
-    buckleInner.rotation.z = 0.1;
+    // Dark inner cutout for hollow buckle look
+    const buckleHole = add(new THREE.BoxGeometry(0.078, 0.078, 0.055), hatBlack, 0, 0.925, 0.35, g);
+    buckleHole.rotation.x = -0.18;
+    buckleHole.rotation.z = 0.1;
 
     g.position.set(0, 0, 0);
     headGroup.add(g);
   }
 
+  // Halloween broom — separate group on the body so the head can still turn
+  const broomGroup = new THREE.Group();
+  {
+    const WOOD  = reg(new THREE.MeshStandardMaterial({ color: 0x9c6b3c, roughness: 0.95 }));
+    const STRAW = reg(new THREE.MeshStandardMaterial({ color: 0xd4a855, roughness: 1.0 }));
+    const TWINE = reg(new THREE.MeshStandardMaterial({ color: 0x5c3d1e, roughness: 0.9 }));
+
+    // Long handle, rotated to lie along the X axis
+    const handle = add(new THREE.CylinderGeometry(0.042, 0.042, 3.2, 12), WOOD, 0, 0, 0, broomGroup);
+    handle.rotation.z = Math.PI / 2;
+
+    // Bristle bundle — wide at the tip, narrow where it meets the handle
+    const bristles = add(new THREE.CylinderGeometry(0.38, 0.06, 0.7, 20), STRAW, 1.76, 0, 0, broomGroup);
+    bristles.rotation.z = Math.PI / 2;
+    bristles.scale.set(1, 1, 0.68);
+
+    // Twine binding at the junction of handle and bristles
+    const twine = add(new THREE.CylinderGeometry(0.075, 0.075, 0.14, 16), TWINE, 1.38, 0, 0, broomGroup);
+    twine.rotation.z = Math.PI / 2;
+
+    // Position under the sitting cat; slight downward tilt toward bristle end
+    broomGroup.position.set(0, -0.9, 0.2);
+    broomGroup.rotation.z = 0.09;
+  }
+  group.add(broomGroup);
+
   // Show only the current season's accessory
   const season = currentSeason();
   (Object.keys(accessories) as Season[]).forEach(k => { accessories[k].visible = k === season; });
+  broomGroup.visible = season === 'halloween';
 
   scene.add(group);
 
