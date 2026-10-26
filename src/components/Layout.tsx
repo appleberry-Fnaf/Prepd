@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import HalloweenCursor from './HalloweenCursor';
 
 const pageVariants = {
   initial: { opacity: 0, y: 14 },
@@ -16,6 +17,7 @@ export default function Layout() {
 
   return (
     <div className="dk-page" style={{ paddingTop: '60px' }}>
+      <HalloweenCursor />
       <Navbar />
       <AnimatePresence mode="wait" initial={false}>
         <motion.main
