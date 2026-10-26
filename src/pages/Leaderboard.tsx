@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { animate, stagger } from 'animejs';
 import { supabase } from '../lib/supabase';
+import { useScrambleTag } from '../hooks/useScrambleTag';
 import type { Contribution } from '../lib/supabase';
 import { Trophy, Crown, Star, Upload, BookOpen, PenTool, CheckCircle, Zap } from 'lucide-react';
 
@@ -21,6 +23,8 @@ const POINT_ITEMS = [
 ];
 
 export default function Leaderboard() {
+  const tagRef = useScrambleTag();
+  const tbodyRef = useRef<HTMLTableSectionElement>(null);
   const [topProfiles, setTopProfiles] = useState<LeaderboardProfile[]>([]);
   const [recentContributions, setRecentContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,12 +48,32 @@ export default function Leaderboard() {
   const unit = sortBy === 'hours' ? 'hrs' : 'pts';
   const getInitials = (name: string | null) => name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??';
 
+  // Stagger rows + count-up points after data loads
+  useEffect(() => {
+    if (!topProfiles.length || !tbodyRef.current) return;
+    const rows = tbodyRef.current.querySelectorAll('tr');
+    animate(rows, { opacity: [0, 1], translateX: [-12, 0], delay: stagger(45), duration: 360, ease: 'outExpo' });
+
+    const ptEls = tbodyRef.current.querySelectorAll('.lb-pts');
+    ptEls.forEach((el, i) => {
+      const target = parseInt(el.getAttribute('data-v') || '0', 10);
+      const obj = { v: 0 };
+      animate(obj, {
+        v: target,
+        duration: 900,
+        delay: i * 45,
+        ease: 'outExpo',
+        onUpdate: () => { el.textContent = Math.round(obj.v).toString(); },
+      });
+    });
+  }, [topProfiles]);
+
   if (loading) return <div className="dk-empty" style={{ minHeight: '60vh' }}><div className="dk-spin" /></div>;
 
   return (
     <div>
       <div className="dk-header">
-        <span className="dk-page-tag">Leaderboard</span>
+        <span ref={tagRef as React.RefObject<HTMLSpanElement>} className="dk-page-tag">Leaderboard</span>
         <h1 className="dk-heading-xl">Rise through<br />the ranks.</h1>
         <p className="dk-sub" style={{ maxWidth: 460 }}>
           Every contribution earns points. See where you stand.
@@ -116,7 +140,7 @@ export default function Leaderboard() {
                     <th style={{ textAlign: 'right' }}>{sortBy === 'hours' ? 'Hours' : 'Points'}</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody ref={tbodyRef}>
                   {topProfiles.map((p, i) => (
                     <tr key={p.id}>
                       <td>
@@ -138,7 +162,7 @@ export default function Leaderboard() {
                         </div>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <span style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 800, color: i < 3 ? MEDAL[i] : 'var(--ah-text)', letterSpacing: '-0.02em' }}>{val(p)}</span>
+                        <span className="lb-pts" data-v={val(p)} style={{ fontFamily: 'var(--ah-sans)', fontSize: 15, fontWeight: 800, color: i < 3 ? MEDAL[i] : 'var(--ah-text)', letterSpacing: '-0.02em' }}>0</span>
                         <span style={{ fontFamily: 'var(--ah-mono)', fontSize: 10, color: 'var(--ah-muted)', marginLeft: 4 }}>{unit}</span>
                       </td>
                     </tr>

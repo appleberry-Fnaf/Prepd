@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { APSubject } from '../lib/supabase';
 import { animate, stagger } from 'animejs';
+import { useScrambleTag } from '../hooks/useScrambleTag';
 import {
   Search, BookOpen, Calculator, BarChart3, Leaf, FlaskConical,
   Atom, Landmark, Globe, Scale, Brain, Code, Castle, ChevronRight,
@@ -29,6 +30,7 @@ export default function Subjects() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const tagRef = useScrambleTag();
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export default function Subjects() {
   return (
     <div>
       <div className="dk-header">
-        <span className="dk-page-tag">AP Subjects</span>
+        <span ref={tagRef as React.RefObject<HTMLSpanElement>} className="dk-page-tag">AP Subjects</span>
         <h1 className="dk-heading-xl">Every course,<br />organized.</h1>
         <p className="dk-sub" style={{ maxWidth: 480 }}>
           Browse all 15 AP subjects — curated notes, guides, and practice questions for each.

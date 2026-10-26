@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useScrambleTag } from '../hooks/useScrambleTag';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -12,6 +13,7 @@ import { getNextTier, tierProgress } from '../lib/rewards';
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth();
+  const tagRef = useScrambleTag();
   const [subjects, setSubjects] = useState<APSubject[]>([]);
   const [progress, setProgress] = useState<UserProgress[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -116,7 +118,7 @@ export default function Profile() {
   return (
     <div>
       <div className="dk-header">
-        <span className="dk-page-tag">Profile</span>
+        <span ref={tagRef as React.RefObject<HTMLSpanElement>} className="dk-page-tag">Profile</span>
         <h1 className="dk-heading-xl">{profile?.display_name || 'Student'}</h1>
         <p className="dk-sub">{user.email}</p>
       </div>

@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useScrambleTag } from '../hooks/useScrambleTag';
 import type { APSubject, PracticeQuestion } from '../lib/supabase';
 import { CheckCircle, XCircle, ChevronRight, ArrowRight, BookOpen, Zap } from 'lucide-react';
 
@@ -37,6 +39,8 @@ async function saveProgress(userId: string, subjectId: string, answered: number,
 
 export default function Practice() {
   const { user } = useAuth();
+  const tagRef = useScrambleTag();
+  const gridRef = useRef<HTMLDivElement>(null);
   const [subjects, setSubjects] = useState<APSubject[]>([]);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -59,10 +63,23 @@ export default function Practice() {
     loadData();
   }, []);
 
-  // Save progress when quiz finishes
+  // Stagger subject cards on load
+  useEffect(() => {
+    if (loading || !gridRef.current) return;
+    import('animejs').then(({ animate: anim, stagger }) => {
+      const cards = gridRef.current!.querySelectorAll('.practice-card');
+      if (cards.length) anim(cards, { opacity: [0, 1], translateY: [16, 0], delay: stagger(50), duration: 380, ease: 'outExpo' });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
+  // Save progress + celebrate on quiz finish
   useEffect(() => {
     if (mode !== 'done' || !user || !selectedSubject) return;
     saveProgress(user.id, selectedSubject, score.total, score.correct);
+    if (score.total > 0 && score.correct === score.total) {
+      confetti({ particleCount: 180, spread: 90, origin: { y: 0.45 }, colors: ['#4ade80', '#60a5fa', '#f5c842', '#fff'] });
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
@@ -84,6 +101,9 @@ export default function Practice() {
     setShowExplanation(true);
     const isCorrect = answer === subjectQuestions[activeQuestion].correct_answer;
     setScore(prev => ({ correct: prev.correct + (isCorrect ? 1 : 0), total: prev.total + 1 }));
+    if (isCorrect) {
+      confetti({ particleCount: 70, spread: 55, origin: { y: 0.65 }, colors: ['#4ade80', '#60a5fa', '#f5c842'], ticks: 180 });
+    }
   };
 
   const nextQuestion = () => {
@@ -114,14 +134,14 @@ export default function Practice() {
     return (
       <div>
         <div className="dk-header">
-          <span className="dk-page-tag">Practice</span>
+          <span ref={tagRef as React.RefObject<HTMLSpanElement>} className="dk-page-tag">Practice</span>
           <h1 className="dk-heading-xl">Practice like<br />it's the real exam.</h1>
           <p className="dk-sub" style={{ maxWidth: 460 }}>
             AP-style multiple choice with instant feedback. Pick a subject to begin.
           </p>
         </div>
         <div className="dk-container" style={{ paddingBottom: 'clamp(64px, 10vh, 100px)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 }}>
+          <div ref={gridRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 }}>
             {subjects.map(subject => {
               const count = subjectQuestionCount(subject.id);
               if (!count) return null;
@@ -129,8 +149,8 @@ export default function Practice() {
                 <button
                   key={subject.id}
                   onClick={() => startQuiz(subject.id)}
-                  className="dk-card dk-card-hover"
-                  style={{ padding: '20px', textAlign: 'left', border: 'none', cursor: 'pointer', width: '100%' }}
+                  className="practice-card dk-card dk-card-hover"
+                  style={{ padding: '20px', textAlign: 'left', border: 'none', cursor: 'pointer', width: '100%', opacity: 0 }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                     <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

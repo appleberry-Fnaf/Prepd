@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useScrambleTag } from '../hooks/useScrambleTag';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -22,6 +23,7 @@ const statusBadge = (status: string) => {
 
 export default function Contribute() {
   const { user } = useAuth();
+  const tagRef = useScrambleTag();
   const [subjects, setSubjects] = useState<APSubject[]>([]);
   const [mySubmissions, setMySubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,7 +112,7 @@ export default function Contribute() {
   return (
     <div>
       <div className="dk-header">
-        <span className="dk-page-tag">Contribute</span>
+        <span ref={tagRef as React.RefObject<HTMLSpanElement>} className="dk-page-tag">Contribute</span>
         <h1 className="dk-heading-xl">Share your work.<br />Earn real credit.</h1>
         <p className="dk-sub" style={{ maxWidth: 460 }}>
           Upload notes and study guides — approved submissions earn points and volunteer hours.
