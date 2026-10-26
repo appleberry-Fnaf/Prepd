@@ -11,6 +11,7 @@ export default function Moderate() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [submitters, setSubmitters] = useState<Record<string, string>>({});
   const [hours, setHours] = useState<Record<string, string>>({});
+  const [points, setPoints] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,9 @@ export default function Moderate() {
 
   async function decide(sub: Submission, status: 'approved' | 'rejected') {
     setBusy(sub.id);
-    const vh = status === 'approved' ? parseFloat(hours[sub.id] || '0') || 0 : 0;
+    // Defaults: 1 volunteer hour and 25 points per approved submission (both editable)
+    const vh  = status === 'approved' ? (parseFloat(hours[sub.id]  ?? '1')  || 0) : 0;
+    const pts = status === 'approved' ? (parseInt(points[sub.id] ?? '25', 10) || 0) : 0;
 
     await supabase.from('submissions').update({
       status, volunteer_hours: vh,
@@ -61,18 +64,21 @@ export default function Moderate() {
       reviewed_at: new Date().toISOString(),
     }).eq('id', sub.id);
 
-    // Award 25 pts to the submitter on approval
+    // Award the chosen points + volunteer hours to the submitter on approval
     if (status === 'approved') {
       await supabase.from('contributions').insert({
         user_id: sub.user_id,
         action_type: 'resource_approved',
-        points: 25,
+        points: pts,
         subject_id: sub.subject_id,
       });
       const { data: prof } = await supabase
-        .from('profiles').select('total_points').eq('id', sub.user_id).single();
+        .from('profiles').select('total_points, volunteer_hours').eq('id', sub.user_id).single();
       await supabase.from('profiles')
-        .update({ total_points: (prof?.total_points ?? 0) + 25 })
+        .update({
+          total_points: (prof?.total_points ?? 0) + pts,
+          volunteer_hours: (prof?.volunteer_hours ?? 0) + vh,
+        })
         .eq('id', sub.user_id);
     }
 
@@ -157,14 +163,20 @@ export default function Moderate() {
 
                 {sub.description && <p style={{ fontSize: 12.5, color: 'var(--ah-muted)', marginBottom: 14, lineHeight: 1.5 }}>{sub.description}</p>}
 
-                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
                   <div style={{ flex: '0 0 auto' }}>
                     <label style={fieldLabel}>Vol. hours</label>
-                    <input type="number" min="0" step="0.5" value={hours[sub.id] || ''}
+                    <input type="number" min="0" step="0.5" value={hours[sub.id] ?? '1'}
                       onChange={e => setHours(p => ({ ...p, [sub.id]: e.target.value }))}
-                      placeholder="0" className="dk-input" style={{ width: 80, padding: '8px 10px', fontSize: 13 }} />
+                      placeholder="1" className="dk-input" style={{ width: 72, padding: '8px 10px', fontSize: 13 }} />
                   </div>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: '0 0 auto' }}>
+                    <label style={fieldLabel}>Points</label>
+                    <input type="number" min="0" step="1" value={points[sub.id] ?? '25'}
+                      onChange={e => setPoints(p => ({ ...p, [sub.id]: e.target.value }))}
+                      placeholder="25" className="dk-input" style={{ width: 72, padding: '8px 10px', fontSize: 13 }} />
+                  </div>
+                  <div style={{ flex: '1 1 140px' }}>
                     <label style={fieldLabel}>Note (optional)</label>
                     <input type="text" value={notes[sub.id] || ''}
                       onChange={e => setNotes(p => ({ ...p, [sub.id]: e.target.value }))}
