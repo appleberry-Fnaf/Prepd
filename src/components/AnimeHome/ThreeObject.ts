@@ -15,9 +15,10 @@ export interface ThreeScene {
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 
-type Season = 'spring' | 'summer' | 'fall' | 'winter';
+type Season = 'spring' | 'summer' | 'fall' | 'winter' | 'halloween';
 function currentSeason(): Season {
   const m = new Date().getMonth(); // 0 = Jan
+  if (m === 9) return 'halloween';  // October
   if (m >= 2 && m <= 4) return 'spring';
   if (m >= 5 && m <= 7) return 'summer';
   if (m >= 8 && m <= 10) return 'fall';
@@ -165,10 +166,11 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
 
   // ── Seasonal accessories ──────────────────────────────────────────────────
   const accessories: Record<Season, THREE.Group> = {
-    spring: new THREE.Group(),
-    summer: new THREE.Group(),
-    fall:   new THREE.Group(),
-    winter: new THREE.Group(),
+    spring:    new THREE.Group(),
+    summer:    new THREE.Group(),
+    fall:      new THREE.Group(),
+    winter:    new THREE.Group(),
+    halloween: new THREE.Group(),
   };
 
   // Spring — flower tucked by the ear
@@ -249,6 +251,41 @@ export function createThreeScene(canvas: HTMLCanvasElement): ThreeScene {
     brim.rotation.x = Math.PI / 2;
     brim.scale.set(1, 1, 0.9);
     add(new THREE.SphereGeometry(0.1, 16, 14), white, 0.12, 1.34, 0.18, g); // pom-pom
+    headGroup.add(g);
+  }
+
+  // Halloween — witch hat (tall cone, wide brim, purple band, gold buckle)
+  {
+    const g = accessories.halloween;
+    const hatBlack  = reg(new THREE.MeshStandardMaterial({ color: 0x0e0c18, roughness: 0.75, metalness: 0.05 }));
+    const hatPurple = reg(new THREE.MeshStandardMaterial({ color: 0x6d28d9, roughness: 0.8 }));
+    const hatGold   = reg(new THREE.MeshStandardMaterial({ color: 0xc89b2a, roughness: 0.5, metalness: 0.35 }));
+
+    // Wide flat brim
+    const brim = add(new THREE.CylinderGeometry(0.72, 0.76, 0.06, 32), hatBlack, 0, 0.85, 0.1, g);
+    brim.rotation.x = -0.08;
+    brim.rotation.z = 0.07;
+
+    // Tall pointy cone
+    const cone = add(new THREE.ConeGeometry(0.27, 0.9, 24), hatBlack, 0, 1.35, 0.14, g);
+    cone.rotation.x = -0.18;
+    cone.rotation.z = 0.1;
+
+    // Purple hat band
+    const band = add(new THREE.CylinderGeometry(0.285, 0.285, 0.1, 20), hatPurple, 0, 0.93, 0.14, g);
+    band.rotation.x = -0.18;
+    band.rotation.z = 0.1;
+
+    // Gold square buckle
+    const buckle = add(new THREE.BoxGeometry(0.11, 0.11, 0.035), hatGold, 0, 0.93, 0.3, g);
+    buckle.rotation.x = -0.18;
+    buckle.rotation.z = 0.1;
+    // Darker inner square (hollow buckle effect)
+    const buckleInner = add(new THREE.BoxGeometry(0.062, 0.062, 0.04), hatBlack, 0, 0.93, 0.316, g);
+    buckleInner.rotation.x = -0.18;
+    buckleInner.rotation.z = 0.1;
+
+    g.position.set(0, 0, 0);
     headGroup.add(g);
   }
 
