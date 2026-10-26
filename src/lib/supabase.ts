@@ -44,6 +44,7 @@ export type Submission = {
   reviewed_by: string | null;
   reviewed_at: string | null;
   volunteer_hours: number;
+  awarded_points?: number | null;
   created_at: string;
 };
 

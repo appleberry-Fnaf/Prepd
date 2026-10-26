@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import type { APSubject, Submission } from '../lib/supabase';
-import { ShieldCheck, CheckCircle, XCircle, Clock, ExternalLink, Loader2, Inbox, User } from 'lucide-react';
+import { ShieldCheck, CheckCircle, XCircle, Clock, ExternalLink, Loader2, Inbox, User, Pencil, Check, X } from 'lucide-react';
 
 export default function Moderate() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -13,6 +13,9 @@ export default function Moderate() {
   const [hours, setHours] = useState<Record<string, string>>({});
   const [points, setPoints] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editHours, setEditHours] = useState('');
+  const [editPoints, setEditPoints] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -80,9 +83,35 @@ export default function Moderate() {
           volunteer_hours: (prof?.volunteer_hours ?? 0) + vh,
         })
         .eq('id', sub.user_id);
+      // Remember how many points this submission awarded (needs the awarded_points
+      // column; best-effort so approvals still work before it's added).
+      await supabase.from('submissions').update({ awarded_points: pts }).eq('id', sub.id);
     }
 
     await loadData();
+    setBusy(null);
+  }
+
+  // Edit an already-reviewed submission's hours/points, adjusting the submitter's totals
+  async function saveEdit(sub: Submission) {
+    setBusy(sub.id);
+    const oldVh  = sub.volunteer_hours ?? 0;
+    const oldPts = sub.awarded_points ?? 0;
+    const newVh  = parseFloat(editHours) || 0;
+    const newPts = parseInt(editPoints, 10) || 0;
+
+    await supabase.from('submissions').update({ volunteer_hours: newVh }).eq('id', sub.id);
+    await supabase.from('submissions').update({ awarded_points: newPts }).eq('id', sub.id); // best-effort
+
+    const { data: prof } = await supabase
+      .from('profiles').select('total_points, volunteer_hours').eq('id', sub.user_id).single();
+    await supabase.from('profiles').update({
+      total_points:    (prof?.total_points ?? 0)    + (newPts - oldPts),
+      volunteer_hours: (prof?.volunteer_hours ?? 0) + (newVh - oldVh),
+    }).eq('id', sub.user_id);
+
+    await loadData();
+    setEditing(null);
     setBusy(null);
   }
 
@@ -213,10 +242,14 @@ export default function Moderate() {
                     <th>Subject</th>
                     <th>Status</th>
                     <th>Hrs</th>
+                    <th>Pts</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {reviewed.map(sub => (
+                  {reviewed.map(sub => {
+                    const isEditing = editing === sub.id;
+                    return (
                     <tr key={sub.id}>
                       <td style={{ fontWeight: 600 }}>
                         {sub.status === 'approved' && sub.file_url ? (
@@ -236,9 +269,46 @@ export default function Moderate() {
                           {sub.status}
                         </span>
                       </td>
-                      <td style={{ fontFamily: 'var(--ah-mono)', fontSize: 12 }}>{sub.volunteer_hours ?? '—'}</td>
+                      <td style={{ fontFamily: 'var(--ah-mono)', fontSize: 12 }}>
+                        {isEditing
+                          ? <input type="number" min="0" step="0.5" value={editHours}
+                              onChange={e => setEditHours(e.target.value)}
+                              className="dk-input" style={{ width: 60, padding: '5px 7px', fontSize: 12 }} />
+                          : (sub.volunteer_hours ?? '—')}
+                      </td>
+                      <td style={{ fontFamily: 'var(--ah-mono)', fontSize: 12 }}>
+                        {isEditing
+                          ? <input type="number" min="0" step="1" value={editPoints}
+                              onChange={e => setEditPoints(e.target.value)}
+                              className="dk-input" style={{ width: 60, padding: '5px 7px', fontSize: 12 }} />
+                          : (sub.awarded_points ?? '—')}
+                      </td>
+                      <td>
+                        {sub.status === 'approved' && (
+                          isEditing ? (
+                            <span style={{ display: 'inline-flex', gap: 6 }}>
+                              <button onClick={() => saveEdit(sub)} disabled={busy === sub.id}
+                                title="Save" className="dk-btn dk-btn-primary" style={{ padding: '5px 8px', fontSize: 11 }}>
+                                {busy === sub.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                              </button>
+                              <button onClick={() => setEditing(null)} title="Cancel"
+                                className="dk-btn dk-btn-ghost" style={{ padding: '5px 8px', fontSize: 11 }}>
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => { setEditing(sub.id); setEditHours(String(sub.volunteer_hours ?? 0)); setEditPoints(String(sub.awarded_points ?? 0)); }}
+                              title="Edit hours / points"
+                              className="dk-btn dk-btn-ghost" style={{ padding: '5px 8px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                              <Pencil className="w-3.5 h-3.5" /> Edit
+                            </button>
+                          )
+                        )}
+                      </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
