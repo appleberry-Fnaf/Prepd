@@ -2,6 +2,24 @@
   grid-template-columns: minmax(0, 340px) 1fr;
 }
 
+/* Typewriter caret for the heading */
+.type-caret {
+  display: inline-block;
+  margin-left: 4px;
+  color: #60a5fa;
+  font-weight: 400;
+  transform: translateY(-2px);
+  animation: caret-blink 1s step-end infinite;
+}
+.type-caret--done {
+  animation: caret-blink 1s step-end 6; /* blink a few times, then stop */
+  animation-fill-mode: forwards;
+}
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* ── Circular flip card ──────────────────────────────────────────────────── */
 .flip {
   position: relative;

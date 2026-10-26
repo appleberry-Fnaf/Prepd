@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Linkedin } from 'lucide-react';
 import SpotifyMiniPlayer, { SpotifyMiniPlayerHandle } from '../components/SpotifyMiniPlayer';
@@ -69,9 +69,26 @@ const VISION: string[] = [
   'Ultimately, we envision Prepd becoming a place where knowledge is shared freely, passions become purpose, and small acts of help add up to lasting, meaningful change.',
 ];
 
+const HEADING = 'Meet the\nfounders.';
+
 export default function Founders() {
   const [flipped, setFlipped] = useState<Record<string, boolean>>({});
   const players = useRef<Record<string, SpotifyMiniPlayerHandle | null>>({});
+
+  // Typewriter effect for the heading
+  const [typed, setTyped] = useState('');
+  const [typingDone, setTypingDone] = useState(false);
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setTyped(HEADING); setTypingDone(true); return; }
+    let i = 0;
+    const id = window.setInterval(() => {
+      i++;
+      setTyped(HEADING.slice(0, i));
+      if (i >= HEADING.length) { window.clearInterval(id); setTypingDone(true); }
+    }, 75);
+    return () => window.clearInterval(id);
+  }, []);
 
   const toggle = (f: Founder) => {
     const next = !flipped[f.name];
@@ -88,7 +105,14 @@ export default function Founders() {
     <div>
       <div className="dk-header">
         <span className="dk-page-tag">About</span>
-        <h1 className="dk-heading-xl">Meet the<br />founders.</h1>
+        <h1 className="dk-heading-xl" style={{ position: 'relative', whiteSpace: 'pre-wrap' }} aria-label="Meet the founders.">
+          {/* hidden sizer reserves the full height so there's no layout shift */}
+          <span aria-hidden="true" style={{ visibility: 'hidden' }}>{HEADING}</span>
+          <span aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+            {typed}
+            <span className={`type-caret ${typingDone ? 'type-caret--done' : ''}`}>|</span>
+          </span>
+        </h1>
         <p className="dk-sub" style={{ maxWidth: 520 }}>
           Prepd is run and built by students! Here are the students who made this happen.
         </p>
