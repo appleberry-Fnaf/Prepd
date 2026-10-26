@@ -220,7 +220,7 @@ export default function HeroStage() {
             ))}
           </h2>
 
-          <p className="ah-scene-sub">{scene.subtext}</p>
+          {sceneIdx === 0 && <p className="ah-scene-sub">{scene.subtext}</p>}
 
           {scene.steps && (
             <ol className="ah-steps" aria-label="Steps">
