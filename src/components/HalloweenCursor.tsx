@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useCandy } from '../context/CandyContext';
 
 interface Candy {
   x: number; y: number;
@@ -101,13 +102,15 @@ function drawCorn(ctx: CanvasRenderingContext2D, c: Candy) {
 }
 
 export default function HalloweenCursor() {
+  const { enabled } = useCandy();
   const isOctober = new Date().getMonth() === 9;
+  const active = isOctober && enabled;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const candies = useRef<Candy[]>([]);
   const rafRef = useRef(0);
 
   useEffect(() => {
-    if (!isOctober) return;
+    if (!active) return;
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext('2d')!;
 
@@ -163,9 +166,9 @@ export default function HalloweenCursor() {
       window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [isOctober]);
+  }, [active]);
 
-  if (!isOctober) return null;
+  if (!active) return null;
 
   return (
     <canvas

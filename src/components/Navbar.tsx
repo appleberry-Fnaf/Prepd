@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCandy } from '../context/CandyContext';
 import { CatMark } from './Logo';
 import { animate, scrambleText } from 'animejs';
-import { Menu, X, ShieldCheck } from 'lucide-react';
+import { Menu, X, ShieldCheck, Candy } from 'lucide-react';
+import './candy.css';
 
 const NAV_LINKS = [
   { path: '/subjects',    label: 'Subjects' },
@@ -17,6 +19,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
+  const { enabled: candyOn, toggle: toggleCandy } = useCandy();
   const brandRef = useRef<HTMLSpanElement>(null);
   const location = useLocation();
 
@@ -61,6 +64,14 @@ export default function Navbar() {
         </div>
 
         <div className="dk-nav-actions">
+          <button
+            onClick={toggleCandy}
+            className={`dk-candy-toggle ${candyOn ? 'is-on' : ''}`}
+            title={candyOn ? 'Turn candy cursor off' : 'Turn candy cursor on'}
+            aria-pressed={candyOn}
+          >
+            <Candy className="w-3.5 h-3.5" /> {candyOn ? 'Candy: On' : 'Candy: Off'}
+          </button>
           {user ? (
             <button onClick={signOut} className="dk-nav-signout">
               Sign out

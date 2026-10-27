@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import HalloweenCursor from './HalloweenCursor';
+import { CandyProvider } from '../context/CandyContext';
 
 const pageVariants = {
   initial: { opacity: 0, y: 14 },
@@ -16,22 +17,24 @@ export default function Layout() {
   const location = useLocation();
 
   return (
-    <div className="dk-page" style={{ paddingTop: '60px' }}>
-      <HalloweenCursor />
-      <Navbar />
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.main
-          key={location.pathname}
-          variants={pageVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          transition={pageTransition}
-        >
-          <Outlet />
-        </motion.main>
-      </AnimatePresence>
-      <Footer />
-    </div>
+    <CandyProvider>
+      <div className="dk-page" style={{ paddingTop: '60px' }}>
+        <HalloweenCursor />
+        <Navbar />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.main
+            key={location.pathname}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageTransition}
+          >
+            <Outlet />
+          </motion.main>
+        </AnimatePresence>
+        <Footer />
+      </div>
+    </CandyProvider>
   );
 }

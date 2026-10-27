@@ -1,0 +1,44 @@
+.candy-bit {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  user-select: none;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  animation: candy-fall 1.05s cubic-bezier(0.4, 0.2, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes candy-fall {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + 90px)) rotate(var(--rot, 0deg)) scale(0.55);
+  }
+}
+
+/* Candy toggle button in the navbar */
+.dk-candy-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-family: var(--ah-mono, monospace);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--ah-muted, #9aa);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.dk-candy-toggle:hover { background: rgba(255, 255, 255, 0.09); }
+.dk-candy-toggle.is-on {
+  color: #f5c842;
+  border-color: rgba(245, 200, 66, 0.35);
+  background: rgba(245, 200, 66, 0.1);
+}
