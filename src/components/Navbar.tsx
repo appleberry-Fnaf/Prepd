@@ -70,7 +70,7 @@ export default function Navbar() {
             title={candyOn ? 'Turn candy cursor off' : 'Turn candy cursor on'}
             aria-pressed={candyOn}
           >
-            <Candy className="w-3.5 h-3.5" /> {candyOn ? 'Candy: On' : 'Candy: Off'}
+            <Candy className="w-3.5 h-3.5" /> {candyOn ? 'Cursor On' : 'Cursor Off'}
           </button>
           {user ? (
             <button onClick={signOut} className="dk-nav-signout">
